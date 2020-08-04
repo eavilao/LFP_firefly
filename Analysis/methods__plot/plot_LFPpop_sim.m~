@@ -1,0 +1,224 @@
+function plot_LFPpop_sim(monk, all_monks, plot_type)
+
+% plot from LFPpop_sim
+% names of variables
+% monk: contains data per monkey
+% all_monks: contains data averaged for all monkeys
+
+%% Plots per monkey
+monks = {'Q', 'S'}; % monk1 = Quigley  monk2 = Schro
+
+switch plot_type
+    
+    %% Per monkey
+    case 'PSD_all'
+        for nmonk = 1:length(monk)
+            areas = fieldnames(monk(1).pw.area);
+            f = monk(1).pw.freq; % frequency
+            for narea = 1:length(areas)
+                psd = monk(nmonk).pw.area.(areas{narea}).all.mu_sess; psd_sem = monk(nmonk).pw.area.(areas{narea}).all.sem_sess;
+                
+                figure; %plot(f,psd,'LineWidth',2,'Color','k');
+                shadedErrorBar(f,psd,psd_sem, 'lineprops','k');
+                %set(s.mainLine,'LineWidth', 1);
+                %set(s.edge,'LineStyle', 'none');
+                %set(s.patch, 'FaceAlpha', 0.1);
+                xlim([2 50]); xlabel('Frequency (Hz)'); ylabel('PSD (dB)'); %ylabel('Power spectral density (\muV^2/Hz)');
+                set(gca,'TickDir', 'out', 'FontSize', 22); box off; % set(gca,'TickDir', 'out', 'FontSize', 22, 'YScale', 'log'); box off;
+                title(['all' areas(narea)])
+            end
+        end
+        
+    case 'PSD_reward'
+        % cond 2 is correct trials
+        for nmonk = 1:length(monk)
+            areas = fieldnames(monk(1).pw.area);
+            f = monk(1).pw.freq; % frequency
+            for narea = 1:length(areas)
+                figure;
+                for ncond = 1:length(monk(nmonk).pw.area.(areas{narea}).reward)
+                    psd = monk(nmonk).pw.area.(areas{narea}).reward(ncond).mu_sess; psd_sem = monk(nmonk).pw.area.(areas{narea}).reward(ncond).sem_sess;
+                    %plot
+                    shadedErrorBar(f,psd,psd_sem, 'lineprops','k');
+                    xlim([2 50]); xlabel('Frequency (Hz)'); ylabel('PSD (dB)'); %ylabel('Power spectral density (\muV^2/Hz)');
+                    set(gca,'TickDir', 'out', 'FontSize', 22); box off; %set(gca,'TickDir', 'out', 'FontSize', 22, 'YScale', 'log'); box off;
+                    title(['Rewarded' areas(narea) 'cond ' (ncond)])
+                end
+            end
+        end
+        
+    case 'PSD_move'
+        for nmonk = 1:length(monk)
+            areas = fieldnames(monk(1).pw.area);
+            f = monk(1).pw.freq; % frequency
+            for narea = 1:length(areas)
+                psd1 = monk(nmonk).pw.area.(areas{narea}).stationary.mu_sess; psd1_sem = monk(nmonk).pw.area.(areas{narea}).stationary.sem_sess; % stationary
+                psd2 = monk(nmonk).pw.area.(areas{narea}).mobile.mu_sess; psd2_sem = monk(nmonk).pw.area.(areas{narea}).mobile.sem_sess; % move
+                %plot
+                figure; subplot(1,2,1); hold on;
+                shadedErrorBar(f,psd1,psd1_sem, 'lineprops','r');
+                shadedErrorBar(f,psd2,psd2_sem, 'lineprops','k');
+                xlim([2 50]); xlabel('Frequency (Hz)'); ylabel('PSD (dB)'); %ylabel('Power spectral density (\muV^2/Hz)');
+                set(gca,'TickDir', 'out', 'FontSize', 22); box off; %set(gca,'TickDir', 'out', 'FontSize', 22, 'YScale', 'log'); box off;
+                % ratio
+                subplot(1,2,2); hold on; plot(psd1./psd2, 'k'); plot(nanmean(psd1./psd2), 'LineWidth',2, 'Color','k');
+                axis([1 50 0 6]); hline(1,'k'); xlabel('Frequency (Hz)'); ylabel('PSD');
+                box off; set(gca,'TickDir', 'out', 'FontSize', 22); title('motion');
+                
+                title(['Move vs stationary' areas(narea) 'monk ' nmonk])
+            end
+        end
+        
+    case 'PSD_eye'
+        for nmonk = 1:length(monk)
+            areas = fieldnames(monk(1).pw.area);
+            f = monk(1).pw.freq_eye; % frequency
+            for narea = 1:length(areas)
+                psd1 = monk(nmonk).pw.area.(areas{narea}).eyesfixed.mu_sess; psd1_sem = monk(nmonk).pw.area.(areas{narea}).eyesfixed.std_sess; % stationary
+                psd2 = monk(nmonk).pw.area.(areas{narea}).eyesfree.mu_sess; psd2_sem = monk(nmonk).pw.area.(areas{narea}).eyesfree.std_sess; % move
+                %plot
+                figure; subplot(1,2,1); hold on;
+                shadedErrorBar(f,psd1,psd1_sem, 'lineprops','r');
+                shadedErrorBar(f,psd2,psd2_sem, 'lineprops','k');
+                xlim([2 50]); xlabel('Frequency (Hz)'); ylabel('PSD (dB)'); % ylabel('Power spectral density (\muV^2/Hz)');
+                set(gca,'TickDir', 'out', 'FontSize', 22); box off; % set(gca,'TickDir', 'out', 'FontSize', 22, 'YScale', 'log'); box off;
+                % ratio
+                subplot(1,2,2); hold on; plot(psd1./psd2, 'k'); plot(nanmean(psd1./psd2), 'LineWidth',2, 'Color','k');
+                axis([1 50 0 6]); hline(1,'k'); xlabel('Frequency (Hz)'); ylabel('PSD');
+                box off; set(gca,'TickDir', 'out', 'FontSize', 22); title('motion');
+                
+                title(['Eyes free vs eyes fixed' areas(narea) 'monk ' nmonk])
+            end
+        end
+        
+    case 'spectrogram_move'
+           ev = 'move'; 
+        for nmonk = 1:length(monk)
+            areas = fieldnames(monk(1).spec.area);
+            for narea = 1:length(areas)
+%                 trialtype = fieldnames(monk(1).spec.area.MST);
+                freq = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).freq_sess;
+                ts = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).ts_sess;
+                p_spectro = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).mu_sess;
+                % plot
+                figure('Name',['Monk ' num2str(nmonk) ' ' char(areas(narea)) ' ' ev]); 
+                imagesc(ts-1,freq,p_spectro); axis xy; colorbar;
+                set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80], 'FontSize', 22)
+                xlabel('time (s)'); ylabel('frequency (Hz)')
+            end
+        end
+        
+    case 'spectrogram_target'
+        ev = 'target'; 
+        for nmonk = 1:length(monk)
+            areas = fieldnames(monk(1).spec.area);
+            for narea = 1:length(areas)
+%                 trialtype = fieldnames(monk(1).spec.area.MST);
+                freq = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).freq_sess;
+                ts = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).ts_sess;
+                p_spectro = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).mu_sess;
+                % plot
+                figure('Name',['Monk ' num2str(nmonk) ' ' char(areas(narea)) ' ' ev]); 
+                imagesc(ts-1,freq,p_spectro); axis xy; colorbar;
+                set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80], 'FontSize', 22)
+                xlabel('time (s)'); ylabel('frequency (Hz)')
+            end
+        end
+        
+    case 'spectrogram_stop'
+        ev = 'stop';
+        for nmonk = 1:length(monk)
+            areas = fieldnames(monk(1).spec.area);
+            for narea = 1:length(areas)
+                %                 trialtype = fieldnames(monk(1).spec.area.MST);
+                freq = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).freq_sess;
+                ts = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).ts_sess;
+                p_spectro = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).mu_sess;
+                % plot
+                figure('Name',['Monk ' num2str(nmonk) ' ' char(areas(narea)) ' ' ev]);
+                imagesc(ts-1,freq,p_spectro); axis xy; colorbar;
+                set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80], 'FontSize', 22)
+                xlabel('time (s)'); ylabel('frequency (Hz)')
+            end
+        end
+        
+        
+    case 'spectrogram_reward'
+        ev = 'reward';
+        for nmonk = 1:length(monk)
+            areas = fieldnames(monk(1).spec.area);
+            for narea = 1:length(areas)
+                %                 trialtype = fieldnames(monk(1).spec.area.MST);
+                freq = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).freq_sess;
+                ts = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).ts_sess;
+                p_spectro = monk(nmonk).spec.area.(areas{narea}).all.events.(ev).mu_sess;
+                % plot
+                figure('Name',['Monk ' num2str(nmonk) ' ' char(areas(narea)) ' ' ev]);
+                imagesc(ts-1,freq,p_spectro); axis xy; colorbar;
+                set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80], 'FontSize', 22)
+                xlabel('time (s)'); ylabel('frequency (Hz)')
+            end
+        end
+        
+        
+        
+        
+    case 'coherogram_move'
+        ev = 'move'
+        for nmonk = 1:length(monk)
+           coher_ppc_mst = monk(nmonk).coher.trialtype.all.events.(ev).PPCMST.coher_mu; 
+           freq_ppc_mst = monk(nmonk).coher.trialtype.all.events.move.PPCMST.coher_freq; 
+           ts_ppc_mst = monk(nmonk).coher.trialtype.all.events.move.PPCMST.coher_ts; 
+           
+           coher_mst_ppc = monk(nmonk).coher.trialtype.all.events.move.MSTPPC.coher_mu; 
+           freq_mst_ppc = monk(nmonk).coher.trialtype.all.events.move.MSTPPC.coher_freq; 
+           ts_mst_ppc = monk(nmonk).coher.trialtype.all.events.move.MSTPPC.coher_ts; 
+           
+           % plot PPC MST
+           figure('Name', ['PPC-->MST' nmonk]); 
+           imagesc(ts_ppc_mst-1, freq_ppc_mst,coher_ppc_mst); 
+           axis xy; set(gca,'xlim',[-0.5 0.5], 'ylim', [4 50]); colorbar;
+           
+            % plot MST PPC
+           figure('Name', ['MST-->PPC' nmonk]); 
+           imagesc(ts_mst_ppc-1, freq_mst_ppc,coher_mst_ppc); 
+           axis xy; set(gca,'xlim',[-0.5 0.5], 'ylim', [4 50]); colorbar;
+        end
+        
+         case 'coherogram_target'
+        ev = 'target'
+        for nmonk = 1:length(monk)
+           coher_ppc_mst = monk(nmonk).coher.trialtype.all.events.move.PPCMST.coher_mu; 
+           freq_ppc_mst = monk(nmonk).coher.trialtype.all.events.move.PPCMST.coher_freq; 
+           ts_ppc_mst = monk(nmonk).coher.trialtype.all.events.move.PPCMST.coher_ts; 
+           
+           coher_mst_ppc = monk(nmonk).coher.trialtype.all.events.move.MSTPPC.coher_mu; 
+           freq_mst_ppc = monk(nmonk).coher.trialtype.all.events.move.MSTPPC.coher_freq; 
+           ts_mst_ppc = monk(nmonk).coher.trialtype.all.events.move.MSTPPC.coher_ts; 
+           
+           % plot PPC MST
+           figure('Name', ['PPC-->MST' nmonk]); 
+           imagesc(ts_ppc_mst-1, freq_ppc_mst,coher_ppc_mst); 
+           axis xy; set(gca,'xlim',[-0.5 0.5], 'ylim', [4 50]); colorbar;
+           
+            % plot MST PPC
+           figure('Name', ['MST-->PPC' nmonk]); 
+           imagesc(ts_mst_ppc-1, freq_mst_ppc,coher_mst_ppc); 
+           axis xy; set(gca,'xlim',[-0.5 0.5], 'ylim', [4 50]); colorbar;
+        end
+        
+        
+        
+        
+        
+        
+        
+        
+        %% Plots for all monkeys
+        
+        
+        
+        
+        
+        
+end
