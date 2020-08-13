@@ -139,7 +139,8 @@ if event_potential
                     
                     %% compute spectrogram
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp');
-                    stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align = trials_lfps_temp2(ts > -1 & ts < 1,:); 
+                    stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align = trials_lfps_temp2(ts > -1.5 & ts < 1.5,:);
+                     stats.trialtype.(trialtypes{i})(j).events.stop.ts_lfp_align = 
                     [stats.trialtype.(trialtypes{i})(j).events.stop.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.freq_spectrogram] = ...
                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align,prs.spectrogram_movingwin,spectralparams); 
 %                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.stop.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.stop.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.p_spectrogram'), [0 0.8e-04]); axis xy;
@@ -411,7 +412,7 @@ if analyse_band_pass
             this_beta_stop = real(trials_beta(i).lfp(ts_align_stop > around_event(1) & ts_align_stop < around_event(2),:)); % align to stop
             this_beta_stop = this_beta_stop(1:333,:); % hardcoded to avoid extra sample once in a while
             this_95 = prctile(this_beta_stop,95); 
-            stats.band_passed.trl(i).beta_95_indx = this_theta_stop > this_95;  % take 95th percentile value
+            stats.band_passed.trl(i).beta_95_indx = this_beta_stop > this_95;  % take 95th percentile value
             % stats.band_passed.trl(i).beta_95 = this_theta_stop(this_beta_95_indx);
             % stats.band_passed.trl(i).beta_95_ts = this_ts(this_beta_95_indx);
         else

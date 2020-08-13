@@ -266,18 +266,19 @@ prs.simulate_population = false; % simulate population activity by running the e
 prs.corr_neuronbehverr = false;
 
 %% LFP
-prs.event_potential = false;
+prs.event_potential = true; %has to be set to true to align lfps to diff events.
 prs.compute_spectrum = false;
 prs.analyse_band_passed = false;
 prs.compute_psd = false;
 prs.lfp_eye = false; 
 prs.compute_spectrum_whole_trial = false;
-prs.compute_spectrum_whole_trial_align_stop = true; 
+prs.compute_spectrum_whole_trial_align_stop = false; 
 prs.analyse_theta = false; % compute tunings
 prs.analyse_alpha = false; % compute tunings
 prs.analyse_beta = false; % compute tunings
 prs.compute_coherencyLFP = false;
-prs.compute_coherogram = false; 
+prs.compute_coherogram = true; 
+prs.compute_coherogram_whole_trial = false; 
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;

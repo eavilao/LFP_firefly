@@ -139,7 +139,8 @@ if event_potential
                     
                     %% compute spectrogram
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp');
-                    stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align = trials_lfps_temp2(ts > -1 & ts < 1,:); 
+                    stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align = trials_lfps_temp2(ts > -1.5 & ts < 1.5,:);
+                    stats.trialtype.(trialtypes{i})(j).events.stop.ts_lfp_align = ts(ts > -1.5 & ts < 1.5); 
                     [stats.trialtype.(trialtypes{i})(j).events.stop.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.freq_spectrogram] = ...
                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align,prs.spectrogram_movingwin,spectralparams); 
 %                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.stop.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.stop.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.p_spectrogram'), [0 0.8e-04]); axis xy;
