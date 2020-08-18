@@ -13,7 +13,7 @@ mintrialsforstats = prs.mintrialsforstats;
 event_potential = prs.event_potential;
 compute_psd = prs.compute_psd;
 analyse_theta = prs.analyse_theta;
-analyse_alpha = prs.analyse_alpha; 
+analyse_alpha = prs.analyse_alpha;
 analyse_beta = prs.analyse_beta;
 analyse_band_pass = prs.analyse_band_passed;
 ntrls = length(trials_lfps);
@@ -49,7 +49,7 @@ if event_potential
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
                     stats.trialtype.(trialtypes{i})(j).events.move.potential_mu = nanmean(lfps_temp2);
                     stats.trialtype.(trialtypes{i})(j).events.move.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
-                    stats.trialtype.(trialtypes{i})(j).events.move.time = prs.ts.move; 
+                    stats.trialtype.(trialtypes{i})(j).events.move.time = prs.ts.move;
                     
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_theta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
@@ -57,11 +57,11 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.move.theta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.move.theta.time = prs.ts.move;
                     
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_alpha');
-                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
-                    stats.trialtype.(trialtypes{i})(j).events.move.alpha.potential_mu = nanmean(lfps_temp2);
-                    stats.trialtype.(trialtypes{i})(j).events.move.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
-                    stats.trialtype.(trialtypes{i})(j).events.move.alpha.time = prs.ts.move;
+                    %                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_alpha');
+                    %                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
+                    %                     stats.trialtype.(trialtypes{i})(j).events.move.alpha.potential_mu = nanmean(lfps_temp2);
+                    %                     stats.trialtype.(trialtypes{i})(j).events.move.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+                    %                     stats.trialtype.(trialtypes{i})(j).events.move.alpha.time = prs.ts.move;
                     
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_beta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
@@ -69,13 +69,19 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.move.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.move.beta.time = prs.ts.move;
                     
+                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_wideband');
+                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
+                    stats.trialtype.(trialtypes{i})(j).events.move.beta.potential_mu = nanmean(lfps_temp2);
+                    stats.trialtype.(trialtypes{i})(j).events.move.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+                    stats.trialtype.(trialtypes{i})(j).events.move.beta.time = prs.ts.move;
+                    
                     %% compute spectrogram
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp');
-                    stats.trialtype.(trialtypes{i})(j).events.move.lfp_align = trials_lfps_temp2(ts > -1 & ts < 5,:); 
+                    stats.trialtype.(trialtypes{i})(j).events.move.lfp_align = trials_lfps_temp2(ts > -1 & ts < 5,:);
                     [stats.trialtype.(trialtypes{i})(j).events.move.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.move.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.move.freq_spectrogram] = ...
-                        mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.move.lfp_align,prs.spectrogram_movingwin,spectralparams); 
-%                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.move.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.move.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.move.p_spectrogram')); axis xy;
-%                     set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80])
+                        mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.move.lfp_align,prs.spectrogram_movingwin,spectralparams);
+                    %                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.move.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.move.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.move.p_spectrogram')); axis xy;
+                    %                     set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80])
                 end
                 %% aligned to target onset
                 if any(strcmp(gettuning,'target'))
@@ -91,11 +97,11 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.target.theta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.target.theta.time = prs.ts.target;
                     
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_targ], 'lfp_alpha');
-                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.target)';
-                    stats.trialtype.(trialtypes{i})(j).events.target.alpha.potential_mu = nanmean(lfps_temp2);
-                    stats.trialtype.(trialtypes{i})(j).events.target.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
-                    stats.trialtype.(trialtypes{i})(j).events.target.alpha.time = prs.ts.target;
+                    %                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_targ], 'lfp_alpha');
+                    %                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.target)';
+                    %                     stats.trialtype.(trialtypes{i})(j).events.target.alpha.potential_mu = nanmean(lfps_temp2);
+                    %                     stats.trialtype.(trialtypes{i})(j).events.target.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+                    %                     stats.trialtype.(trialtypes{i})(j).events.target.alpha.time = prs.ts.target;
                     
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_targ],'lfp_beta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.target)';
@@ -103,13 +109,19 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.target.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.target.beta.time = prs.ts.target;
                     
+                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_targ],'lfp_wideband');
+                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.target)';
+                    stats.trialtype.(trialtypes{i})(j).events.target.beta.potential_mu = nanmean(lfps_temp2);
+                    stats.trialtype.(trialtypes{i})(j).events.target.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+                    stats.trialtype.(trialtypes{i})(j).events.target.beta.time = prs.ts.target;
+                    
                     %% compute spectrogram
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_targ],'lfp');
-                    stats.trialtype.(trialtypes{i})(j).events.target.lfp_align = trials_lfps_temp2(ts > -1 & ts < 1,:); 
+                    stats.trialtype.(trialtypes{i})(j).events.target.lfp_align = trials_lfps_temp2(ts > -1 & ts < 1,:);
                     [stats.trialtype.(trialtypes{i})(j).events.target.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.target.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.target.freq_spectrogram] = ...
-                        mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.target.lfp_align,prs.spectrogram_movingwin,spectralparams); 
-%                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.target.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.target.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.target.p_spectrogram'), [0 0.8e-04]); axis xy;
-%                     set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80])
+                        mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.target.lfp_align,prs.spectrogram_movingwin,spectralparams);
+                    %                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.target.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.target.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.target.p_spectrogram'), [0 0.8e-04]); axis xy;
+                    %                     set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80])
                 end
                 %% aligned to movement stop
                 if any(strcmp(gettuning,'stop'))
@@ -125,13 +137,19 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.stop.theta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.stop.theta.time = prs.ts.stop;
                     
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp_alpha');
-                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop)';
-                    stats.trialtype.(trialtypes{i})(j).events.stop.alpha.potential_mu = nanmean(lfps_temp2);
-                    stats.trialtype.(trialtypes{i})(j).events.stop.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
-                    stats.trialtype.(trialtypes{i})(j).events.stop.alpha.time = prs.ts.stop;
+                    %                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp_alpha');
+                    %                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop)';
+                    %                     stats.trialtype.(trialtypes{i})(j).events.stop.alpha.potential_mu = nanmean(lfps_temp2);
+                    %                     stats.trialtype.(trialtypes{i})(j).events.stop.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+                    %                     stats.trialtype.(trialtypes{i})(j).events.stop.alpha.time = prs.ts.stop;
                     
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop],'lfp_beta');
+                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop)';
+                    stats.trialtype.(trialtypes{i})(j).events.stop.beta.potential_mu = nanmean(lfps_temp2);
+                    stats.trialtype.(trialtypes{i})(j).events.stop.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+                    stats.trialtype.(trialtypes{i})(j).events.stop.beta.time = prs.ts.stop;
+                    
+                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop],'lfp_wideband');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop)';
                     stats.trialtype.(trialtypes{i})(j).events.stop.beta.potential_mu = nanmean(lfps_temp2);
                     stats.trialtype.(trialtypes{i})(j).events.stop.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
@@ -140,11 +158,11 @@ if event_potential
                     %% compute spectrogram
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp');
                     stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align = trials_lfps_temp2(ts > -1.5 & ts < 1.5,:);
-                    stats.trialtype.(trialtypes{i})(j).events.stop.ts_lfp_align = ts(ts > -1.5 & ts < 1.5); 
+                    stats.trialtype.(trialtypes{i})(j).events.stop.ts_lfp_align = ts(ts > -1.5 & ts < 1.5);
                     [stats.trialtype.(trialtypes{i})(j).events.stop.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.freq_spectrogram] = ...
-                        mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align,prs.spectrogram_movingwin,spectralparams); 
-%                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.stop.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.stop.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.p_spectrogram'), [0 0.8e-04]); axis xy;
-%                     set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80])
+                        mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align,prs.spectrogram_movingwin,spectralparams);
+                    %                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.stop.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.stop.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.p_spectrogram'), [0 0.8e-04]); axis xy;
+                    %                     set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80])
                     
                 end
                 
@@ -162,11 +180,11 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.reward.theta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.reward.theta.time = prs.ts.reward;
                     
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew], 'lfp_alpha');
-                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.reward)';
-                    stats.trialtype.(trialtypes{i})(j).events.reward.alpha.potential_mu = nanmean(lfps_temp2);
-                    stats.trialtype.(trialtypes{i})(j).events.reward.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
-                    stats.trialtype.(trialtypes{i})(j).events.reward.alpha.time = prs.ts.reward;
+                    %                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew], 'lfp_alpha');
+                    %                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.reward)';
+                    %                     stats.trialtype.(trialtypes{i})(j).events.reward.alpha.potential_mu = nanmean(lfps_temp2);
+                    %                     stats.trialtype.(trialtypes{i})(j).events.reward.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+                    %                     stats.trialtype.(trialtypes{i})(j).events.reward.alpha.time = prs.ts.reward;
                     
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew],'lfp_beta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.reward)';
@@ -174,8 +192,14 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.reward.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.reward.beta.time = prs.ts.reward;
                     
+                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew],'lfp_wideband');
+                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.reward)';
+                    stats.trialtype.(trialtypes{i})(j).events.reward.beta.potential_mu = nanmean(lfps_temp2);
+                    stats.trialtype.(trialtypes{i})(j).events.reward.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+                    stats.trialtype.(trialtypes{i})(j).events.reward.beta.time = prs.ts.reward;
+                    
                     %% compute spectrogram
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew],'lfp');
+                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew],'lfp_wideband');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.reward)';
                     inc = ~isnan(lfps_temp2); trials_lfps_temp2 = trials_lfps_temp2(:,inc(:,end));   % remove nans
                     stats.trialtype.(trialtypes{i})(j).events.reward.lfp_align = trials_lfps_temp2(ts > -1.5 & ts < 0.5,:);
@@ -242,37 +266,37 @@ if compute_psd
     [stats.trialtype.mobile.spectrum.psd , stats.trialtype.mobile.spectrum.freq] = ...
         mtspectrumc_unequal_length_trials(lfp_concat(:), [1 1] , spectralparams, sMarkers); % needs http://chronux.org/
     
-%     %% eyes-fixed period
-%     eyesfixed_lfps_temp = []; sMarkers = [];
-%     for i=1:length(eyesfixed_lfps)
-%         if ~isempty(eyesfixed_lfps(i).lfp)
-%             eyesfixed_lfps_temp(end+1).lfp = eyesfixed_lfps(i).lfp;
-%         end
-%     end
-%     lfp_concat = cell2mat({eyesfixed_lfps_temp.lfp}); % concatenate trials
-%     triallen = cellfun(@(x) length(x), {eyesfixed_lfps_temp.lfp});
-%     sMarkers(:,1) = cumsum([1 triallen(1:end-1)]); sMarkers(:,2) = cumsum(triallen); % demarcate trial onset and end
-%     [stats.trialtype.eyesfixed.spectrum.psd , stats.trialtype.eyesfixed.spectrum.freq] = ...
-%         mtspectrumc_unequal_length_trials(lfp_concat(:), [fixateduration fixateduration] , spectralparams, sMarkers); % needs http://chronux.org/
-%     
-%     %% eyes-free period
-%     eyesfree_lfps_temp = []; sMarkers = [];
-%     for i=1:length(eyesfree_lfps)
-%         if ~isempty(eyesfree_lfps(i).lfp)
-%             eyesfree_lfps_temp(end+1).lfp = eyesfree_lfps(i).lfp;
-%         end
-%     end
-%     lfp_concat = cell2mat({eyesfree_lfps_temp.lfp}); % concatenate trials
-%     triallen = cellfun(@(x) length(x), {eyesfree_lfps_temp.lfp});
-%     sMarkers(:,1) = cumsum([1 triallen(1:end-1)]); sMarkers(:,2) = cumsum(triallen); % demarcate trial onset and end
-%     [stats.trialtype.eyesfree.spectrum.psd , stats.trialtype.eyesfree.spectrum.freq] = ...
-%         mtspectrumc_unequal_length_trials(lfp_concat(:), [fixateduration fixateduration] , spectralparams, sMarkers); % needs http://chronux.org/
+    %     %% eyes-fixed period
+    %     eyesfixed_lfps_temp = []; sMarkers = [];
+    %     for i=1:length(eyesfixed_lfps)
+    %         if ~isempty(eyesfixed_lfps(i).lfp)
+    %             eyesfixed_lfps_temp(end+1).lfp = eyesfixed_lfps(i).lfp;
+    %         end
+    %     end
+    %     lfp_concat = cell2mat({eyesfixed_lfps_temp.lfp}); % concatenate trials
+    %     triallen = cellfun(@(x) length(x), {eyesfixed_lfps_temp.lfp});
+    %     sMarkers(:,1) = cumsum([1 triallen(1:end-1)]); sMarkers(:,2) = cumsum(triallen); % demarcate trial onset and end
+    %     [stats.trialtype.eyesfixed.spectrum.psd , stats.trialtype.eyesfixed.spectrum.freq] = ...
+    %         mtspectrumc_unequal_length_trials(lfp_concat(:), [fixateduration fixateduration] , spectralparams, sMarkers); % needs http://chronux.org/
+    %
+    %     %% eyes-free period
+    %     eyesfree_lfps_temp = []; sMarkers = [];
+    %     for i=1:length(eyesfree_lfps)
+    %         if ~isempty(eyesfree_lfps(i).lfp)
+    %             eyesfree_lfps_temp(end+1).lfp = eyesfree_lfps(i).lfp;
+    %         end
+    %     end
+    %     lfp_concat = cell2mat({eyesfree_lfps_temp.lfp}); % concatenate trials
+    %     triallen = cellfun(@(x) length(x), {eyesfree_lfps_temp.lfp});
+    %     sMarkers(:,1) = cumsum([1 triallen(1:end-1)]); sMarkers(:,2) = cumsum(triallen); % demarcate trial onset and end
+    %     [stats.trialtype.eyesfree.spectrum.psd , stats.trialtype.eyesfree.spectrum.freq] = ...
+    %         mtspectrumc_unequal_length_trials(lfp_concat(:), [fixateduration fixateduration] , spectralparams, sMarkers); % needs http://chronux.org/
 end
 
 %% theta LFP
 trials_theta(ntrls) = struct();
 if analyse_theta
-    for i=1:ntrls 
+    for i=1:ntrls
         trials_theta(i).lfp = trials_lfps(i).lfp_theta(:); % read as column vector
         theta_freq = [(1/dt)/(2*pi)*diff(unwrap(angle(trials_theta(i).lfp))) ; nan];
         theta_freq(theta_freq<prs.lfp_theta(1) | theta_freq>prs.lfp_theta(2)) = nan;
@@ -299,22 +323,22 @@ if analyse_theta
             stats.trialtype.(trialtypes{i})(j).continuous.vw.thetafreq = ...
                 ComputeTuning2D({continuous_temp.v},{continuous_temp.w},{continuous_temp.ts},{trials_theta_temp.freq},timewindow_move,prs.tuning,prs.tuning_method);
             %% horizontal eye velocity
-%             heye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.yle},{continuous_temp.yre},'UniformOutput',false); % average both eyes (if available)
-%             heyevel = cellfun(@(x) [0 ; diff(x)'/dt],heye,'UniformOutput',false);
-%             stats.trialtype.(trialtypes{i})(j).continuous.heyevel.thetafreq = ...
-%                 ComputeTuning(heyevel,{continuous_temp.ts},{trials_theta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.heye_vel);
+            %             heye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.yle},{continuous_temp.yre},'UniformOutput',false); % average both eyes (if available)
+            %             heyevel = cellfun(@(x) [0 ; diff(x)'/dt],heye,'UniformOutput',false);
+            %             stats.trialtype.(trialtypes{i})(j).continuous.heyevel.thetafreq = ...
+            %                 ComputeTuning(heyevel,{continuous_temp.ts},{trials_theta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.heye_vel);
             %% vertical velocity
-%             veye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.zle},{continuous_temp.zre},'UniformOutput',false); % average both eyes (if available)
-%             veyevel = cellfun(@(x) [0 ; diff(x)'/dt],veye,'UniformOutput',false);
-%             stats.trialtype.(trialtypes{i})(j).continuous.veyevel.thetafreq = ...
-%                 ComputeTuning(veyevel,{continuous_temp.ts},{trials_theta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.veye_vel);
-        end        
+            %             veye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.zle},{continuous_temp.zre},'UniformOutput',false); % average both eyes (if available)
+            %             veyevel = cellfun(@(x) [0 ; diff(x)'/dt],veye,'UniformOutput',false);
+            %             stats.trialtype.(trialtypes{i})(j).continuous.veyevel.thetafreq = ...
+            %                 ComputeTuning(veyevel,{continuous_temp.ts},{trials_theta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.veye_vel);
+        end
     end
 end
 %% alpha LFP
 trials_alpha(ntrls) = struct();
 if analyse_alpha
-    for i=1:ntrls 
+    for i=1:ntrls
         trials_alpha(i).lfp = trials_lfps(i).lfp_alpha(:); % read as column vector
         alpha_freq = [(1/dt)/(2*pi)*diff(unwrap(angle(trials_alpha(i).lfp))) ; nan];
         alpha_freq(alpha_freq<prs.lfp_alpha(1) | alpha_freq>prs.lfp_alpha(2)) = nan;
@@ -339,16 +363,16 @@ if analyse_alpha
             stats.trialtype.(trialtypes{i})(j).continuous.vw.alphafreq = ...
                 ComputeTuning2D({continuous_temp.v},{continuous_temp.w},{continuous_temp.ts},{trials_alpha_temp.freq},timewindow_move,prs.tuning,prs.tuning_method);
             %% horizontal eye velocity
-%             heye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.yle},{continuous_temp.yre},'UniformOutput',false); % average both eyes (if available)
-%             heyevel = cellfun(@(x) [0 ; diff(x)'/dt],heye,'UniformOutput',false);
-%             stats.trialtype.(trialtypes{i})(j).continuous.heyevel.thetafreq = ...
-%                 ComputeTuning(heyevel,{continuous_temp.ts},{trials_theta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.heye_vel);
+            %             heye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.yle},{continuous_temp.yre},'UniformOutput',false); % average both eyes (if available)
+            %             heyevel = cellfun(@(x) [0 ; diff(x)'/dt],heye,'UniformOutput',false);
+            %             stats.trialtype.(trialtypes{i})(j).continuous.heyevel.thetafreq = ...
+            %                 ComputeTuning(heyevel,{continuous_temp.ts},{trials_theta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.heye_vel);
             %% vertical velocity
-%             veye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.zle},{continuous_temp.zre},'UniformOutput',false); % average both eyes (if available)
-%             veyevel = cellfun(@(x) [0 ; diff(x)'/dt],veye,'UniformOutput',false);
-%             stats.trialtype.(trialtypes{i})(j).continuous.veyevel.thetafreq = ...
-%                 ComputeTuning(veyevel,{continuous_temp.ts},{trials_theta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.veye_vel);
-        end        
+            %             veye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.zle},{continuous_temp.zre},'UniformOutput',false); % average both eyes (if available)
+            %             veyevel = cellfun(@(x) [0 ; diff(x)'/dt],veye,'UniformOutput',false);
+            %             stats.trialtype.(trialtypes{i})(j).continuous.veyevel.thetafreq = ...
+            %                 ComputeTuning(veyevel,{continuous_temp.ts},{trials_theta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.veye_vel);
+        end
     end
 end
 
@@ -380,15 +404,15 @@ if analyse_beta
             stats.trialtype.(trialtypes{i})(j).continuous.vw.betafreq = ...
                 ComputeTuning2D({continuous_temp.v},{continuous_temp.w},{continuous_temp.ts},{trials_beta_temp.freq},timewindow_move,prs.tuning,prs.tuning_method);
             %% horizontal eye velocity
-%             heye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.yle},{continuous_temp.yre},'UniformOutput',false); % average both eyes (if available)
-%             heyevel = cellfun(@(x) [0 ; diff(x)'/dt],heye,'UniformOutput',false);
-%             stats.trialtype.(trialtypes{i})(j).continuous.heyevel.betafreq = ...
-%                 ComputeTuning(heyevel,{continuous_temp.ts},{trials_beta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.heye_vel);
+            %             heye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.yle},{continuous_temp.yre},'UniformOutput',false); % average both eyes (if available)
+            %             heyevel = cellfun(@(x) [0 ; diff(x)'/dt],heye,'UniformOutput',false);
+            %             stats.trialtype.(trialtypes{i})(j).continuous.heyevel.betafreq = ...
+            %                 ComputeTuning(heyevel,{continuous_temp.ts},{trials_beta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.heye_vel);
             %% vertical velocity
-%             veye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.zle},{continuous_temp.zre},'UniformOutput',false); % average both eyes (if available)
-%             veyevel = cellfun(@(x) [0 ; diff(x)'/dt],veye,'UniformOutput',false);
-%             stats.trialtype.(trialtypes{i})(j).continuous.veyevel.betafreq = ...
-%                 ComputeTuning(veyevel,{continuous_temp.ts},{trials_beta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.veye_vel);
+            %             veye = cellfun(@(x,y) nanmean([x(:)' ; y(:)']),{continuous_temp.zle},{continuous_temp.zre},'UniformOutput',false); % average both eyes (if available)
+            %             veyevel = cellfun(@(x) [0 ; diff(x)'/dt],veye,'UniformOutput',false);
+            %             stats.trialtype.(trialtypes{i})(j).continuous.veyevel.betafreq = ...
+            %                 ComputeTuning(veyevel,{continuous_temp.ts},{trials_beta_temp.freq},timewindow_move,duration_zeropad,corr_lag,nbootstraps,prs.tuning,prs.tuning_method,prs.binrange.veye_vel);
         end
     end
 end
@@ -403,7 +427,7 @@ if analyse_band_pass
             trials_theta(i).lfp = trials_lfps(i).lfp_theta(:); % read as column vector
             this_theta_stop = real(trials_theta(i).lfp(ts_align_stop > around_event(1) & ts_align_stop < around_event(2),:)); % align to stop
             this_theta_stop = this_theta_stop(1:333,:); % hardcoded to avoid extra sample once in a while
-            this_95 = prctile(this_theta_stop,95); 
+            this_95 = prctile(this_theta_stop,95);
             stats.band_passed.trl(i).theta_95_indx = this_theta_stop > this_95;  % take 95th percentile value
             %stats.band_passed.trl(i).theta_95 = this_theta_stop(this_theta_95_indx);
             % stats.band_passed.trl(i).theta_95_ts = this_ts(this_theta_95_indx);
@@ -411,14 +435,14 @@ if analyse_band_pass
             trials_beta(i).lfp = trials_lfps(i).lfp_beta(:); % read as column vector
             this_beta_stop = real(trials_beta(i).lfp(ts_align_stop > around_event(1) & ts_align_stop < around_event(2),:)); % align to stop
             this_beta_stop = this_beta_stop(1:333,:); % hardcoded to avoid extra sample once in a while
-            this_95 = prctile(this_beta_stop,95); 
+            this_95 = prctile(this_beta_stop,95);
             stats.band_passed.trl(i).beta_95_indx = this_beta_stop > this_95;  % take 95th percentile value
             % stats.band_passed.trl(i).beta_95 = this_theta_stop(this_beta_95_indx);
             % stats.band_passed.trl(i).beta_95_ts = this_ts(this_beta_95_indx);
         else
             %stats.band_passed.trl(i).theta_95 = NaN;
             stats.band_passed.trl(i).theta_95_ts = NaN;
-           % stats.band_passed.trl(i).beta_95 = NaN;
+            % stats.band_passed.trl(i).beta_95 = NaN;
             stats.band_passed.trl(i).beta_95_ts = NaN;
         end
     end

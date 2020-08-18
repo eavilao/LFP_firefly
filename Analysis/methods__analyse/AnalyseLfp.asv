@@ -57,11 +57,11 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.move.theta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.move.theta.time = prs.ts.move;
                     
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_alpha');
-                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
-                    stats.trialtype.(trialtypes{i})(j).events.move.alpha.potential_mu = nanmean(lfps_temp2);
-                    stats.trialtype.(trialtypes{i})(j).events.move.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
-                    stats.trialtype.(trialtypes{i})(j).events.move.alpha.time = prs.ts.move;
+%                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_alpha');
+%                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
+%                     stats.trialtype.(trialtypes{i})(j).events.move.alpha.potential_mu = nanmean(lfps_temp2);
+%                     stats.trialtype.(trialtypes{i})(j).events.move.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+%                     stats.trialtype.(trialtypes{i})(j).events.move.alpha.time = prs.ts.move;
                     
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_beta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
@@ -91,11 +91,11 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.target.theta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.target.theta.time = prs.ts.target;
                     
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_targ], 'lfp_alpha');
-                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.target)';
-                    stats.trialtype.(trialtypes{i})(j).events.target.alpha.potential_mu = nanmean(lfps_temp2);
-                    stats.trialtype.(trialtypes{i})(j).events.target.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
-                    stats.trialtype.(trialtypes{i})(j).events.target.alpha.time = prs.ts.target;
+%                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_targ], 'lfp_alpha');
+%                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.target)';
+%                     stats.trialtype.(trialtypes{i})(j).events.target.alpha.potential_mu = nanmean(lfps_temp2);
+%                     stats.trialtype.(trialtypes{i})(j).events.target.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+%                     stats.trialtype.(trialtypes{i})(j).events.target.alpha.time = prs.ts.target;
                     
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_targ],'lfp_beta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.target)';
@@ -125,11 +125,11 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.stop.theta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.stop.theta.time = prs.ts.stop;
                     
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp_alpha');
-                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop)';
-                    stats.trialtype.(trialtypes{i})(j).events.stop.alpha.potential_mu = nanmean(lfps_temp2);
-                    stats.trialtype.(trialtypes{i})(j).events.stop.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
-                    stats.trialtype.(trialtypes{i})(j).events.stop.alpha.time = prs.ts.stop;
+%                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp_alpha');
+%                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop)';
+%                     stats.trialtype.(trialtypes{i})(j).events.stop.alpha.potential_mu = nanmean(lfps_temp2);
+%                     stats.trialtype.(trialtypes{i})(j).events.stop.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+%                     stats.trialtype.(trialtypes{i})(j).events.stop.alpha.time = prs.ts.stop;
                     
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop],'lfp_beta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop)';
@@ -140,7 +140,7 @@ if event_potential
                     %% compute spectrogram
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp');
                     stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align = trials_lfps_temp2(ts > -1.5 & ts < 1.5,:);
-                     stats.trialtype.(trialtypes{i})(j).events.stop.ts_lfp_align = 
+                    stats.trialtype.(trialtypes{i})(j).events.stop.ts_lfp_align = ts(ts > -1.5 & ts < 1.5); 
                     [stats.trialtype.(trialtypes{i})(j).events.stop.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.freq_spectrogram] = ...
                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.lfp_align,prs.spectrogram_movingwin,spectralparams); 
 %                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.stop.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.stop.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.p_spectrogram'), [0 0.8e-04]); axis xy;
@@ -162,11 +162,11 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.reward.theta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.reward.theta.time = prs.ts.reward;
                     
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew], 'lfp_alpha');
-                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.reward)';
-                    stats.trialtype.(trialtypes{i})(j).events.reward.alpha.potential_mu = nanmean(lfps_temp2);
-                    stats.trialtype.(trialtypes{i})(j).events.reward.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
-                    stats.trialtype.(trialtypes{i})(j).events.reward.alpha.time = prs.ts.reward;
+%                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew], 'lfp_alpha');
+%                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.reward)';
+%                     stats.trialtype.(trialtypes{i})(j).events.reward.alpha.potential_mu = nanmean(lfps_temp2);
+%                     stats.trialtype.(trialtypes{i})(j).events.reward.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+%                     stats.trialtype.(trialtypes{i})(j).events.reward.alpha.time = prs.ts.reward;
                     
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew],'lfp_beta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.reward)';

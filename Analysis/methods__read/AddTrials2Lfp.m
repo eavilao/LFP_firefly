@@ -123,6 +123,22 @@ if prs.compute_spectrum
         end
     end
     
+    %% trials (wideband analytic form)
+    [b,a] = butter(prs.lfp_filtorder,[prs.lfp_wideband(1) prs.lfp_wideband(2)]/(fs/2));
+    lfp_wideband = filtfilt(b,a,lfp);
+    lfp_wideband_analytic = hilbert(lfp_wideband);
+    for i=1:ntrls
+        if ~isnan(trialevents.t_beg(i))
+            t_beg = trialevents.t_beg(i) + trials_behv(i).events.t_beg_correction; % correction aligns t_beg with target onset
+            t1 = trials_behv(i).continuous.ts(1); % read lfp from first behavioural sample of trial i
+            t2 = trials_behv(i).continuous.ts(end); % till last behavioural sample of trial i
+            lfp_raw = lfp_wideband_analytic(ts > (t_beg + t1) & ts < (t_beg + t2)); t_raw = linspace(t1,t2,length(lfp_raw));
+            trials(i).lfp_wideband = interp1(t_raw,lfp_raw,trials_behv(i).continuous.ts,'linear'); % beta-band LFP
+        else
+            trials(i).lfp_wideband = nan(length(trials_behv(i).continuous.ts),1);
+        end
+    end
+    
     %% fixation period (raw)
     if prs.lfp_eye
         eyesfixed = struct(); count = 0;

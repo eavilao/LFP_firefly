@@ -81,11 +81,10 @@ prs.spectrum_movingwin = [1.5 1.5]; % [window-size step-size] to compute frequen
 prs.spectrogram_movingwin = [0.5 0.05]; % [window-size step-size] to compute spectrogram (s)
 prs.min_stationary = 0.5; % mimimum duration of stationary period for LFP analysis (s)
 prs.min_mobile = 0.5; % mimimum duration of mobile period for LFP analysis (s)
-% prs.lfp_theta = [4 8]; prs.lfp_theta_peak = 6; % prs.lfp_theta = [6 12]; prs.lfp_theta_peak = 8.5;
-% prs.lfp_alpha = [8 12]; prs.lfp_alpha_peak = 10;
-prs.lfp_beta = [12 20]; prs.lfp_beta_peak = 18.5;
 prs.lfp_delta = [1 4]; prs.lfp_delta_peak = 2;
 prs.lfp_theta = [4 12]; prs.lfp_theta_peak = 8; % prs.lfp_theta = [6 12]; prs.lfp_theta_peak = 8.5;
+prs.lfp_beta = [12 20]; prs.lfp_beta_peak = 18.5;
+prs.lfp_wideband = [5 40]; prs.lfp_wideband_peak = 20;
 % prs.lfp_alpha = [8 12]; prs.lfp_alpha_peak = 10;
 % prs.lfp_low_beta = [12 20]; prs.lfp_beta_peak = 16; % prs.lfp_beta = [12 20]; prs.lfp_beta_peak = 18.5;
 % prs.lfp_high_beta = [20 30]; prs.lfp_beta_peak = 25; 
@@ -272,13 +271,14 @@ prs.analyse_band_passed = false;
 prs.compute_psd = false;
 prs.lfp_eye = false; 
 prs.compute_spectrum_whole_trial = false;
-prs.compute_spectrum_whole_trial_align_stop = false; 
+prs.compute_spectrum_whole_trial_align_stop = true; 
 prs.analyse_theta = false; % compute tunings
 prs.analyse_alpha = false; % compute tunings
 prs.analyse_beta = false; % compute tunings
+prs.analyse_wideband = false; % compute tunings
 prs.compute_coherencyLFP = false;
-prs.compute_coherogram = true; 
-prs.compute_coherogram_whole_trial = false; 
+prs.compute_coherogram = false; 
+prs.compute_coherogram_trial_by_trial = false; 
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;

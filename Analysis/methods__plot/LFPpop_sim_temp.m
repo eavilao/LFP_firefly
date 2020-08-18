@@ -39,7 +39,7 @@ function LFPpop_sim_temp(exp)
 %                 % %                 exp(cnt).area.PFC.signal = experiments.sessions(sess).lfps(indx_PFC); % extract lfp signal and band passed signal
 %                 exp(cnt).behavior = [experiments.sessions(sess).behaviours];
 %             else
-%                 exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
+%                 exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats]; 
 %                 exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
 %                 % %                 exp(cnt).area.MST.signal = []; exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
 %                 % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
@@ -57,7 +57,7 @@ function LFPpop_sim_temp(exp)
 % % save
 % disp('Saving... . . .')
 % fprintf(['Time:  ' num2str(clock) '\n']);
-% save('exp_out_lfp_stats_pop_2020_07_22_spectro_trial_align_stop','exp', '-v7.3');
+% save('exp_out_lfp_stats_pop_2020_08_18_coherence_align_stop','exp', '-v7.3');
 % % load train
 % % sound(y,Fs)
 % disp('           Saved! ')
@@ -71,8 +71,8 @@ save_lfp_raw = false; % raw and per trial lfps
 do_PSD = false;  % extract power spectral densities
 save_spectro = false; % save spectrogram file?
 save_spectro_per_trial = false;
-save_spectro_per_trial_align_stop = true;
-save_cohero = false; % save coherogram file
+save_spectro_per_trial_align_stop = false;
+save_cohero = true; % save coherogram file
 avg_monks = false; % average for all monkeys?
 do_cohero = false; % extract coherograms
 doCSD = false; % Perform CSD analysis for MST recordings?
@@ -925,7 +925,7 @@ end
 %% Save
     disp('                 Done, saving . . .     ')
     fprintf(['Time:  ' num2str(clock) '\n']);
-    save('lfp_pop_sim_2020_07_22_spectro_align_stop', 'monk', 'all_monks', '-v7.3');
+    save('lfp_pop_sim_2020_08_18_coherence_align_stop', 'monk', 'all_monks', '-v7.3');
     load train
     sound(y,Fs)
     disp('                     Saved!')
