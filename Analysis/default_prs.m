@@ -265,13 +265,14 @@ prs.simulate_population = false; % simulate population activity by running the e
 prs.corr_neuronbehverr = false;
 
 %% LFP
-prs.event_potential = true; %has to be set to true to align lfps to diff events.
-prs.compute_spectrum = false;
+prs.event_potential = true;
+prs.compute_spectrum = true;
 prs.analyse_band_passed = false;
 prs.compute_psd = false;
 prs.lfp_eye = false; 
 prs.compute_spectrum_whole_trial = false;
-prs.compute_spectrum_whole_trial_align_stop = true; 
+prs.compute_spectrum_whole_trial_align_stop = false; 
+prs.compute_spectrum_whole_trial_align_stop_per_band = true; 
 prs.analyse_theta = false; % compute tunings
 prs.analyse_alpha = false; % compute tunings
 prs.analyse_beta = false; % compute tunings

@@ -621,6 +621,45 @@ if prs.compute_spectrum_whole_trial_align_stop
     end
 end
 
+%% compute spectrogram for each trial for all channels (average all channels per trial) and per channel aligned to movement stop for each band separately
+if prs.compute_spectrum_whole_trial_align_stop_per_band
+    fprintf('**********Computing coherogram for the whole trial between LFPs********** \n');
+    fprintf(['Time:  ' num2str(clock) '\n']);
+    spectralparams.tapers = prs.spectrum_tapers;
+    spectralparams.Fs = 1/dt;
+    spectralparams.trialave = prs.spectrum_trialave;
+    gettuning = prs.tuning_events; unique_brain_areas = unique({units.brain_area}); num_brain_areas = numel(unique_brain_areas);
+    for type = 2 %1:length(trialtypes)
+        nconds = length(behv_stats.trialtype.(trialtypes{type}));
+        for cond = 1:2 %nconds
+            %             for ev = 3 % ('stop') %1:length(gettuning)
+            for area = 1:num_brain_areas
+                unitindx = strcmp({units.brain_area}, unique_brain_areas{area});
+                %% extract LFP trace for each trial for all channels in each brain area
+                bands = {'theta' 'beta' 'wideband'}
+                for b = 1:length(bands)
+                    if ~isempty(lfps(1).stats.trialtype.(trialtypes{type})(cond).events.stop.(bands{b}).lfp_align)
+                        for j = 1:length(lfps(1).stats.trialtype.(trialtypes{type})(cond).events.stop.(bands{b}).lfp_align(1,:)) % trials
+                            ar = find(unitindx); clear lfp_trl_area
+                            for n = 1:length(ar)  % first 24 ch for MST if applicable
+                                lfp_trl_area(n,:) =  lfps(ar(n)).stats.trialtype.(trialtypes{type})(cond).events.stop.(bands{b}).lfp_align(:,j); % extract lfp for all ch per trial  % get # of trials (samp x ch) 334xch
+                                % compute spectrogram for each trial for each channel
+                                [stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).(bands{b}).ch(n).trl(j).spectrogram_stop, stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).(bands{b}).ch(n).trl(j).ts_spectrogram_stop,...
+                                    stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).(bands{b}).ch(n).trl(j).freq_spectrogram_stop] = ...
+                                    mtspecgramc(lfp_trl_area(n,:),prs.spectrogram_movingwin,spectralparams);
+                            end
+                            % compute spectrogram
+                            [stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).(bands{b}).pop_trl(j).spectrogram_stop, stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).(bands{b}).pop_trl(j).ts_spectrogram_stop,...
+                                stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).(bands{b}).pop_trl(j).freq_spectrogram_stop] = ...
+                                mtspecgramc(lfp_trl_area',prs.spectrogram_movingwin,spectralparams);
+                        end
+                    end
+                end
+            end
+            %             end
+        end
+    end
+end
 
 
 %% compute coherence over time
