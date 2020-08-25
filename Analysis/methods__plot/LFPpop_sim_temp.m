@@ -455,10 +455,10 @@ if do_cohero
                         
                         % coherogram mean
                         for coh_ar = 1:length(coh_areas)
-                            monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_mu = squeeze(nanmean(coh_ev,1));
-                            monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_phi_mu = squeeze(nanmean(coh_phi,1));
-                            monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_ts = squeeze(nanmean(coh_ts,1));
-                            monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_freq = squeeze(nanmean(coh_freq,1));
+                            monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher = squeeze(coh_ev(coh_ar,:,:));
+                            monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_phi = squeeze(coh_phi(coh_ar,:,:));
+                            monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher = squeeze(coh_ts(coh_ar,:,:));
+                            monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_freq = squeeze(coh_freq(coh_ar,:,:));
                         end
                     end
                 end
