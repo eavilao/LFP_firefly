@@ -272,13 +272,13 @@ prs.compute_psd = false;
 prs.lfp_eye = false; 
 prs.compute_spectrum_whole_trial = false;
 prs.compute_spectrum_whole_trial_align_stop = false; 
-prs.compute_spectrum_whole_trial_align_stop_per_band = true; 
+prs.compute_spectrum_whole_trial_align_stop_per_band = false; 
 prs.analyse_theta = false; % compute tunings
 prs.analyse_alpha = false; % compute tunings
 prs.analyse_beta = false; % compute tunings
 prs.analyse_wideband = false; % compute tunings
 prs.compute_coherencyLFP = false;
-prs.compute_coherogram = false; 
+prs.compute_coherogram = true;
 prs.compute_coherogram_trial_by_trial = false; 
 
 %% Spike-LFP

@@ -454,7 +454,11 @@ if do_cohero
                         
                         
                         % coherogram mean
+<<<<<<< HEAD
                          for coh_ar = 1:length(coh_areas)
+=======
+                        for coh_ar = 1:length(coh_areas)
+>>>>>>> e3f27dc6f1667e727cca02e3483f6dbe42fdde7e
                             monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher = squeeze(coh_ev(coh_ar,:,:));
                             monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_phi = squeeze(coh_phi(coh_ar,:,:));
                             monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher = squeeze(coh_ts(coh_ar,:,:));
