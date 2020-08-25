@@ -680,18 +680,18 @@ if prs.compute_coherogram
                         unitindx2 = strcmp({units.brain_area}, unique_brain_areas{area2});
                         clear lfp_trl_a1 lfp_trl_a2 a1_lfp a2_lfp
                         %% extract LFP trace for each trial for all channels in each brain area
-                        if ~isempty(lfps(1).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).lfp_align)
-                            for j = 1:length(lfps(1).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).lfp_align(1,:)) % trials
+                        if ~isempty(lfps(1).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.lfp_align)
+                            for j = 1:length(lfps(1).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.lfp_align(1,:)) % trials
                                 
                                 a1 = find(unitindx1);
                                 for n = 1:length(a1)  % first 24 ch for MST
-                                    lfp_trl_a1(n,j,:) = lfps(a1(n)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).lfp_align(:,j)';  % extract lfp for all ch per trial  % get # of trials (samp x trl) 334xch
+                                    lfp_trl_a1(n,j,:) = lfps(a1(n)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.lfp_align(:,j)';  % extract lfp for all ch per trial  % get # of trials (samp x trl) 334xch
                                 end
                                 
                                 a2 = find(unitindx2);
                                 
                                 for n2 = 1:length(a2) % ch
-                                    lfp_trl_a2(n2,j,:) = lfps(a2(n2)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).lfp_align(:,j)';  % extract lfp for all ch per trial  % get # of trials (samp x trl) 334xch
+                                    lfp_trl_a2(n2,j,:) = lfps(a2(n2)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.lfp_align(:,j)';  % extract lfp for all ch per trial  % get # of trials (samp x trl) 334xch
                                 end
                             end
                             % average over all channels
