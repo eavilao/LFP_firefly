@@ -925,7 +925,7 @@ end
 %% Save
     disp('                 Done, saving . . .     ')
     fprintf(['Time:  ' num2str(clock) '\n']);
-    save('lfp_pop_sim_2020_08_27_coherence_align_target_stop', 'monk', 'all_monks', '-v7.3');
+    save('lfp_pop_sim_2020_08_27_coherence_align_target_stop', 'monk', 'all_monks', '-v7.3')
     load train
     sound(y,Fs)
     disp('                     Saved!')

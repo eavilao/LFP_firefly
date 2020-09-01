@@ -43,7 +43,7 @@ function plot_LFPpop_sim(monk, all_monks, plot_type)
 % 'coherogram_target'
 % 'coherogram_stop'
 % 'coherogram_reward_PPC_MST'
-% 'coherogram_stop_PPC_MST'
+% 'coherogram_target_stop_PPC_MST'
 % 'coherence_dist'
 % 'coherence_dist_all'
 % 'coherence_dist_reward_density'
@@ -2896,23 +2896,23 @@ switch plot_type
             end
         end
         
-    case 'coherogram_stop_PPC_MST'
+    case 'coherogram_target_stop_PPC_MST'
         %Contains average per session
         type = 'reward'
         ev = 'stop'
-        brain_area = 'PFCMST'  % 'PPCMST'
+        brain_area = 'PPCMST'  % 'PFCMST'  % 'PPCMST'
         time_win = [-0.5 0.5];   % [-0.25 0.25]; [-0.45 0.25];
         freq_win = [3 51];
         align_t = 1;  % 1.3 for target (so it's aligned to target offset
         p = numSubplots(12);  % 9 for reward cond, 12 for rest
         cnt=1;
-        for nmonk = 2 %[1 3]
+        for nmonk = 1 %[1 3]
             for nsess = 1:length(monk(nmonk).coher.sess)
                  ncond = length(monk(nmonk).coher.sess(nsess).trialtype.(type));
                 for cond = 1 % 1:ncond
                     freq = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_freq;
                     ts = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_ts-align_t;
-                    p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_mu';
+                    p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher';
                     ts_win = ts(ts>time_win(1) & ts<time_win(2));
                     p_cohero_win = p_cohero(freq>freq_win(1) & freq<freq_win(2),ts>time_win(1) & ts<time_win(2));
                     coher_all(nsess,:,:) = p_cohero_win; 
@@ -2934,9 +2934,9 @@ switch plot_type
                     
                     %colormap(parula); copper
                     % imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),p_cohero_win/max_cohero, [0 1]); axis xy; %colorbar;
-                    imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),p_cohero_win, [0 0.6]); axis xy; %colorbar;
+                    imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),p_cohero_win, [0 max_cohero]); axis xy; colorbar;
                     set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; % vline(-0.3,'b');
-                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)])
+                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
                     % xlabel('time (s)'); ylabel('frequency (Hz)');
                     cnt = cnt+1;
                 end 
@@ -2945,33 +2945,33 @@ switch plot_type
             coher_mu = mean(coher_all);
             % plot
             figure; 
-            imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),squeeze(coher_mu),[0 0.55]); axis xy; colorbar;
-            set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; % vline(-0.3,'b');
+            imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),squeeze(coher_mu),[0 0.6]); axis xy; colorbar;
+            set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; if align_t == 1.3; vline(-0.3,'--w'); end
             title (['Cond ' num2str(cond)]); box off
             xlabel('time (s)'); ylabel('frequency (Hz)');
             
             % mu all
-            figure(2);
+            figure;
             plot(ts_win,mean(squeeze(coher_mu)))
-            set(gca, 'ylim',[0.24 0.29], 'xlim',[-0.5 0.5], 'FontSize', 22, 'TickDir', 'out'); vline(0,'k'); axis square;
-            title (['cond ' num2str(cond)]); box off;
+            set(gca, 'ylim',[0.16 0.31], 'xlim',[-0.5 0.5], 'FontSize', 22, 'TickDir', 'out'); vline(0,'k'); axis square;
+            title (['cond ' num2str(cond)]); box off; %if align_t == 1.3; vline(-0.3,'--k'); end
             
             % theta mu
             figure; coher_theta = coher_mu(1,freq>3 & freq<12,:);
             plot(ts_win, squeeze(mean(coher_theta))); box off
-            set(gca, 'ylim',[0.34 0.4], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
+            set(gca, 'ylim',[0.22 0.36], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
             title('theta')
             
             % beta mu
             figure; coher_beta = coher_mu(1,freq>12 & freq<21,:);
             plot(ts_win, squeeze(mean(coher_beta))); box off
-            set(gca, 'ylim',[0.295 0.37], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
+            set(gca, 'ylim',[0.11 0.165], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
             title('beta')
             
             % wideband mu
             figure; coher_wideband = coher_mu(1,freq>5 & freq<40,:);
             plot(ts_win, squeeze(mean(coher_wideband))); box off
-            set(gca, 'ylim',[0.255 0.3], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
+            set(gca, 'ylim',[0.13 0.19], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
             title('wideband') % compute statistics
             
             % save per monk
