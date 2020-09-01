@@ -142,7 +142,7 @@ if event_potential
                     
                      [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_targ],'lfp_wideband');
                     stats.trialtype.(trialtypes{i})(j).events.target.wideband.lfp_align = trials_lfps_temp2(ts > -1 & ts < 1,:);
-                    stats.trialtype.(trialtypes{i})(j).events.target.wideband.ts_lfp_align = ts(ts > -1 & ts < 1);
+                    stats.trialtype.(trialtypes{i})(j).events.target.all_freq.ts_lfp_align = ts(ts > -1 & ts < 1);
 %                     [stats.trialtype.(trialtypes{i})(j).events.target.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.target.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.target.freq_spectrogram] = ...
 %                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.target.all_freq.lfp_align,prs.spectrogram_movingwin,spectralparams);
                     %                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.target.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.target.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.target.p_spectrogram'), [0 0.8e-04]); axis xy;
@@ -175,11 +175,11 @@ if event_potential
 %                     stats.trialtype.(trialtypes{i})(j).events.stop.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
 %                     stats.trialtype.(trialtypes{i})(j).events.stop.beta.time = prs.ts.stop;
 %                     
-%                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop],'lfp_wideband');
-%                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop)';
-%                     stats.trialtype.(trialtypes{i})(j).events.stop.wideband.potential_mu = nanmean(lfps_temp2);
-%                     stats.trialtype.(trialtypes{i})(j).events.stop.wideband.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
-%                     stats.trialtype.(trialtypes{i})(j).events.stop.wideband.time = prs.ts.stop;
+                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop],'lfp_wideband');
+                    lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop)';
+                    stats.trialtype.(trialtypes{i})(j).events.stop.wideband.potential_mu = nanmean(lfps_temp2);
+                    stats.trialtype.(trialtypes{i})(j).events.stop.wideband.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
+                    stats.trialtype.(trialtypes{i})(j).events.stop.wideband.time = prs.ts.stop;
                     
                      %% compute spectrogram lfp not band passed
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp');

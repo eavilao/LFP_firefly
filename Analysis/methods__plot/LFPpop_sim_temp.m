@@ -6,63 +6,63 @@ function LFPpop_sim_temp(exp)
 % path = 'D:\output_data';
 % cd(path)
 
-% fprintf(['Time:  ' num2str(clock) '\n']);
-% fnames = dir('experiments*.mat');
-% cnt=1;
-% for i = 1:length(fnames)
-%     fprintf(['****   Loading file ' num2str(fnames(i).name) '   ****' '\n'])
-%     load(fnames(i).name);
-%     for sess = 1:length(experiments.sessions)
-%         %         if ~isempty(experiments.sessions(sess).lfps(1).stats)
-%         if ~isempty(experiments.sessions(sess).lfps(1).trials)
-%             %% Read areas
-%             if experiments.sessions(sess).monk_id == 53
-%                 for nlfps = 1:length(experiments.sessions(1).lfps)
-%                     indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
-%                     indx_PFC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PFC');
-%                     indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
-%                 end
-%             else
-%                 for nlfps = 1:length(experiments.sessions(1).lfps)
-%                     indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
-%                     indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
-%                 end
-%             end
-%             
-%             %% extract per area
-%             if experiments.sessions(sess).monk_id == 53
-%                 exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
-%                 exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
-%                 exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
-%                 % %                 exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
-%                 % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
-%                 % %                 exp(cnt).area.PFC.signal = experiments.sessions(sess).lfps(indx_PFC); % extract lfp signal and band passed signal
-%                 exp(cnt).behavior = [experiments.sessions(sess).behaviours];
-%             else
-%                 exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats]; 
-%                 exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
-%                 % %                 exp(cnt).area.MST.signal = []; exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
-%                 % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
-%                 exp(cnt).behavior = [experiments.sessions(sess).behaviours];
-%             end
-%             exp(cnt).pop = experiments.sessions(sess).populations.lfps.stats;
-%             exp(cnt).monk_id = experiments.sessions(sess).monk_id; % extract lfp signal and band passed signal
-%         end
-%         cnt=cnt+1;
-%     end
-%     disp('Clearing experiments... . . .')
-%     clear experiments
-% end
-% 
-% % save
-% disp('Saving... . . .')
-% fprintf(['Time:  ' num2str(clock) '\n']);
-% save('exp_out_lfp_stats_pop_2020_08_20_coherence_align_stop','exp', '-v7.3');
-% % load train
-% % sound(y,Fs)
-% disp('           Saved! ')
-% fprintf(['Time:  ' num2str(clock) '\n']);
-% disp('Extracting... . . .')
+fprintf(['Time:  ' num2str(clock) '\n']);
+fnames = dir('experiments*.mat');
+cnt=1;
+for i = 1:length(fnames)
+    fprintf(['****   Loading file ' num2str(fnames(i).name) '   ****' '\n'])
+    load(fnames(i).name);
+    for sess = 1:length(experiments.sessions)
+        %         if ~isempty(experiments.sessions(sess).lfps(1).stats)
+        if ~isempty(experiments.sessions(sess).lfps(1).trials)
+            %% Read areas
+            if experiments.sessions(sess).monk_id == 53
+                for nlfps = 1:length(experiments.sessions(1).lfps)
+                    indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
+                    indx_PFC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PFC');
+                    indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
+                end
+            else
+                for nlfps = 1:length(experiments.sessions(1).lfps)
+                    indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
+                    indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
+                end
+            end
+            
+            %% extract per area
+            if experiments.sessions(sess).monk_id == 53
+                exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
+                exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
+                exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
+                % %                 exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
+                % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
+                % %                 exp(cnt).area.PFC.signal = experiments.sessions(sess).lfps(indx_PFC); % extract lfp signal and band passed signal
+                exp(cnt).behavior = [experiments.sessions(sess).behaviours];
+            else
+                exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats]; 
+                exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
+                % %                 exp(cnt).area.MST.signal = []; exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
+                % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
+                exp(cnt).behavior = [experiments.sessions(sess).behaviours];
+            end
+            exp(cnt).pop = experiments.sessions(sess).populations.lfps.stats;
+            exp(cnt).monk_id = experiments.sessions(sess).monk_id; % extract lfp signal and band passed signal
+        end
+        cnt=cnt+1;
+    end
+    disp('Clearing experiments... . . .')
+    clear experiments
+end
+
+% save
+disp('Saving... . . .')
+fprintf(['Time:  ' num2str(clock) '\n']);
+save('exp_out_lfp_stats_pop_2020_08_27_coherence_align_target_stop','exp', '-v7.3');
+% load train
+% sound(y,Fs)
+disp('           Saved! ')
+fprintf(['Time:  ' num2str(clock) '\n']);
+disp('Extracting... . . .')
 
 %% Choose what to analyze and save
 save_behavior = true;
@@ -925,7 +925,7 @@ end
 %% Save
     disp('                 Done, saving . . .     ')
     fprintf(['Time:  ' num2str(clock) '\n']);
-    save('lfp_pop_sim_2020_08_20_coherence_align_stop', 'monk', 'all_monks', '-v7.3');
+    save('lfp_pop_sim_2020_08_27_coherence_align_target_stop', 'monk', 'all_monks', '-v7.3');
     load train
     sound(y,Fs)
     disp('                     Saved!')

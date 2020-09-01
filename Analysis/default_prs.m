@@ -267,6 +267,7 @@ prs.corr_neuronbehverr = false;
 %% LFP
 prs.event_potential = true;
 prs.compute_spectrum = true;
+prs.extract_band_passed = false;
 prs.analyse_band_passed = false;
 prs.compute_psd = false;
 prs.lfp_eye = false; 
@@ -278,8 +279,8 @@ prs.analyse_alpha = false; % compute tunings
 prs.analyse_beta = false; % compute tunings
 prs.analyse_wideband = false; % compute tunings
 prs.compute_coherencyLFP = false;
-prs.compute_coherogram = true;
-prs.compute_coherogram_trial_by_trial = false; 
+prs.compute_coherogram = false;
+prs.compute_coherogram_band_passed = true; 
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;

@@ -7724,4 +7724,18 @@ monkeyInfo (end).electrode_type = {'utah2x48'};
 monkeyInfo (end).area = {'PPC', 'MST'};
 monkeyInfo (end).eyechannels = [2 2];
 
+%% Ody
+
+%% Session 1
+monkeyInfo (end+1).monk_id = 00;
+monkeyInfo (end).session_id = 1;
+monkeyInfo (end).coord.row = nan;
+monkeyInfo (end).coord.column = nan;
+monkeyInfo (end).coord.depth = nan;
+monkeyInfo (end).units = 0;
+monkeyInfo (end).folder = 'Quigley\Sim_recordings\Feb 14 2018';
+monkeyInfo (end).comments = {'two densities, no landmarks, no ptb, random DCI, random ITI, 1D Azimuth, MSTd'};
+monkeyInfo (end).electrode_type = {'utah96', 'linearprobe24'};
+monkeyInfo (end).area = {'PPC', 'MST'};
+monkeyInfo (end).eyechannels = [2 2];
 
