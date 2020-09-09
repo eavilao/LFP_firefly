@@ -6,63 +6,63 @@ function LFPpop_sim_temp(exp)
 % path = 'D:\output_data';
 % cd(path)
 
-fprintf(['Time:  ' num2str(clock) '\n']);
-fnames = dir('experiments*.mat');
-cnt=1;
-for i = 1:length(fnames)
-    fprintf(['****   Loading file ' num2str(fnames(i).name) '   ****' '\n'])
-    load(fnames(i).name);
-    for sess = 1:length(experiments.sessions)
-        %         if ~isempty(experiments.sessions(sess).lfps(1).stats)
-        if ~isempty(experiments.sessions(sess).lfps(1).trials)
-            %% Read areas
-            if experiments.sessions(sess).monk_id == 53
-                for nlfps = 1:length(experiments.sessions(1).lfps)
-                    indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
-                    indx_PFC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PFC');
-                    indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
-                end
-            else
-                for nlfps = 1:length(experiments.sessions(1).lfps)
-                    indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
-                    indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
-                end
-            end
-            
-            %% extract per area
-            if experiments.sessions(sess).monk_id == 53
-                exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
-                exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
-                exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
-                % %                 exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
-                % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
-                % %                 exp(cnt).area.PFC.signal = experiments.sessions(sess).lfps(indx_PFC); % extract lfp signal and band passed signal
-                exp(cnt).behavior = [experiments.sessions(sess).behaviours];
-            else
-                exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats]; 
-                exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
-                % %                 exp(cnt).area.MST.signal = []; exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
-                % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
-                exp(cnt).behavior = [experiments.sessions(sess).behaviours];
-            end
-            exp(cnt).pop = experiments.sessions(sess).populations.lfps.stats;
-            exp(cnt).monk_id = experiments.sessions(sess).monk_id; % extract lfp signal and band passed signal
-        end
-        cnt=cnt+1;
-    end
-    disp('Clearing experiments... . . .')
-    clear experiments
-end
-
-% save
-disp('Saving... . . .')
-fprintf(['Time:  ' num2str(clock) '\n']);
-save('exp_out_lfp_stats_pop_2020_08_27_coherence_align_target_stop','exp', '-v7.3');
-% load train
-% sound(y,Fs)
-disp('           Saved! ')
-fprintf(['Time:  ' num2str(clock) '\n']);
-disp('Extracting... . . .')
+% fprintf(['Time:  ' num2str(clock) '\n']);
+% fnames = dir('experiments*.mat');
+% cnt=1;
+% for i = 1:length(fnames)
+%     fprintf(['****   Loading file ' num2str(fnames(i).name) '   ****' '\n'])
+%     load(fnames(i).name);
+%     for sess = 1:length(experiments.sessions)
+%         %         if ~isempty(experiments.sessions(sess).lfps(1).stats)
+%         if ~isempty(experiments.sessions(sess).lfps(1).trials)
+%             %% Read areas
+%             if experiments.sessions(sess).monk_id == 53
+%                 for nlfps = 1:length(experiments.sessions(1).lfps)
+%                     indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
+%                     indx_PFC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PFC');
+%                     indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
+%                 end
+%             else
+%                 for nlfps = 1:length(experiments.sessions(1).lfps)
+%                     indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
+%                     indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
+%                 end
+%             end
+%             
+%             %% extract per area
+%             if experiments.sessions(sess).monk_id == 53
+%                 exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
+%                 exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
+%                 exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
+%                 % %                 exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
+%                 % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
+%                 % %                 exp(cnt).area.PFC.signal = experiments.sessions(sess).lfps(indx_PFC); % extract lfp signal and band passed signal
+%                 exp(cnt).behavior = [experiments.sessions(sess).behaviours];
+%             else
+%                 exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats]; 
+%                 exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
+%                 % %                 exp(cnt).area.MST.signal = []; exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
+%                 % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
+%                 exp(cnt).behavior = [experiments.sessions(sess).behaviours];
+%             end
+%             exp(cnt).pop = experiments.sessions(sess).populations.lfps.stats;
+%             exp(cnt).monk_id = experiments.sessions(sess).monk_id; % extract lfp signal and band passed signal
+%         end
+%         cnt=cnt+1;
+%     end
+%     disp('Clearing experiments... . . .')
+%     clear experiments
+% end
+% 
+% % save
+% disp('Saving... . . .')
+% fprintf(['Time:  ' num2str(clock) '\n']);
+% save('exp_out_lfp_stats_pop_2020_09_01_coherence_align_target_stop_per_band','exp', '-v7.3');
+% % load train
+% % sound(y,Fs)
+% disp('           Saved! ')
+% fprintf(['Time:  ' num2str(clock) '\n']);
+% disp('Extracting... . . .')
 
 %% Choose what to analyze and save
 save_behavior = true;
@@ -73,7 +73,8 @@ save_spectro = false; % save spectrogram file?
 save_spectro_per_trial = false;
 save_spectro_per_trial_align_stop = false;
 avg_monks = false; % average for all monkeys?
-do_cohero = true; % extract coherograms
+do_cohero = false; % extract coherograms
+do_cohero_band_passed = true; % extract coherograms per band
 doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
 save_lfp_band_pass = false; % extract band passed lfp signal only
@@ -90,7 +91,7 @@ if save_behavior
             monk(ii).behavior(j) = p_monk(j).behavior;
         end
     end
-end
+end  
 %% PSD
 %% avg per session
 if do_PSD
@@ -441,7 +442,7 @@ if do_cohero
                     for ev = 1:length(events)
                         clear coh_ar coh_ev coh_phi coh_ts coh_freq
                         for coh_ar = 1:length(coh_areas)
-                            coh_ev(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher;
+                            coh_ev(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).(bands(b)).coher;
                             coh_phi(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coherPhi;
                             coh_ts(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_ts;
                             coh_freq(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_freq;
@@ -451,8 +452,6 @@ if do_cohero
                         %             imagesc(coh_ts(2,:)-1, coh_freq(2,:),squeeze(coh_ev(2,:,:)));
                         %             axis xy; set(gca,'xlim',[-0.25 0.25], 'ylim', [4 50],'FontSize', 22); colorbar;
                         %
-                        
-                        
                         % coherogram mean
                         for coh_ar = 1:length(coh_areas)
                             monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher = squeeze(coh_ev(coh_ar,:,:));
@@ -460,7 +459,49 @@ if do_cohero
                             monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_ts = squeeze(coh_ts(coh_ar,:,:));
                             monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_freq = squeeze(coh_freq(coh_ar,:,:));
                         end
+                    end
+                end
+            end
+        end
+    end
+end
 
+if do_cohero_band_passed
+     monks = unique([exp.monk_id]);
+    for i = 1:length(monks) % [1 3]
+        m = [exp.monk_id] == monks(i); p_monk = exp(m);
+        coh_areas = fieldnames(p_monk(i).pop.trialtype.reward(1).events.stop);
+        trialtype = fieldnames(p_monk(i).pop.trialtype);
+        for sess = 1:length(p_monk)
+            for type = 1:length(trialtype)
+                nconds = length(p_monk(sess).pop.trialtype.(trialtype{type})); clear cond
+                for cond = 1:nconds
+                    events = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).events);
+                    for ev = 1:length(events)
+                        bands = fieldnames(p_monk(1).pop.trialtype.reward(1).events.stop.(coh_areas{1})); % per band
+                        for b = 1:length(bands)
+                            clear coh_ar coh_ev coh_phi coh_ts coh_freq
+                            for coh_ar = 1:length(coh_areas)
+                                coh_ev(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).(bands{b}).coher;
+                                coh_phi(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).(bands{b}).coherPhi;
+                                coh_ts(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).(bands{b}).coher_ts;
+                                coh_freq(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).(bands{b}).coher_freq;
+                            end
+                            % plot -- sanity
+                            %             figure('Name', 'PPC-->MST');
+                            %             imagesc(coh_ts(2,:)-1, coh_freq(2,:),squeeze(coh_ev(2,:,:)));
+                            %             axis xy; set(gca,'xlim',[-0.25 0.25], 'ylim', [4 50],'FontSize', 22); colorbar;
+                            %
+                            
+                            
+                            % coherogram mean
+                            for coh_ar = 1:length(coh_areas)
+                                monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).(bands{b}).coher = squeeze(coh_ev(coh_ar,:,:));
+                                monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).(bands{b}).coher_phi = squeeze(coh_phi(coh_ar,:,:));
+                                monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).(bands{b}).coher_ts = squeeze(coh_ts(coh_ar,:,:));
+                                monk(i).coher.sess(sess).trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).(bands{b}).coher_freq = squeeze(coh_freq(coh_ar,:,:));
+                            end
+                        end
                     end
                 end
             end
@@ -925,7 +966,7 @@ end
 %% Save
     disp('                 Done, saving . . .     ')
     fprintf(['Time:  ' num2str(clock) '\n']);
-    save('lfp_pop_sim_2020_08_27_coherence_align_target_stop', 'monk', 'all_monks', '-v7.3')
+    save('lfp_pop_sim_2020_09_01_coherence_align_target_stop_per_band', 'monk', 'all_monks', '-v7.3')
     load train
     sound(y,Fs)
     disp('                     Saved!')
