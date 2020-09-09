@@ -2900,16 +2900,16 @@ switch plot_type
         %Contains average per session
         type = 'reward'
         ev = 'stop'
-        brain_area = 'PPCMST'  % 'PFCMST'  % 'PPCMST'
+        brain_area = 'MSTPFC'  % 'PFCMST'  % 'PPCMST'
         time_win = [-0.5 0.5];   % [-0.25 0.25]; [-0.45 0.25];
         freq_win = [3 51];
         align_t = 1;  % 1.3 for target (so it's aligned to target offset
         p = numSubplots(12);  % 9 for reward cond, 12 for rest
         cnt=1;
-        for nmonk = 1 %[1 3]
+        for nmonk = 2 %[1 3]
             for nsess = 1:length(monk(nmonk).coher.sess)
                  ncond = length(monk(nmonk).coher.sess(nsess).trialtype.(type));
-                for cond = 1 % 1:ncond
+                for cond = 2 % 1:ncond
                     freq = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_freq;
                     ts = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_ts-align_t;
                     p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher';
@@ -2921,7 +2921,7 @@ switch plot_type
                     %figure('Name',['Monk ' num2str(nmonk) ' sess ' num2str(nsess)  ' PPC--MST ' ev ' rew ' num2str(cond)]);
                     %                     subplot(p(1),p(2),cnt)
                     %
-                    %                     colormap(copper);
+                    %                     colovrmap(copper);
                     %                     imagesc(ts,freq,p_cohero,[0 1]); axis xy; %colorbar;
                     %                     set(gca,'xlim',[-0.25 0.25], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); %vline(-0.3,'b');
                     %                     axis square
@@ -2952,21 +2952,21 @@ switch plot_type
             
             % mu all
             figure;
-            plot(ts_win,mean(squeeze(coher_mu)))
-            set(gca, 'ylim',[0.16 0.31], 'xlim',[-0.5 0.5], 'FontSize', 22, 'TickDir', 'out'); vline(0,'k'); axis square;
+            plot(ts_win,smooth(mean(squeeze(coher_mu))))
+            set(gca, 'ylim',[0.14 0.31], 'xlim',[-0.5 0.5], 'FontSize', 22, 'TickDir', 'out'); vline(0,'k'); axis square;
             title (['cond ' num2str(cond)]); box off; %if align_t == 1.3; vline(-0.3,'--k'); end
             
             % theta mu
             figure; coher_theta = coher_mu(1,freq>3 & freq<12,:);
-            plot(ts_win, squeeze(mean(coher_theta))); box off
-            set(gca, 'ylim',[0.22 0.36], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
-            title('theta')
+            plot(ts_win, smooth(squeeze(mean(coher_theta)))); box off
+            set(gca, 'ylim',[0.25 0.36], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
+            title(['theta cond ' num2str(cond)])
             
             % beta mu
             figure; coher_beta = coher_mu(1,freq>12 & freq<21,:);
-            plot(ts_win, squeeze(mean(coher_beta))); box off
-            set(gca, 'ylim',[0.11 0.165], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
-            title('beta')
+            plot(ts_win, smooth(squeeze(mean(coher_beta)))); box off
+            set(gca, 'ylim',[0.18 0.32], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
+            title(['beta cond ' num2str(cond)])
             
             % wideband mu
             figure; coher_wideband = coher_mu(1,freq>5 & freq<40,:);
@@ -2978,6 +2978,49 @@ switch plot_type
             save(['monk ' num2str(nmonk) ' cond' num2str(cond)], 'coher_mu', 'coher_theta','coher_beta', 'coher_wideband');
             
         end
+        
+        case 'coherogram_target_stop_per_band'
+        %Contains average per session
+        type = 'reward'
+        ev = 'stop'
+        brain_area = 'MSTPFC'  % 'PFCMST'  % 'PPCMST' $ PFCPPC
+        band = 'beta';
+        time_win = [-0.5 0.5];   % [-0.25 0.25]; [-0.45 0.25];
+        freq_win = [3 51];
+        align_t = 1;  % 1.3 for target (so it's aligned to target offset
+        p = numSubplots(12);  % 9 for reward cond, 12 for rest
+        cnt=1;
+        for nmonk = 2 %[1 3]
+            for nsess = 1:length(monk(nmonk).coher.sess)
+                 ncond = length(monk(nmonk).coher.sess(nsess).trialtype.(type));
+                for cond = 1 % 1:ncond
+                    % freq = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_freq;
+                    ts = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).(band).coher_ts-align_t;
+                    p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).(band).coher';
+                    ts_win = ts(ts>time_win(1) & ts<time_win(2));
+                    p_cohero_win = p_cohero(:,ts>time_win(1) & ts<time_win(2));
+                    coher_all(nsess,:,:) = p_cohero_win; 
+                    max_cohero = max(max(p_cohero_win));
+                   
+                    figure(1); subplot(p(1),p(2),cnt)
+                    plot(ts_win,mean(p_cohero_win)); box off; 
+                    set(gca,'xlim',[-0.5 0.5], 'FontSize', 22); vline(0,'w'); axis square; % vline(-0.3,'b');
+                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
+                    % xlabel('time (s)'); ylabel('frequency (Hz)');
+                    cnt = cnt+1;
+                end 
+            end
+            % Mean for all sessions for one condition 
+            coher_mu = mean(coher_all);
+            % plot
+            figure; 
+            plot(ts_win,smooth(squeeze(mean(coher_mu)))); ylim([0.24 0.33])
+            set(gca,'xlim',[-0.5 0.5], 'FontSize', 22); vline(0,'k'); axis square; if align_t == 1.3; vline(-0.3,'--w'); end
+            title ([ band ' Cond ' num2str(cond)]); box off
+            xlabel('time (s)'); ylabel('Coherence');
+            
+        end
+        
         
     case 'coherence_dist'
         
