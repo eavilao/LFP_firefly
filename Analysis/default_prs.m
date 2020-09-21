@@ -6,8 +6,8 @@ getnthcell = @(x,n) x{n};
 %% session specific parameters
 monkeyInfoFile_joysticktask;
 monkeyInfo = monkeyInfo([monkeyInfo.session_id]==session_id & [monkeyInfo.monk_id]==monk_id);
-prs.filepath_behv = ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\behavioural data\'];
-prs.filepath_neur = ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\neural data\'];
+prs.filepath_behv = ['Z:\Data\Monkey2_newzdrive\' monkeyInfo.folder '\behavioural data\'];  % ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\behavioural data\'];
+prs.filepath_neur = ['Z:\Data\Monkey2_newzdrive\' monkeyInfo.folder '\neural data\Sorted']; % ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\neural data\'];
 prs.filepath_neuralnet = 'C:\Users\jkl9\Documents\GitHub\spykesML\MLencoding\';
 prs.sess_date = datestr(datenum(getnthcell(split(monkeyInfo.folder,'\'),3)));
 prs.coord = monkeyInfo.coord;
@@ -269,7 +269,7 @@ prs.event_potential = true;
 prs.compute_spectrum = true;
 prs.extract_band_passed = false;
 prs.analyse_band_passed = false;
-prs.compute_psd = false;
+prs.compute_psd = true;
 prs.lfp_eye = false; 
 prs.compute_spectrum_whole_trial = false;
 prs.compute_spectrum_whole_trial_align_stop = false; 
@@ -280,7 +280,7 @@ prs.analyse_beta = false; % compute tunings
 prs.analyse_wideband = false; % compute tunings
 prs.compute_coherencyLFP = false;
 prs.compute_coherogram = false;
-prs.compute_coherogram_band_passed = true; 
+prs.compute_coherogram_band_passed = false; 
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;

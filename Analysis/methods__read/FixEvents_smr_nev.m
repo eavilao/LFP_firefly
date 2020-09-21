@@ -1,4 +1,4 @@
-function events_nev = FixEvents_nev(events_nev,behv_trials)
+function [events_nev, events_smr] = FixEvents_smr_nev(events_nev,behv_trials)
 
 events_smr = cell2mat({behv_trials.events});
 ntrls_smr = length(events_smr);
@@ -16,17 +16,17 @@ else
     iti_smr = iti_smr(~badindx); iti_nev = iti_nev(~badindx);
     if corr(iti_smr(:),iti_nev(:)) > 0.99 % this level of corr. is unlikely by chance
         warning('Mismatch in number of trials in NEV and SMR -- problem most likely fixed!');
+        % check if number of end times are the same
+        if ntrls_smr_end ~= ntrls_nev_end
+        min_ntrls = min([ntrls_smr_end ntrls_nev_end]) 
+        events_nev.t_beg = events_nev.t_beg(1:min_ntrls);
+        events_nev.t_end = events_nev.t_end(1:min_ntrls);
+        events_smr = events_smr(1:min_ntrls); 
+        else
         % yes, neural recording was not started on time
         events_nev.t_beg = [nan(1,ntrls_missed) events_nev.t_beg];
         events_nev.t_end = [nan(1,ntrls_missed) events_nev.t_end];
-    end
-    
-    if ntrls_smr_end - ntrls_nev_end > 0
-    % stopped neural recording first, extra trial(s) in smr file
-    events_nev.t_end(ntrls_smr_end)=NaN;
+        end
     end
 end
 
-
-
- 
