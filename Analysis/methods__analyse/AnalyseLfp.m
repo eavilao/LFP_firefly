@@ -62,7 +62,7 @@ if event_potential
                     %                     stats.trialtype.(trialtypes{i})(j).events.move.alpha.potential_mu = nanmean(lfps_temp2);
                     %                     stats.trialtype.(trialtypes{i})(j).events.move.alpha.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     %                     stats.trialtype.(trialtypes{i})(j).events.move.alpha.time = prs.ts.move;
-                    
+                     
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_beta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
                     stats.trialtype.(trialtypes{i})(j).events.move.beta.potential_mu = nanmean(lfps_temp2);
