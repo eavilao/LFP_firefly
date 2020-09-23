@@ -6,63 +6,63 @@ function LFPpop_sim_temp(exp)
 % path = 'D:\output_data';
 % cd(path)
 
-% fprintf(['Time:  ' num2str(clock) '\n']);
-% fnames = dir('experiments*.mat');
-% cnt=1;
-% for i = 1:length(fnames)
-%     fprintf(['****   Loading file ' num2str(fnames(i).name) '   ****' '\n'])
-%     load(fnames(i).name);
-%     for sess = 1:length(experiments.sessions)
-%         %         if ~isempty(experiments.sessions(sess).lfps(1).stats)
-%         if ~isempty(experiments.sessions(sess).lfps(1).trials)
-%             %% Read areas
-%             if experiments.sessions(sess).monk_id == 53
-%                 for nlfps = 1:length(experiments.sessions(1).lfps)
-%                     indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
-%                     indx_PFC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PFC');
-%                     indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
-%                 end
-%             else
-%                 for nlfps = 1:length(experiments.sessions(1).lfps)
-%                     indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
-%                     indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
-%                 end
-%             end
-%             
-%             %% extract per area
-%             if experiments.sessions(sess).monk_id == 53
-%                 exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
-%                 exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
-%                 exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
-%                 % %                 exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
-%                 % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
-%                 % %                 exp(cnt).area.PFC.signal = experiments.sessions(sess).lfps(indx_PFC); % extract lfp signal and band passed signal
-%                 exp(cnt).behavior = [experiments.sessions(sess).behaviours];
-%             else
-%                 exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats]; 
-%                 exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
-%                 % %                 exp(cnt).area.MST.signal = []; exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
-%                 % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
-%                 exp(cnt).behavior = [experiments.sessions(sess).behaviours];
-%             end
-%             exp(cnt).pop = experiments.sessions(sess).populations.lfps.stats;
-%             exp(cnt).monk_id = experiments.sessions(sess).monk_id; % extract lfp signal and band passed signal
-%         end
-%         cnt=cnt+1;
-%     end
-%     disp('Clearing experiments... . . .')
-%     clear experiments
-% end
-% 
-% % save
-% disp('Saving... . . .')
-% fprintf(['Time:  ' num2str(clock) '\n']);
-% save('exp_out_lfp_stats_pop_2020_09_01_coherence_align_target_stop_per_band','exp', '-v7.3');
-% % load train
-% % sound(y,Fs)
-% disp('           Saved! ')
-% fprintf(['Time:  ' num2str(clock) '\n']);
-% disp('Extracting... . . .')
+fprintf(['Time:  ' num2str(clock) '\n']);
+fnames = dir('experiments*.mat');
+cnt=1;
+for i = 1:length(fnames)
+    fprintf(['****   Loading file ' num2str(fnames(i).name) '   ****' '\n'])
+    load(fnames(i).name);
+    for sess = 1:length(experiments.sessions)
+        %         if ~isempty(experiments.sessions(sess).lfps(1).stats)
+        if ~isempty(experiments.sessions(sess).lfps(1).trials)
+            %% Read areas
+            if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 91
+                for nlfps = 1:length(experiments.sessions(1).lfps)
+                    indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
+                    indx_PFC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PFC');
+                    indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
+                end
+            else
+                for nlfps = 1:length(experiments.sessions(1).lfps)
+                    indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
+                    indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
+                end
+            end
+            
+            %% extract per area
+            if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 91
+                exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
+                exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
+                exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
+                % %                 exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
+                % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
+                % %                 exp(cnt).area.PFC.signal = experiments.sessions(sess).lfps(indx_PFC); % extract lfp signal and band passed signal
+                exp(cnt).behavior = [experiments.sessions(sess).behaviours];
+            else
+                exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats]; 
+                exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
+                % %                 exp(cnt).area.MST.signal = []; exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
+                % %                 exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
+                exp(cnt).behavior = [experiments.sessions(sess).behaviours];
+            end
+            exp(cnt).pop = experiments.sessions(sess).populations.lfps.stats;
+            exp(cnt).monk_id = experiments.sessions(sess).monk_id; % extract lfp signal and band passed signal
+        end
+        cnt=cnt+1;
+    end
+    disp('Clearing experiments... . . .')
+    clear experiments
+end
+ 
+% save
+disp('Saving... . . .')
+fprintf(['Time:  ' num2str(clock) '\n']);
+save('exp_out_lfp_stats_pop_2020_09_21_spectro_trial_stop','exp', '-v7.3');
+% load train
+% sound(y,Fs)
+disp('           Saved! ')
+fprintf(['Time:  ' num2str(clock) '\n']);
+disp('Extracting... . . .')
 
 %% Choose what to analyze and save
 save_behavior = true;
@@ -71,12 +71,12 @@ save_lfp_raw = false; % raw and per trial lfps
 do_PSD = false;  % extract power spectral densities
 save_spectro = false; % save spectrogram file?
 save_spectro_per_trial = false;
-save_spectro_per_trial_align_stop = false;
+save_spectro_per_trial_align_stop = true;
 avg_monks = false; % average for all monkeys?
 do_cohero = false; % extract coherograms
-do_cohero_band_passed = true; % extract coherograms per band
+do_cohero_band_passed = false; % extract coherograms per band
 doCSD = false; % Perform CSD analysis for MST recordings?
-do_ERP = false; % extract ERPs (evoked LFPs)
+do_ERP = true; % extract ERPs (evoked LFPs)
 save_lfp_band_pass = false; % extract band passed lfp signal only
 do_band_passed = false; % extract and analyse band passed signal
 do_band_passed_vs_accuracy = false;
@@ -183,7 +183,7 @@ if do_PSD
         for a = 1:length(areas)
             trialtype = [fieldnames(p_monk(1).area.(areas{a})); fieldnames(p_monk_eye(1).area.(areas{a}))];
             for type = 1:length(trialtype)
-                if type == 6 | type == 7;  % eyes
+                if type == 6 | type == 7  % eyes
                     nconds = 1; clear cond
                 else
                     nconds = length(p_monk(1).area.(areas{a}).(trialtype{type})); clear cond
@@ -352,7 +352,7 @@ if save_spectro_per_trial
             for type = 1:length(trialtype) % num of trial types
                 for cond = 2%1:length(p_monk(sess).pop.trialtype.(trialtype{type}));
                     areas = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area);
-                    for a=1:length(areas);
+                    for a=1:length(areas)
                         for ch = 1:length(p_monk(sess).pop.trialtype.reward(1).area.(areas{a}).ch)
                             monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).ch(ch).trl = p_monk(sess).pop.trialtype.reward(cond).area.(areas{a}).ch(ch).trl;
                         end
@@ -371,7 +371,7 @@ if save_spectro_per_trial
             for type = 1:length(trialtype) % num of trial types
                 for cond = 1:length(p_monk(sess).pop.trialtype.(trialtype{type}))
                     areas = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area);
-                    for a=1:length(areas);
+                    for a=1:length(areas)
                         for trl = 1:length(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).pop_trl)
                             monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).pw_trl(trl).ts = p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).pop_trl(trl).ts_spectrogram;
                             monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).pw_trl(trl).freq = p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).pop_trl(trl).freq_spectrogram;
@@ -544,7 +544,9 @@ if do_ERP
             for type = 1:length(trialtype)
                 nconds = length(p_monk(j).area.PPC.lfps.stats(1).trialtype.(trialtype{type})); clear cond
                 for cond = 1:nconds
+                    events = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).events);
                     for ch = 1:length(p_monk(j).area.MST.lfps.stats)
+                        
                         % cont
                         %                     monk(ii).cont.MST.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).continuous = p_monk(j).area.MST.lfps.stats(ch).trialtype.(trialtype{type})(cond).continuous; %gather continuous
                         for ev = 1:length(events)
@@ -555,8 +557,8 @@ if do_ERP
                             monk(ii).erp.MST.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).lfp_align = p_monk(j).area.MST.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).lfp_align;
                             if extract_lfp_raw
                                 monk(ii).erp.MST.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).theta = p_monk(j).area.MST.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).theta;
-                                monk(ii).erp.MST.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).alpha = p_monk(j).area.MST.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).alpha;
-                                monk(ii).erp.MST.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).beta = p_monk(j).area.MST.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).theta;
+                                % monk(ii).erp.MST.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).alpha = p_monk(j).area.MST.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).alpha;
+                                monk(ii).erp.MST.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).beta = p_monk(j).area.MST.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).beta;
                             end
                         end
                     end
@@ -569,8 +571,8 @@ if do_ERP
                             monk(ii).erp.PPC.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).erp_time = p_monk(j).area.PPC.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).time;
                             if extract_lfp_raw
                                 monk(ii).erp.PPC.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).theta = p_monk(j).area.PPC.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).theta;
-                                monk(ii).erp.PPC.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).alpha = p_monk(j).area.PPC.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).alpha;
-                                monk(ii).erp.PPC.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).beta = p_monk(j).area.PPC.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).theta;
+                                % monk(ii).erp.PPC.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).alpha = p_monk(j).area.PPC.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).alpha;
+                                monk(ii).erp.PPC.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).beta = p_monk(j).area.PPC.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).beta;
                             end
                         end
                     end
@@ -600,7 +602,7 @@ if do_ERP
                             if extract_lfp_raw
                                 monk(ii).erp.PPC.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).theta = p_monk(j).area.PPC.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).theta;
                                 monk(ii).erp.PPC.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).alpha = p_monk(j).area.PPC.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).alpha;
-                                monk(ii).erp.PPC.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).beta = p_monk(j).area.PPC.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).theta;
+                                monk(ii).erp.PPC.sess(j).lfps(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).beta = p_monk(j).area.PPC.lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).beta;
                             end
                         end
                     end

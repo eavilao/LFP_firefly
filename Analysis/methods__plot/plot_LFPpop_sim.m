@@ -118,18 +118,18 @@ switch plot_type
                     t_w_targ(j) = behv_correct(j).continuous.w(this_ts>-0.001 & this_ts<0.005);
                 end
                 % mean for a session
-                %                 ts = ts_win(1:169); % ts_win(1:169);
-                %                 ts_win_targ = ts_win_targ(1:269);
-                %
-                %                 v_sess_move(sess,:) = nanmean(v_this_move);
-                %                 v_sess_targ(sess,:) = nanmean(v_this_targ);
-                %                 v_sess_stop(sess,:) = nanmean(v_this_stop);
-                %                 v_sess_reward(sess,:) = nanmean(v_this_rew);
-                %
-                %                 w_sess_move(sess,:) = nanmean(w_this_move);
-                %                 w_sess_targ(sess,:) = nanmean(w_this_targ);
-                %                 w_sess_stop(sess,:) = nanmean(w_this_stop);
-                %                 w_sess_reward(sess,:) = nanmean(w_this_rew);
+                                ts = ts_win(1:169); % ts_win(1:169);
+                                ts_win_targ = ts_win_targ(1:269);
+                
+                                v_sess_move(sess,:) = nanmean(v_this_move);
+                                v_sess_targ(sess,:) = nanmean(v_this_targ);
+                                v_sess_stop(sess,:) = nanmean(v_this_stop);
+                                v_sess_reward(sess,:) = nanmean(v_this_rew);
+                
+                                w_sess_move(sess,:) = nanmean(w_this_move);
+                                w_sess_targ(sess,:) = nanmean(w_this_targ);
+                                w_sess_stop(sess,:) = nanmean(w_this_stop);
+                                w_sess_reward(sess,:) = nanmean(w_this_rew);
                 
                 % plot per distribution of velocties when target is on per
                 % session
