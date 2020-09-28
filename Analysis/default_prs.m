@@ -3,11 +3,13 @@ function prs = default_prs(monk_id,session_id)
 if nargin<2, session_id = 1; end
 getnthcell = @(x,n) x{n};
 
+prs.monk_Ody = 1; % This will run AddLOGData_Ody instead.  
+
 %% session specific parameters
 monkeyInfoFile_joysticktask;
 monkeyInfo = monkeyInfo([monkeyInfo.session_id]==session_id & [monkeyInfo.monk_id]==monk_id);
-prs.filepath_behv = ['Z:\Data\Monkey2_newzdrive\' monkeyInfo.folder '\behavioural data\'];  % ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\behavioural data\'];
-prs.filepath_neur = ['Z:\Data\Monkey2_newzdrive\' monkeyInfo.folder '\neural data\Sorted']; % ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\neural data\'];
+prs.filepath_behv = ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\behavioural data\']; % ['Z:\Data\Monkey2_newzdrive\' monkeyInfo.folder '\behavioural data\'];  % ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\behavioural data\'];
+prs.filepath_neur = ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\neural data\']; % ['Z:\Data\Monkey2_newzdrive\' monkeyInfo.folder '\neural data\Sorted']; % ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\neural data\'];
 prs.filepath_neuralnet = 'C:\Users\jkl9\Documents\GitHub\spykesML\MLencoding\';
 prs.sess_date = datestr(datenum(getnthcell(split(monkeyInfo.folder,'\'),3)));
 prs.coord = monkeyInfo.coord;
@@ -16,6 +18,27 @@ prs.electrode_type = monkeyInfo.electrode_type;
 prs.area = monkeyInfo.area;
 prs.comments = monkeyInfo.comments;
 prs.eyechannels = monkeyInfo.eyechannels;
+
+%% check if there are info about the FF params  ---> Thank you Ody
+list_fields = fieldnames(monkeyInfo);
+flag_ffpars = false;
+for field = list_fields'
+    if contains(field{1},'FFparams_')
+        flag_ffpars = true;
+        break
+    end
+end
+if flag_ffpars
+    prs.FFparams_xpos = monkeyInfo.FFparams_xpos;
+    prs.FFparams_ypos = monkeyInfo.FFparams_ypos;
+    prs.FFparams_rewardDur = monkeyInfo.FFparams_rewardDur;
+    prs.FFparams_flyDuration = monkeyInfo.FFparams_flyDuration;
+else
+    prs.FFparams_xpos = 7;
+    prs.FFparams_ypos = 8;
+    prs.FFparams_rewardDur = 9;
+    prs.FFparams_flyDuration = nan;
+end
 
 %% data acquisition parameters
 prs.fs_smr = 5000/6; % sampling rate of smr file
@@ -272,7 +295,7 @@ prs.analyse_band_passed = false;
 prs.compute_psd = true;
 prs.lfp_eye = false; 
 prs.compute_spectrum_whole_trial = false;
-prs.compute_spectrum_whole_trial_align_stop = false; 
+prs.compute_spectrum_whole_trial_align_stop = true; 
 prs.compute_spectrum_whole_trial_align_stop_per_band = false; 
 prs.analyse_theta = false; % compute tunings
 prs.analyse_alpha = false; % compute tunings
