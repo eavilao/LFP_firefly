@@ -6,22 +6,7 @@ electrode = prs.electrode_type;
 
 if electrode_id ~= 0
     lfp = lfps([lfps.electrode_id]==electrode_id);
-    switch plot_type
-        case 'LFParray'
-            nlfps = 48;   % 1:48 is PPC .  49:96 is PFC
-            [xloc,yloc] = map_utaharray([],char(electrode));
-            [channel_id,electrode_id] = MapChannel2Electrode(char(electrode));
-            [~,indx] = sort(electrode_id); reorderindx = channel_id(indx);
-            lfps = lfps(reorderindx);
-            figure; hold on;
-            ts = lfps(1).stats.trialtype.all.events.stop.all_freq.ts_lfp_align;
-            for i = 1:nlfps
-                l = nanmean(lfps(i+48).stats.trialtype.all.events.stop.all_freq.lfp_align,2);
-                subplot(10,10,10*(xloc(i)-1) + yloc(i)); hold on;
-                plot(ts,l, 'k'); xlim([-1 1]) ;box off;
-                %vline(15, '--k');
-            end
-            
+    switch plot_type           
         case 'PSD'
             f = lfp.stats.trialtype.all.spectrum.freq;
             psd = lfp.stats.trialtype.all.spectrum.psd;
@@ -467,7 +452,22 @@ if electrode_id ~= 0
     end
 else
     nlfps = length(lfps);
-    switch plot_type
+    switch plot_type       
+           case 'LFParray'  % For Ody..other monks need adjust 
+           nlfps = 48;   % 1:48 is PPC .  49:96 is PFC
+            [xloc,yloc] = map_utaharray([],char(electrode));
+            [channel_id,electrode_id] = MapChannel2Electrode(char(electrode));
+            [~,indx] = sort(electrode_id); reorderindx = channel_id(indx);
+            lfps = lfps(reorderindx);
+            figure; hold on;
+            ts = lfps(1).stats.trialtype.all.events.stop.all_freq.ts_lfp_align;
+            for ii = 1:nlfps
+                % l = nanmean(lfps(i+48).stats.trialtype.all.events.stop.all_freq.lfp_align,2);
+                l = nanmean(lfps(ii+48).stats.trialtype.all.events.stop.lfp_align,2);
+                subplot(10,10,10*(xloc(ii)-1) + yloc(ii)); hold on;
+                plot(ts,l, 'k'); xlim([-1 1]) ;box off;
+                %vline(15, '--k');
+            end
         case 'PSD'
             f = lfps(1).stats.trialtype.all.spectrum.freq;
             for i=1:nlfps, psd(i,:) = lfps(i).stats.trialtype.all.spectrum.psd; end
