@@ -57,7 +57,7 @@ end
 % save
 disp('Saving... . . .')
 fprintf(['Time:  ' num2str(clock) '\n']);
-save('exp_out_lfp_stats_pop_2020_09_21_spectro_trial_stop','exp', '-v7.3');
+save('exp_out_lfp_stats_pop_2020_09_28_Ody_spectro_trial_stop','exp', '-v7.3');
 % load train
 % sound(y,Fs)
 disp('           Saved! ')
@@ -968,7 +968,7 @@ end
 %% Save
     disp('                 Done, saving . . .     ')
     fprintf(['Time:  ' num2str(clock) '\n']);
-    save('lfp_pop_sim_2020_09_01_coherence_align_target_stop_per_band', 'monk', 'all_monks', '-v7.3')
+    save('lfp_pop_sim_2020_09_28_Ody_spectro_align_target_stop', 'monk', 'all_monks', '-v7.3')
     load train
     sound(y,Fs)
     disp('                     Saved!')
