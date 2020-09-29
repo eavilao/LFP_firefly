@@ -462,8 +462,8 @@ else
             figure; hold on;
             ts = lfps(1).stats.trialtype.all.events.stop.all_freq.ts_lfp_align;
             for ii = 1:nlfps
-                % l = nanmean(lfps(i+48).stats.trialtype.all.events.stop.all_freq.lfp_align,2);
-                l = nanmean(lfps(ii+48).stats.trialtype.all.events.stop.lfp_align,2);
+%                 l = nanmean(lfps(ii+48).stats.trialtype.all.events.stop.all_freq.lfp_align,2); % PPC
+                l = nanmean(lfps(ii).stats.trialtype.all.events.stop.all_freq.lfp_align,2); % PFC
                 subplot(10,10,10*(xloc(ii)-1) + yloc(ii)); hold on;
                 plot(ts,l, 'k'); xlim([-1 1]) ;box off;
                 %vline(15, '--k');
