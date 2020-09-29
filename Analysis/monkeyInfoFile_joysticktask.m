@@ -7758,6 +7758,38 @@ monkeyInfo (end).FFparams_xpos = 4;
 monkeyInfo (end).FFparams_ypos = 5;
 monkeyInfo (end).FFparams_rewardDur = 7;
 monkeyInfo (end).FFparams_flyDuration = 8;
+%% session 2
+monkeyInfo (end+1).monk_id = 91;
+monkeyInfo (end).session_id = 1;
+monkeyInfo (end).coord.row = nan;
+monkeyInfo (end).coord.column = nan;
+monkeyInfo (end).coord.depth = nan;
+monkeyInfo (end).units = 0;
+monkeyInfo (end).folder = 'Ody\Utah Array\Aug 16 2019';
+monkeyInfo (end).comments = {'fixed density, no landmarks, no ptb, random DCI, random ITI'};
+monkeyInfo (end).electrode_type = {'utah2x48'};
+monkeyInfo (end).area = {{'PPC', 'PFC'}};
+monkeyInfo (end).eyechannels = [2 2];
+monkeyInfo (end).FFparams_xpos = 4;
+monkeyInfo (end).FFparams_ypos = 5;
+monkeyInfo (end).FFparams_rewardDur = 7;
+monkeyInfo (end).FFparams_flyDuration = 8;
+%% session 3
+monkeyInfo (end+1).monk_id = 91;
+monkeyInfo (end).session_id = 1;
+monkeyInfo (end).coord.row = nan;
+monkeyInfo (end).coord.column = nan;
+monkeyInfo (end).coord.depth = nan;
+monkeyInfo (end).units = 0;
+monkeyInfo (end).folder = 'Ody\Utah Array\Aug 17 2019';
+monkeyInfo (end).comments = {'fixed density, no landmarks, no ptb, random DCI, random ITI'};
+monkeyInfo (end).electrode_type = {'utah2x48'};
+monkeyInfo (end).area = {{'PPC', 'PFC'}};
+monkeyInfo (end).eyechannels = [2 2];
+monkeyInfo (end).FFparams_xpos = 4;
+monkeyInfo (end).FFparams_ypos = 5;
+monkeyInfo (end).FFparams_rewardDur = 7;
+monkeyInfo (end).FFparams_flyDuration = 8;
 
 %% session 2
 monkeyInfo (end+1).monk_id = 91;
