@@ -1,0 +1,188 @@
+%Run batch of files to analyze LFP
+
+%% Quigley
+experiments.AddSessions(44,182,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_182_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,183,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,184,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_184_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,185,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_185_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,186,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_186_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,187,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_187_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,188,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_188_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,189,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_189_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,190,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_190_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,191,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_191_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,192,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_192_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,193,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_193_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,194,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_194_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,194,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,195,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,196,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,197,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,198,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,199,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,200,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,202,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+experiments.AddSessions(44,201,{'behv','lfps','pop'})
+save('experiments_lfp_Quigley_183_spectro_whole_trial', 'experiments', '-v7.3')
+clear experiments
+%
+
+%% Bruno
+
+
+
+%% Schro
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
