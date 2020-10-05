@@ -1,5 +1,4 @@
 function LFPpop_sim_temp(exp)
-% Only to extract and plot spectrograms and coherence over time.
 
 %% load, extract, and save relevant variables
 
