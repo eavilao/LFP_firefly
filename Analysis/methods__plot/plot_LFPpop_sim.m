@@ -1,9 +1,8 @@
-function plot_LFPpop_sim(monk, all_monks, plot_type)
+function plot_LFPpop_sim(monk, plot_type)
 
 % plot from LFPpop_sim
 % names of variables
 % monk: contains data per monkey
-% all_monks: contains data averaged for all monkeys
 %
 %% Plot directory
 
@@ -3579,6 +3578,7 @@ switch plot_type
         
         
     case 'pop_psth_band_passed'
+        % load behavioral file if saved separately
         areaToLoad = 'PPC'
         monkey = '1'; 
         band = 'beta'
@@ -3694,7 +3694,7 @@ switch plot_type
         
     case 'band_passed_vs_accuracy'
         % needs single session files "...band_passed area..."
-        areaToLoad = 'PFC'
+        areaToLoad = 'PPC'
         monkey = '3';
         band = 'beta'
         win = [-0.5 0.5];
@@ -3706,7 +3706,7 @@ switch plot_type
             load(fnames(sess).name)
             monk = dataToSave;
             clear dataToSave
-            ts = monk.area.(areaToLoad).band_passed.(band).lfp(1).psth.low.ts_95_corr; ts_win_indx = ts>=win(1) & ts<=win(2); ts_win = ts(ts>=win(1) & ts<=win(2));
+            ts = monk.area.(areaToLoad).band_passed.(band).lfp(1).psth.middle.ts_95_corr; ts_win_indx = ts>=win(1) & ts<=win(2); ts_win = ts(ts>=win(1) & ts<=win(2));
             for ch = 1:length(monk.area.(areaToLoad).band_passed.(band).lfp)
                 r_corr_low(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.low.rate_95_corr_low; [~,indx_max_corr_low] = max(r_corr_low(ch,ts_win_indx)); peak_t_corr_low(ch,sess) = ts_win(indx_max_corr_low);
                 r_corr_middle(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.middle.rate_95_corr; [~,indx_max_corr_middle] = max(r_corr_middle(ch,ts_win_indx)); peak_t_corr_middle(ch,sess) = ts_win(indx_max_corr_middle);
@@ -3736,14 +3736,14 @@ switch plot_type
             title([(areaToLoad) ' ' num2str(sess)])
             xlabel('Time(s)'); vline(0,'-r');
             
-            %% bar mean plots
+            %% bar mean plots (calculate latency to peak)
             figure(4); hold on
             errorbar(sess, mean(peak_t_corr_low(:,sess)),std(peak_t_corr_low(:,sess)),'o', 'Color',[0 1 0], 'MarkerSize', 20)
             errorbar(sess+0.25, mean(peak_t_corr_middle(:,sess)),std(peak_t_corr_middle(:,sess)),'o', 'Color',[0 0.65 0], 'MarkerSize', 20)
             %errorbar(sess+0.55, mean(peak_t_corr_upper(:,sess)),std(peak_t_corr_upper(:,sess)), 'ok', 'MarkerSize', 20)
             set(gca, 'xlim', [0.5 sess+0.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
         end
-           
+         z=1; 
    
      case 'distance_vs_reward'
         figure; hold on;
