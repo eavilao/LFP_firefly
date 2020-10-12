@@ -8,6 +8,7 @@ function plot_LFPpop_sim(monk, plot_type)
 
 % 'trial_times'
 % 'behavior_steering'
+% 'distance_vs_reward' need to load behv as behv.stats (needs update)
 % 'move_on_target_on_distribution'
 % 'erp_single_sess_all'
 % 'erp_single_sess_reward_densities'
@@ -53,7 +54,7 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'pop_psth_band_passed'
 % 'psth_peak_pop'
 % 'band_passed_vs_accuracy'
-% 'distance_vs_reward'
+
 
 % print('-painters', '-depsc2', 'raster')
 
@@ -182,6 +183,35 @@ switch plot_type
         set(ax(2),'YLim',[0 45]);
         set(gca,'xlim',[-0.5 0.5],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off;
         vline(0,'k'); axis square;
+        
+    case 'distance_vs_reward'
+        figure; hold on;
+        r_targ = behv.stats.pos_final.r_targ(incorrect);
+        r_monk = behv.stats.pos_final.r_monk(incorrect);
+        if ntrls > maxtrls
+            trl_indx = randperm(ntrls);
+            trl_indx = trl_indx(1:maxtrls);
+            plot(r_targ(trl_indx), r_monk(trl_indx), '.r','markersize',4);
+        else
+            plot(r_targ, r_monk, '.r','markersize',4);
+        end
+        
+        r_targ = behv.stats.pos_final.r_targ(correct);
+        r_monk = behv.stats.pos_final.r_monk(correct);
+        if ntrls > maxtrls
+            trl_indx = randperm(ntrls);
+            trl_indx = trl_indx(1:maxtrls);
+            plot(r_targ(trl_indx), r_monk(trl_indx), '.b','markersize',4);
+        else
+            plot(r_targ, r_monk, '.b','markersize',4);
+        end
+        
+        axis([0 400 0 400]);
+        plot(0:400,0:400,'--k','Linewidth',1);
+        set(gca, 'XTick', [0 200 400], 'XTickLabel', [0 2 4], 'Fontsize',14);
+        xlabel('Target, r(m)');
+        set(gca, 'YTick', [0 200 400], 'YTickLabel', [0 2 4]);
+        ylabel('Response, r(m)');
         
     case 'move_on_target_on_distribution'
         for m = 1:length(monk)
@@ -3745,33 +3775,6 @@ switch plot_type
         end
          z=1; 
    
-     case 'distance_vs_reward'
-        figure; hold on;
-        r_targ = behv.stats.pos_final.r_targ(incorrect);
-        r_monk = behv.stats.pos_final.r_monk(incorrect);
-        if ntrls > maxtrls
-            trl_indx = randperm(ntrls);
-            trl_indx = trl_indx(1:maxtrls);
-            plot(r_targ(trl_indx), r_monk(trl_indx), '.r','markersize',4);
-        else
-            plot(r_targ, r_monk, '.r','markersize',4);
-        end
-        
-        r_targ = behv.stats.pos_final.r_targ(correct);
-        r_monk = behv.stats.pos_final.r_monk(correct);
-        if ntrls > maxtrls
-            trl_indx = randperm(ntrls);
-            trl_indx = trl_indx(1:maxtrls);
-            plot(r_targ(trl_indx), r_monk(trl_indx), '.b','markersize',4);
-        else
-            plot(r_targ, r_monk, '.b','markersize',4);
-        end
-        
-        axis([0 400 0 400]);
-        plot(0:400,0:400,'--k','Linewidth',1);
-        set(gca, 'XTick', [0 200 400], 'XTickLabel', [0 2 4], 'Fontsize',14);
-        xlabel('Target, r(m)');
-        set(gca, 'YTick', [0 200 400], 'YTickLabel', [0 2 4]);
-        ylabel('Response, r(m)');
+ 
 
 end
