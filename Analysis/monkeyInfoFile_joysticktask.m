@@ -6872,7 +6872,7 @@ monkeyInfo (end).eyechannels = [2 2];
 
 
 
-%% session 85
+%% session 85 % not in excel sheet
 monkeyInfo (end+1).monk_id = 53;
 monkeyInfo (end).session_id = 85;
 monkeyInfo (end).coord.row = nan;
