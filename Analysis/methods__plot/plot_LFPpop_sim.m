@@ -3499,7 +3499,7 @@ switch plot_type
         end
         
         
-    case 'trial_band_passed'
+    case 'trial_band_passed' %%% (old)
         area = 'PPC'     % MST PPC PFC
         
         for m = 3  % 1:length(monk)
@@ -3601,12 +3601,7 @@ switch plot_type
                 end
             end
         end
-        
-        
-        
-        
-        
-        
+            
     case 'pop_psth_band_passed'
         % load behavioral file if saved separately
         areaToLoad = 'PPC'
@@ -3722,36 +3717,83 @@ switch plot_type
         set(gca,'xlim',[0.5 2],'ylim',[-0.3 0.3], 'TickDir', 'out', 'FontSize', 22); axis square; box off
         ylabel('Time (s)'); xlabel(''); title(band)
         
+        
+    case 'band_passed_hist'
+        areaToLoad = 'PPC'
+        monkey = '1';
+        band = 'theta'
+        win = [-0.5 0.5];
+        %% load and extract each file per area
+        fprintf(['Time:  ' num2str(clock) '\n']);
+        fnames = dir(['monk ' (monkey) ' * ' (areaToLoad) ' *.mat']);
+        for sess = 1:length(fnames)
+            load(fnames(sess).name)
+            monk = dataToSave;
+            tspk_corr = []; tspk_incorr = []; tspk_corr_all = []; tspk_incorr_all = []; 
+            clear dataToSave
+            for ch = 1:length(monk.area.(areaToLoad).band_passed.(band).lfp)
+                % gather tspk correct and incorrect
+                for trl = 1:length(monk.area.(areaToLoad).band_passed.(band).lfp(ch).trl_corr), tspk_corr = [tspk_corr ; monk.area.(areaToLoad).band_passed.(band).lfp(ch).trl_corr(trl).tspk];end 
+                for trl = 1:length(monk.area.(areaToLoad).band_passed.(band).lfp(ch).trl_incorr), tspk_incorr = [tspk_incorr ; monk.area.(areaToLoad).band_passed.(band).lfp(ch).trl_incorr(trl).tspk]; end
+            end
+            figure(1); hold on
+            subplot(1,length(fnames),sess); hold on
+            h1 = histfit(tspk_corr,100, 'kernel');
+            h2 = histfit(tspk_incorr,100, 'kernel');
+            xlabel('Time (s)')
+            ylabel('Count')
+            set (gca,'xlim',[-0.75 0.75], 'TickDir', 'out','FontSize', 18);
+            axis square; %alpha(0.5);
+            set(h1(1),'FaceColor', [0 1 0], 'EdgeColor', 'none');
+            set(h2(1),'FaceColor', [0 0 0],'EdgeColor', 'none');
+            set(h1(2),'Color',[0 1 0]);
+            set(h2(2),'Color',[0 0 0]);
+            [~,max_h1] = max(h1(2).YData); vline(h1(2).XData(max_h1),'g'); 
+            [~,max_h2] = max(h2(2).YData); vline(h2(2).XData(max_h2),'k'); 
+            [h,p] = kstest2(tspk_corr(tspk_corr>-0.75 & tspk_corr<0.75),tspk_incorr(tspk_incorr>-0.75 & tspk_incorr<0.75))
+            tspk_corr_all = [tspk_corr_all ; tspk_corr];
+            tspk_incorr_all = [tspk_incorr_all ; tspk_incorr];
+        end
+        save(['monkey_' monkey '_' areaToLoad '_' band '_tspk_all'], 'tspk_corr_all', 'tspk_incorr_all'); 
+        
+        
     case 'band_passed_vs_accuracy'
         % needs single session files "...band_passed area..."
-        areaToLoad = 'PPC'
-        monkey = '3';
+        areaToLoad = 'MST'
+        monkey = '1';
         band = 'beta'
         win = [-0.5 0.5];
         %% load and extract each file per area
         fprintf(['Time:  ' num2str(clock) '\n']);
         fnames = dir(['monk ' (monkey) ' * ' (areaToLoad) ' *.mat']);
-        r_corr_low = []; r_corr_middle = []; r_corr_upper = [];  peak_t_corr_low = []; peak_t_corr_middle = []; peak_t_corr_upper = [];
+        r_corr_low = []; r_corr_middle = []; r_corr_upper = [];  peak_t_corr_low = []; peak_t_corr_middle = []; peak_t_corr_upper = []; tspk_low = []; tspk_middle = []; 
         for sess = 1:length(fnames)
             load(fnames(sess).name)
             monk = dataToSave;
             clear dataToSave
-            ts = monk.area.(areaToLoad).band_passed.(band).lfp(1).psth.middle.ts_95_corr; ts_win_indx = ts>=win(1) & ts<=win(2); ts_win = ts(ts>=win(1) & ts<=win(2));
+            ts = monk.area.(areaToLoad).band_passed.(band).lfp(1).psth.low.ts_95_corr; ts_win_indx = ts>=win(1) & ts<=win(2); ts_win = ts(ts>=win(1) & ts<=win(2));
             for ch = 1:length(monk.area.(areaToLoad).band_passed.(band).lfp)
                 r_corr_low(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.low.rate_95_corr_low; [~,indx_max_corr_low] = max(r_corr_low(ch,ts_win_indx)); peak_t_corr_low(ch,sess) = ts_win(indx_max_corr_low);
                 r_corr_middle(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.middle.rate_95_corr; [~,indx_max_corr_middle] = max(r_corr_middle(ch,ts_win_indx)); peak_t_corr_middle(ch,sess) = ts_win(indx_max_corr_middle);
-                r_corr_upper(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.upper.rate_95_corr; [~,indx_max_corr_upper] = max(r_corr_upper(ch,ts_win_indx)); peak_t_corr_upper(ch,sess) = ts_win(indx_max_corr_upper);
+                %r_corr_upper(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.upper.rate_95_corr; [~,indx_max_corr_upper] = max(r_corr_upper(ch,ts_win_indx)); peak_t_corr_upper(ch,sess) = ts_win(indx_max_corr_upper);
+            % gather tspk low and middle
+            tspk_low = [tspk_low ; monk.area.(areaToLoad).band_passed.(band).lfp(ch).low.all_tspk];
+            tspk_middle = [tspk_middle ; monk.area.(areaToLoad).band_passed.(band).lfp(ch).middle.all_tspk];
             end
-            % mean and sem
+            
+            % mean and sem 
             r_corr_low_mu(sess,:) = mean(r_corr_low(:,:,sess)); r_corr_low_sem(sess,:) = std(r_corr_low(:,:,sess))/sqrt(size(r_corr_low(:,:,sess),1));
             r_corr_middle_mu(sess,:) = mean(r_corr_middle(:,:,sess)); r_corr_middle_sem(sess,:) = std(r_corr_middle(:,:,sess))/sqrt(size(r_corr_middle(:,:,sess),1));
-            r_corr_upper_mu(sess,:) = mean(r_corr_upper(:,:,sess)); r_corr_upper_sem(sess,:) = std(r_corr_upper(:,:,sess))/sqrt(size(r_corr_upper(:,:,sess),1));
+            %r_corr_upper_mu(sess,:) = mean(r_corr_upper(:,:,sess)); r_corr_upper_sem(sess,:) = std(r_corr_upper(:,:,sess))/sqrt(size(r_corr_upper(:,:,sess),1));
+            
+            
+            
             %% plot all channels
             
             figure(1); hold on
             subplot(1,length(fnames),sess); hold on
             for ii = 1:size(r_corr_low(:,:,sess),1), plot(ts,smooth(r_corr_low(ii,:,sess)), 'Color', [0 1 0]); end
-            for ii = 1:size(r_corr_middle(:,:,sess),1), plot(ts,smooth(r_corr_middle(ii,:,sess)), 'Color', [0 0.65 0]); end
+            for ii = 1:size(r_corr_middle(:,:,sess),1), plot(ts,smooth(r_corr_middle(ii,:,sess)), 'Color', [0 0.5 0]); end
             %for ii = 1:size(r_corr_upper(:,:,sess),1), plot(ts,smooth(r_corr_upper(ii,:,sess)), 'Color', [0 0.25 0]); end
             set(gca, 'xlim', [-0.95 0.95], 'TickDir', 'out', 'FontSize', 22); axis square; box off
             vline(0,'-r'); title([(areaToLoad) ' ' num2str(sess)])
@@ -3760,7 +3802,7 @@ switch plot_type
             figure(2); hold on
             subplot(1,length(fnames),sess); hold on
             shadedErrorBar(ts,smooth(r_corr_low_mu(sess,:),5),r_corr_low_sem(sess,:), 'lineprops', {'Color',[0 1 0]})
-            shadedErrorBar(ts,smooth(r_corr_middle_mu(sess,:)),r_corr_middle_sem(sess,:), 'lineprops', {'Color',[0 0.65 0]})
+            shadedErrorBar(ts,smooth(r_corr_middle_mu(sess,:),5),r_corr_middle_sem(sess,:), 'lineprops', {'Color',[0 0.5 0]})
             %shadedErrorBar(ts,smooth(r_corr_upper_mu(sess,:)),r_corr_upper_sem(sess,:), 'lineprops', {'Color',[0 0.25 0]})
             set(gca, 'xlim', [-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
             title([(areaToLoad) ' ' num2str(sess)])
@@ -3773,8 +3815,33 @@ switch plot_type
             %errorbar(sess+0.55, mean(peak_t_corr_upper(:,sess)),std(peak_t_corr_upper(:,sess)), 'ok', 'MarkerSize', 20)
             set(gca, 'xlim', [0.5 sess+0.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
         end
-         z=1; 
-   
- 
+        % plot all sessions (mean of the mean -- pb not good)
+        figure(3); hold on
+        shadedErrorBar(ts,smooth(mean(r_corr_low_mu)), mean(r_corr_low_sem),'lineprops', {'Color',[0 1 0]})
+        shadedErrorBar(ts,smooth(mean(r_corr_middle_mu)),mean(r_corr_middle_sem),'lineprops', {'Color',[0 0.5 0]})
+        
+        % plot histogram with a kernel smoothing function fit of all times for theta and beta, low vs middle 
+        % -0.750 to 0.750 s
+        figure; hold on; 
+        h1 = histfit(tspk_low(tspk_low>-0.75 & tspk_low<0.75),100, 'kernel'); 
+        h2 = histfit(tspk_middle(tspk_middle>-0.75 & tspk_middle<0.75),100, 'kernel');
+        xlabel('Time (s)')
+        ylabel('Count')
+        set (gca,'xlim',[-0.75 0.75], 'TickDir', 'out','FontSize', 18);
+        alpha(0.25)
+        set(h1(1),'FaceColor', [0 1 0], 'EdgeColor', 'none');
+        set(h2(1),'FaceColor', [0 0.5 0],'EdgeColor', 'none');
+        set(h1(2),'Color',[0 1 0]);
+        set(h2(2),'Color',[0 0.5 0]);
+        [h,p] = kstest2(tspk_low(tspk_low>-0.75 & tspk_low<0.75),tspk_middle(tspk_middle>-0.75 & tspk_middle<0.75))
+        
+        %save data for this monk to compare with other monks
+        save(['tspk_acc_monkey_' num2str(monkey) '_' areaToLoad '_' band ],'tspk_low','tspk_middle')
+        
+    case 'band_passed_vs_accuracy_pop'
+        fprintf(['Time:  ' num2str(clock) '\n']);
+        fnames = dir('tspk_acc_monkey_*.mat')
+        load(fnames)
+        
 
 end
