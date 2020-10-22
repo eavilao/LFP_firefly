@@ -858,8 +858,8 @@ if do_band_passed_vs_accuracy
                         for trl = 1:length(trl_corr_low)
                             this_ts = behv_low(trl).continuous.ts-trl_end_corr_low(trl);
                             if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:333,:);
-                                this_lfp_corr = trl_corr_low(trl).lfp_theta(this_ts>-1 & this_ts<1); theta_corr_low(trl,:) = this_lfp_corr(1:333,:);  %%%%%%%%%%%%%%% Choose band
+                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
+                                this_lfp_corr = trl_corr_low(trl).lfp_theta(this_ts>-1 & this_ts<1); theta_corr_low(trl,:) = this_lfp_corr(1:300,:);  %%%%%%%%%%%%%%% Choose band
                                 this_ninety = prctile(real(theta_corr_low(trl,:)),95); theta_corr_indx_95(trl,:) = real(theta_corr_low(trl,:))>this_ninety;
                                 monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).low.trl_corr(trl).tspk = ts(trl,theta_corr_indx_95(trl,:))';
                             else
@@ -876,8 +876,8 @@ if do_band_passed_vs_accuracy
                         for trl = 1:length(trl_corr_middle)
                             this_ts = behv_middle(trl).continuous.ts-trl_end_corr_middle(trl);
                             if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:333,:);
-                                this_lfp_corr = trl_corr_middle(trl).lfp_theta(this_ts>-1 & this_ts<1); theta_corr_middle(trl,:) = this_lfp_corr(1:333,:); %%%%%%%%%%%%%%% Choose band
+                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
+                                this_lfp_corr = trl_corr_middle(trl).lfp_theta(this_ts>-1 & this_ts<1); theta_corr_middle(trl,:) = this_lfp_corr(1:300,:); %%%%%%%%%%%%%%% Choose band
                                 this_ninety = prctile(real(theta_corr_middle(trl,:)),95); theta_corr_indx_95(trl,:) = real(theta_corr_middle(trl,:))>this_ninety;
                                 monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).middle.trl_corr(trl).tspk = ts(trl,theta_corr_indx_95(trl,:))';
                             else
@@ -894,8 +894,8 @@ if do_band_passed_vs_accuracy
                         for trl = 1:length(trl_corr_upper)
                             this_ts = behv_upper(trl).continuous.ts-trl_end_corr_upper(trl);
                             if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:333,:);
-                                this_lfp_corr = trl_corr_upper(trl).lfp_theta(this_ts>-1 & this_ts<1); theta_corr_upper(trl,:) = this_lfp_corr(1:333,:);  %%%%%%%%%%%%%%% Choose band
+                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
+                                this_lfp_corr = trl_corr_upper(trl).lfp_theta(this_ts>-1 & this_ts<1); theta_corr_upper(trl,:) = this_lfp_corr(1:300,:);  %%%%%%%%%%%%%%% Choose band
                                 this_ninety = prctile(real(theta_corr_upper(trl,:)),95); theta_corr_indx_95(trl,:) = real(theta_corr_upper(trl,:))>this_ninety;
                                 monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).upper.trl_corr(trl).tspk = ts(trl,theta_corr_indx_95(trl,:))';
                             else
@@ -912,7 +912,7 @@ if do_band_passed_vs_accuracy
                         for trl = 1:length(trl_corr_low)
                             this_ts = behv_low(trl).continuous.ts-trl_end_corr_low(trl);
                             if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:333,:);
+                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
                                 this_lfp_corr = trl_corr_low(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr_low(trl,:) = this_lfp_corr(1:333,:);  %%%%%%%%%%%%%%% Choose band
                                 this_ninety = prctile(real(beta_corr_low(trl,:)),95); beta_corr_indx_95(trl,:) = real(beta_corr_low(trl,:))>this_ninety;
                                 monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).low.trl_corr(trl).tspk = ts(trl,beta_corr_indx_95(trl,:))';
@@ -930,8 +930,8 @@ if do_band_passed_vs_accuracy
                         for trl = 1:length(trl_corr_middle)
                             this_ts = behv_middle(trl).continuous.ts-trl_end_corr_middle(trl);
                             if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:333,:);
-                                this_lfp_corr = trl_corr_middle(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr_middle(trl,:) = this_lfp_corr(1:333,:); %%%%%%%%%%%%%%% Choose band
+                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
+                                this_lfp_corr = trl_corr_middle(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr_middle(trl,:) = this_lfp_corr(1:300,:); %%%%%%%%%%%%%%% Choose band
                                 this_ninety = prctile(real(beta_corr_middle(trl,:)),95); beta_corr_indx_95(trl,:) = real(beta_corr_middle(trl,:))>this_ninety;
                                 monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).middle.trl_corr(trl).tspk = ts(trl,beta_corr_indx_95(trl,:))';
                             else
@@ -948,8 +948,8 @@ if do_band_passed_vs_accuracy
                         for trl = 1:length(trl_corr_upper)
                             this_ts = behv_upper(trl).continuous.ts-trl_end_corr_upper(trl);
                             if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:333,:);
-                                this_lfp_corr = trl_corr_upper(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr_upper(trl,:) = this_lfp_corr(1:333,:);  %%%%%%%%%%%%%%% Choose band
+                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
+                                this_lfp_corr = trl_corr_upper(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr_upper(trl,:) = this_lfp_corr(1:300,:);  %%%%%%%%%%%%%%% Choose band
                                 this_ninety = prctile(real(beta_corr_upper(trl,:)),95); beta_corr_indx_95(trl,:) = real(beta_corr_upper(trl,:))>this_ninety;
                                 monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).upper.trl_corr(trl).tspk = ts(trl,beta_corr_indx_95(trl,:))';
                             else
