@@ -3500,8 +3500,7 @@ switch plot_type
         
         
     case 'trial_band_passed' %%% (old)
-        area = 'PPC'     % MST PPC PFC
-        
+         area = 'PPC'     % MST PPC PFC
         for m = 3  % 1:length(monk)
             nsess = 1:length(monk(m).session);
             for sess = 1:length(nsess)
@@ -3601,9 +3600,31 @@ switch plot_type
                 end
             end
         end
+
+    case 'band_passed_trial'
+        % load behavioral file --- saved separately
+        areaToLoad = 'PPC'
+        monkey = '1'; 
+        band = 'beta'
+        win = [-0.5 0.5];
+        %% load and extract each file per area
+        fprintf(['Time:  ' num2str(clock) '\n']);
+        fnames = dir(['monk ' (monkey) ' * ' (areaToLoad) ' *.mat']);
+        r_corr = []; r_incorr = []; peak_t_corr = []; peak_t_incorr = [];
+        for sess = 1:length(fnames)
+            load(fnames(sess).name)
+            monk = dataToSave;
+            clear dataToSave
+            ts = monk.area.(areaToLoad).band_passed.(band).lfp(1).psth.ts_95_corr; ts_win_indx = ts>=win(1) & ts<=win(2); ts_win = ts(ts>=win(1) & ts<=win(2)); 
+            for ch = 1:length(monk.area.(areaToLoad).band_passed.(band).lfp)
+                r_corr(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.rate_95_corr; [~,indx_max_corr] = max(r_corr(ch,ts_win_indx)); peak_t_corr(ch,sess) = ts_win(indx_max_corr);
+                r_incorr(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.rate_95_incorr; [~,indx_max_incorr] = max(r_incorr(ch,ts_win_indx)); peak_t_incorr(ch,sess) = ts_win(indx_max_incorr);
+            end
+        end
+        
             
     case 'pop_psth_band_passed'
-        % load behavioral file if saved separately
+        % load behavioral file --- saved separately
         areaToLoad = 'PPC'
         monkey = '1'; 
         band = 'beta'
