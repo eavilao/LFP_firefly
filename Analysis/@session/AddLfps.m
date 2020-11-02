@@ -18,7 +18,7 @@ function AddLfps(this,prs)
         if length(this.behaviours.trials)==length(events_plx.t_end)
             fprintf(['... reading ' file_lfp.name '\n']);
             [ch_id,electrode_id] = MapChannel2Electrode('linearprobe');
-            for j=5%1:prs.linearprobe.channelcount(linearprobe_type)
+            for j=1:prs.linearprobe.channelcount(linearprobe_type)
                 fprintf(['...... channel ' num2str(j) '/' num2str(prs.linearprobe.channelcount(linearprobe_type)) '\n']);
                 [adfreq, n, ~, fn, ad] = plx_ad_v(file_lfp.name, j-1);
                 if n == fn
@@ -56,7 +56,7 @@ function AddLfps(this,prs)
             if NS1.MetaTags.ChannelCount ~= prs.utaharray.channelcount(utaharray_type), warning('Unexpected channel count in the file \n'); end
             [ch_id,electrode_id] = MapChannel2Electrode(prs.utaharray.types{utaharray_type});
             brain_area = prs.area{strcmp(prs.electrode_type,prs.utaharray.types{utaharray_type})};
-            for j=%1:prs.utaharray.channelcount(utaharray_type)
+            for j=1:prs.utaharray.channelcount(utaharray_type)
                 channel_id = NS1.MetaTags.ChannelID(j);
                 fprintf(['Segmenting LFP :: channel ' num2str(channel_id) '\n']);
                 fprintf(['Time:  ' num2str(clock) '\n']);
