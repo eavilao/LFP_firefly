@@ -22,7 +22,7 @@ save_lfp_band_pass = false; % extract band passed lfp signal only
 do_band_passed = false; % extract and analyse band passed signal
 do_band_passed_vs_accuracy = false;
 
-name_output_file = 'lfp_Ody_PSD_2020_10_07';
+name_output_file = 'lfp_band_passed_2020_10_07';
 
 %% Extract
 if extract_exp_out

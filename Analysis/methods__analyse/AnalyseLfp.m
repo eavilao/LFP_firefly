@@ -493,30 +493,29 @@ if extract_band_pass
 % %             stats.band_passed.target.trl(i).beta_95_ts = NaN;
 % %         end
 
-        % aligned to stop
-        %% theta
+%% aligned to stop
         ts_align_stop = trials_behv(i).continuous.ts-events(i).t_stop;
         this_ts = ts_align_stop(ts_align_stop > around_event(1) & ts_align_stop < around_event(2) ,:); % choose 1s around event
-        % if size(this_ts,1)>=333 && this_ts(end)>=0.999 % ensure that there is 1 second around
         if  this_ts(end)>=0.999 % ensure that there is 1 second around
+            %% theta
             stats.band_passed.stop.ts = this_ts(1:300,:);
             trials_theta(i).lfp = trials_lfps(i).lfp_theta(:); % read as column vector
             this_theta_stop = real(trials_theta(i).lfp(ts_align_stop > around_event(1) & ts_align_stop < around_event(2),:)); % align to stop
+            stats.band_passed.stop.trl(i).theta.lfp_stop = this_theta_stop; 
             this_theta_stop = this_theta_stop(1:300,:); % hardcoded to avoid extra sample once in a while
             this_95 = prctile(this_theta_stop,95);
             stats.band_passed.stop.trl(i).theta_95_indx = this_theta_stop > this_95;  % take 95th percentile value
-            %stats.band_passed.stop.trl(i).theta_95 = this_theta_stop(this_theta_95_indx);
-            % stats.band_passed.stop.trl(i).theta_95_ts = this_ts(this_theta_95_indx);
+            % stats.band_passed.stop.trl(i).theta_95 = this_theta_stop(stats.band_passed.stop.trl(i).theta_95_indx);
             %% beta
             trials_beta(i).lfp = trials_lfps(i).lfp_beta(:); % read as column vector
             this_beta_stop = real(trials_beta(i).lfp(ts_align_stop > around_event(1) & ts_align_stop < around_event(2),:)); % align to stop
+            stats.band_passed.stop.trl(i).beta.lfp_stop = this_beta_stop; 
             this_beta_stop = this_beta_stop(1:300,:); % hardcoded to avoid extra sample once in a while
             this_95 = prctile(this_beta_stop,95);
             stats.band_passed.stop.trl(i).beta_95_indx = this_beta_stop > this_95;  % take 95th percentile value
-            % stats.band_passed.stop.trl(i).beta_95 = this_theta_stop(this_beta_95_indx);
-            % stats.band_passed.stop.trl(i).beta_95_ts = this_ts(this_beta_95_indx);
+            % stats.band_passed.stop.trl(i).beta_95 = this_theta_stop(stats.band_passed.stop.trl(i).beta_95_indx);
         else
-            %stats.band_passed.stop.trl(i).theta_95 = NaN;
+            % stats.band_passed.stop.trl(i).theta_95 = NaN;
             stats.band_passed.stop.trl(i).theta_95_ts = NaN;
             % stats.band_passed.stop.trl(i).beta_95 = NaN;
             stats.band_passed.stop.trl(i).beta_95_ts = NaN;
