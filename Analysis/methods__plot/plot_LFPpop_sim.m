@@ -3501,7 +3501,6 @@ switch plot_type
         
     case 'trial_band_passed' %%% (old)
         area = 'PPC'     % MST PPC PFC
-        
         for m = 3  % 1:length(monk)
             nsess = 1:length(monk(m).session);
             for sess = 1:length(nsess)
