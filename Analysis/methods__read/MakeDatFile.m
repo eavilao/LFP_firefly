@@ -27,10 +27,10 @@ t_read = 0;
 while t_read<T_exp
     fprintf(['Reading datafile... T = ' num2str(t_read) 's\n']);
     if T_exp-t_read > buffer_read
-        NS6 = openNSx(['/' fname '.ns6'],'report','read', 'uV',['t:' num2str(t_read) ':' num2str(t_read+buffer_read)],'sec');        
+        NS6 = openNSx(['/' fname '.ns2'],'report','read', 'uV',['t:' num2str(t_read) ':' num2str(t_read+buffer_read)],'sec');        
         dt_read = buffer_read;
     else
-        NS6 = openNSx(['/' fname '.ns6'],'report','read', 'uV',['t:' num2str(t_read) ':' num2str(T_exp)],'sec');
+        NS6 = openNSx(['/' fname '.ns2'],'report','read', 'uV',['t:' num2str(t_read) ':' num2str(T_exp)],'sec');
         dt_read = T_exp - t_read;
     end
     t_read = t_read + buffer_read;
