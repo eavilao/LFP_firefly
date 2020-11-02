@@ -3757,6 +3757,7 @@ switch plot_type
                 for trl = 1:length(monk.area.(areaToLoad).band_passed.(band).lfp(ch).trl_corr), tspk_corr = [tspk_corr ; monk.area.(areaToLoad).band_passed.(band).lfp(ch).trl_corr(trl).tspk];end 
                 for trl = 1:length(monk.area.(areaToLoad).band_passed.(band).lfp(ch).trl_incorr), tspk_incorr = [tspk_incorr ; monk.area.(areaToLoad).band_passed.(band).lfp(ch).trl_incorr(trl).tspk]; end
             end
+            
             figure(1); hold on
             subplot(1,length(fnames),sess); hold on
             h1 = histfit(tspk_corr,100, 'kernel');
