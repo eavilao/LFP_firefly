@@ -3500,8 +3500,7 @@ switch plot_type
         
         
     case 'trial_band_passed'
-        area = 'PPC'     % MST PPC PFC
-        
+        area = 'PFC'     % MST PPC PFC
         for m = 3  % 1:length(monk)
             nsess = 1:length(monk(m).session);
             for sess = 1:length(nsess)
@@ -3512,7 +3511,7 @@ switch plot_type
                 pick_ch = randperm(length(monk(m).session(sess).area.(area).lfp)); 
                 %p = numSubplots(6); 
                 cnt=1;
-                for nlfp = pick_ch(1:5) %1:length(monk(m).session(sess).area.(area).lfp)
+                for nlfp = 4 %pick_ch(1:5) %1:length(monk(m).session(sess).area.(area).lfp)
                     trl_corr = monk(m).session(sess).area.(area).lfp(nlfp).trials(corr);
                     trl_incorr = monk(m).session(sess).area.(area).lfp(nlfp).trials(incorr);
                     % extract t_stop corr
@@ -3521,13 +3520,14 @@ switch plot_type
                     for j = 1:length(behv_incorr), trl_end_incorr(j) = behv_incorr(j).events.t_end; end
                     %% corr
                     % align to t_stop and extract around stop time
+                    trl_corr_tspk = []; 
                     for trl = 1:length(behv_corr)
                         this_ts = behv_corr(trl).continuous.ts-trl_end_corr(trl);
                         if this_ts(end)>0.5
                             this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:333,:);
-                            this_lfp_corr = trl_corr(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr(trl,:) = this_lfp_corr(1:333,:);  %% Choose band
+                            this_lfp_corr = trl_corr(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr(trl,:) = this_lfp_corr(1:333,:);  %%%%%%%%%%% Choose band
                             this_ninety = prctile(real(beta_corr(trl,:)),95); beta_corr_indx_90(trl,:) = real(beta_corr(trl,:))>this_ninety;
-                            trial_corr(trl).tspk = ts(trl,beta_corr_indx_90(trl,:))';
+                            trial_corr(trl).tspk = ts(trl,beta_corr_indx_90(trl,:))'; trl_corr_tspk = [trl_corr_tspk ; trial_corr(trl).tspk]; 
                         else
                             beta_corr(trl,:) = NaN(1,333); 
                         end
@@ -3537,33 +3537,37 @@ switch plot_type
                     figure; hold on; colormap(jet);title('Correct')
                     %subplot(p(1),p(2),cnt); hold on; colormap(jet)
                     %subplot(1,5,cnt); hold on; colormap(jet)
-                    for trl = 16:36 % 1:length(behv_corr)
+                    for trl = 1:length(behv_corr) %16:36 % 1:length(behv_corr)
                         % plot(ts(trl,:),real(beta_corr(trl,:)))
                         %plot(ts(trl,:),real(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:))))) % normalized
                         %                         waterfall(ts(trl,:),trl,real(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:)))));
                         %                         waterfall(ts(trl,:),trl,abs(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:)))));
                        
-                        waterfall(ts(trl,:),trl,real(beta_corr(trl,:)));
+                        % waterfall(ts(trl,:),trl,real(beta_corr(trl,:)));
                         waterfall(ts(trl,:),trl,abs(beta_corr(trl,:)));
-                        set(gca,'xTick',[-1 0 1], 'yTick', [], 'zTick',[])
+                        set(gca,'xLim',[-0.8 0.8], 'xTick',[-0.8 0 0.8], 'yTick', [], 'zTick',[])
                     end
-                    view(gca,[0 64.4]); grid off; axis square; vline(0,'k')
+                    % view(gca,[0 64.4]); grid off; axis square; vline(0,'k')
+                    view(gca,[0 82]); grid off; axis square; vline(0,'k'); ylim([0 trl]);
                     cnt=cnt+1;
+                    
                     % plot raster of time points above 95
                     figure; hold on; 
                     for trl = 1:size(beta_corr_indx_90,1)
                     plot(ts(trl,beta_corr_indx_90(trl,:)),trl,'.k', 'MarkerSize',4)
+                    set(gca,'xlim',[-0.8 0.8],'TickDir', 'out', 'FontSize', 22); axis square; box off
                     end
-                    vline(0,'-r')
-                    
+                    ylim([0 trl]); vline(0,'-r')
+                    % print('raster_corr','-depsc2', '-painters', '-cmyk')
                     %% incorrect 
+                    trl_incorr_tspk = []; 
                      for trl = 1:length(behv_incorr)
                         this_ts = behv_incorr(trl).continuous.ts-trl_end_incorr(trl);
                         if this_ts(end)>0.5
                             this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:333,:);
-                            this_lfp_incorr = trl_incorr(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_incorr(trl,:) = this_lfp_incorr(1:333,:);  %% Choose band
+                            this_lfp_incorr = trl_incorr(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_incorr(trl,:) = this_lfp_incorr(1:333,:);  %%%%%%%%%%% Choose band
                             this_ninety = prctile(real(beta_incorr(trl,:)),95); beta_incorr_indx_90(trl,:) = real(beta_incorr(trl,:))>this_ninety;
-                            trial_incorr(trl).tspk = ts(trl,beta_incorr_indx_90(trl,:))';
+                            trial_incorr(trl).tspk = ts(trl,beta_incorr_indx_90(trl,:))'; trl_incorr_tspk = [trl_incorr_tspk ; trial_incorr(trl).tspk]; 
                         else
                             beta_incorr(trl,:) = NaN(1,333); 
                         end
@@ -3574,39 +3578,70 @@ switch plot_type
                     figure; hold on; colormap(jet); title('Incorrect')
                     %subplot(p(1),p(2),cnt); hold on; colormap(jet)
                     %subplot(1,5,cnt); hold on; colormap(jet)
-                    for trl = 16:36 % 1:length(behv_corr)
+                    for trl = 1:length(behv_incorr) % 16:36 % 1:length(behv_incorr)
                         % plot(ts(trl,:),real(beta_corr(trl,:)))
                         %plot(ts(trl,:),real(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:))))) % normalized
                         %                         waterfall(ts(trl,:),trl,real(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:)))));
                         %                         waterfall(ts(trl,:),trl,abs(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:)))));
                        
-                        waterfall(ts(trl,:),trl,real(beta_incorr(trl,:)));
-                        waterfall(ts(trl,:),trl,abs(beta_incorr(trl,:)));
-                        set(gca,'xTick',[-1 0 1], 'yTick', [], 'zTick',[])
+                        % waterfall(ts(trl,:),trl,real(beta_incorr(trl,:)));
+                         waterfall(ts(trl,:),trl,abs(beta_incorr(trl,:)));
+                         set(gca,'xLim',[-0.8 0.8], 'xTick',[-0.8 0 0.8], 'yTick', [], 'zTick',[])
                     end
-                    view(gca,[0 64.4]); grid off; axis square; vline(0,'k')
+                    % view(gca,[0 64.4]); grid off; axis square; vline(0,'k')
+                    view(gca,[0 82]); grid off; axis square; vline(0,'k'); ylim([0 trl]);
+                    
                     % plot raster of time points above 95
                     figure; hold on; 
-                    for trl = 1:size(beta_corr_indx_90,2)
+                    for trl = 1:size(beta_incorr_indx_90,1)
                     plot(ts(trl,beta_incorr_indx_90(trl,:)),trl,'.k', 'MarkerSize',4)
+                    set(gca,'xlim',[-0.8 0.8],'TickDir', 'out', 'FontSize', 22); axis square; box off
                     end
-                    vline(0,'-r')
+                    ylim([0 trl]); vline(0,'-r'); 
+                    % print('raster_incorr','-depsc2', '-painters', '-cmyk')
+                    
                     %plot psths
                     figure; hold on
-                    plot(ts_90_corr,smooth(rate_90_corr),'b')
-                    plot(ts_90_incorr,smooth(rate_90_incorr),'r')
-                    set(gca,'TickDir', 'out', 'FontSize', 22); axis square; box off
+                    plot(ts_90_corr,smooth(rate_90_corr,10),'g')
+                    plot(ts_90_incorr,smooth(rate_90_incorr,10),'k')
+                    set(gca,'xlim',[-0.8 0.8],'TickDir', 'out', 'FontSize', 22); axis square; box off
                     title([area ' Channel ' num2str(nlfp)])
                     cnt=cnt+1;
+                    
+                    % plot difference in psth
+                    figure; hold on; 
+                    plot(ts_90_corr,smooth(rate_90_corr./rate_90_incorr,10), 'k')
+                    set(gca,'xlim',[-0.8 0.8],'TickDir', 'out', 'FontSize', 22); axis square; box off
+                    hline(1, '--k')
+                    ylabel('Correct/Incorrect')
+                    xlabel('Time(s)')
+                    
+                    % plot histogram
+                    % normalize hists by max
+                    figure; hold on; 
+                    h_corr =  histogram(trl_corr_tspk,100, 'Normalization', 'pdf');
+                    h_incorr =  histogram(trl_incorr_tspk,100, 'Normalization', 'pdf');
+                    set (gca,'xlim',[-0.8 0.8], 'TickDir', 'out','FontSize', 18);
+
+                    figure; hold on
+                    h1 = histfit(trl_corr_tspk,40, 'kernel');
+                    h2 = histfit(trl_incorr_tspk,40, 'kernel');
+                    xlabel('Time (s)')
+                    ylabel('Count')
+                    set (gca,'xlim',[-0.8 0.8], 'TickDir', 'out','FontSize', 18);
+                    axis square; %alpha(0.5);
+                    set(h1(1),'FaceColor', [0 1 0], 'EdgeColor', 'none');
+                    set(h2(1),'FaceColor', [0 0 0],'EdgeColor', 'none');
+                    set(h1(2),'Color',[0 1 0]);
+                    set(h2(2),'Color',[0 0 0]);
+                    [~,max_h1] = max(h1(2).YData); vline(h1(2).XData(max_h1),'g');
+                    [~,max_h2] = max(h2(2).YData); vline(h2(2).XData(max_h2),'k');
+                    [h,p] = kstest2(trl_corr_tspk(trl_corr_tspk>-0.8 & trl_corr_tspk<0.8),trl_incorr_tspk(trl_incorr_tspk>-0.8 & trl_incorr_tspk<0.8))
+                    %[h,p] = ttest2(trl_corr_tspk(trl_corr_tspk>-0.8 & trl_corr_tspk<0.8),trl_incorr_tspk(trl_incorr_tspk>-0.8 & trl_incorr_tspk<0.8),'Vartype','unequal')
                 end
             end
         end
-        
-        
-        
-        
-        
-        
+            
     case 'pop_psth_band_passed'
         % load behavioral file if saved separately
         areaToLoad = 'PPC'
