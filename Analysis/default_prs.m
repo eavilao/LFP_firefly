@@ -3,7 +3,7 @@ function prs = default_prs(monk_id,session_id)
 if nargin<2, session_id = 1; end
 getnthcell = @(x,n) x{n};
 
-prs.monk_Ody = 1; % This will run AddLOGData_Ody instead.  
+prs.monk_Ody = 0; % This will run AddLOGData_Ody instead.  
 
 %% session specific parameters
 monkeyInfoFile_joysticktask;

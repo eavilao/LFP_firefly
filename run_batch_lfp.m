@@ -3,25 +3,25 @@
 name_exp = 'band_passed'; 
 
 %% Quigley
-% experiments = experiment('firefly-monkey')
-% experiments.AddSessions(44,182,{'behv','lfps','pop'})
-% save(['experiments_lfp_Quigley_182_' name_exp], 'experiments', '-v7.3')
-% clear experiments
-%
-% experiments = experiment('firefly-monkey')
-% experiments.AddSessions(44,183,{'behv','lfps','pop'})
-% save(['experiments_lfp_Quigley_183_' name_exp], 'experiments', '-v7.3')
-% clear experiments
-%
-% % experiments = experiment('firefly-monkey')
-% % experiments.AddSessions(44,184,{'behv','lfps','pop'})
-% % save(['experiments_lfp_Quigley_184_' name_exp], 'experiments', '-v7.3')
-% % clear experiments
-% % % %
-% % experiments = experiment('firefly-monkey')
-% % experiments.AddSessions(44,185,{'behv','lfps','pop'})
-% % save(['experiments_lfp_Quigley_185_' name_exp], 'experiments', '-v7.3')
-% % clear experiments
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(44,182,{'behv','lfps','pop'})
+save(['experiments_lfp_Quigley_182_' name_exp], 'experiments', '-v7.3')
+clear experiments
+
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(44,183,{'behv','lfps','pop'})
+save(['experiments_lfp_Quigley_183_' name_exp], 'experiments', '-v7.3')
+clear experiments
+
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(44,184,{'behv','lfps','pop'})
+save(['experiments_lfp_Quigley_184_' name_exp], 'experiments', '-v7.3')
+clear experiments
+% % 
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(44,185,{'behv','lfps','pop'})
+save(['experiments_lfp_Quigley_185_' name_exp], 'experiments', '-v7.3')
+clear experiments
 % %
 % experiments = experiment('firefly-monkey')
 % experiments.AddSessions(44,186,{'behv','lfps','pop'})
@@ -33,10 +33,10 @@ name_exp = 'band_passed';
 % save('experiments_lfp_Quigley_187_' name_exp, 'experiments', '-v7.3')
 % clear experiments
 % %
-% % experiments = experiment('firefly-monkey')
-% % experiments.AddSessions(44,188,{'behv','lfps','pop'})
-% % save(['experiments_lfp_Quigley_188_' name_exp], 'experiments', '-v7.3')
-% % clear experiments
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(44,188,{'behv','lfps','pop'})
+save(['experiments_lfp_Quigley_188_' name_exp], 'experiments', '-v7.3')
+clear experiments
 % %
 % experiments = experiment('firefly-monkey')
 % experiments.AddSessions(44,189,{'behv','lfps','pop'})
@@ -128,10 +128,10 @@ name_exp = 'band_passed';
 % save('experiments_lfp_Quigley_206_' name_exp, 'experiments', '-v7.3')
 % clear experiments
 % % % %
-% % experiments = experiment('firefly-monkey')
-% % experiments.AddSessions(44,207,{'behv','lfps','pop'})
-% % save(['experiments_lfp_Quigley_207_' name_exp], 'experiments', '-v7.3')
-% % clear experiments
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(44,207,{'behv','lfps','pop'})
+save(['experiments_lfp_Quigley_207_' name_exp], 'experiments', '-v7.3')
+clear experiments
 % %
 % experiments = experiment('firefly-monkey')
 % experiments.AddSessions(44,208,{'behv','lfps','pop'})
@@ -210,48 +210,48 @@ name_exp = 'band_passed';
 % %
 
 %% Bruno
-% experiments = experiment('firefly-monkey')
-% experiments.AddSessions(51,38,{'behv','lfps','pop'})
-% save(['experiments_lfp_Bruno_38_' name_exp, 'experiments'], '-v7.3')
-% clear experiments
-% %
-% experiments = experiment('firefly-monkey')
-% experiments.AddSessions(51,41,{'behv','lfps','pop'})
-% save(['experiments_lfp_Bruno_41_' name_exp], 'experiments', '-v7.3')
-% clear experiments
-% %
-% experiments = experiment('firefly-monkey')
-% experiments.AddSessions(51,42,{'behv','lfps','pop'})
-% save(['experiments_lfp_Bruno_42_' name_exp], 'experiments', '-v7.3')
-% clear experiments
-% %
-% experiments = experiment('firefly-monkey')
-% experiments.AddSessions(51,43,{'behv','lfps','pop'})
-% save(['experiments_lfp_Bruno_43_' name_exp], 'experiments', '-v7.3')
-% clear experiments
-% %
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(51,38,{'behv','lfps','pop'})
+save(['experiments_lfp_Bruno_38_' name_exp, 'experiments'], '-v7.3')
+clear experiments
+%
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(51,41,{'behv','lfps','pop'})
+save(['experiments_lfp_Bruno_41_' name_exp], 'experiments', '-v7.3')
+clear experiments
+%
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(51,42,{'behv','lfps','pop'})
+save(['experiments_lfp_Bruno_42_' name_exp], 'experiments', '-v7.3')
+clear experiments
+%
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(51,43,{'behv','lfps','pop'})
+save(['experiments_lfp_Bruno_43_' name_exp], 'experiments', '-v7.3')
+clear experiments
+%
 
 %% Schro
-% % experiments = experiment('firefly-monkey')
-% % experiments.AddSessions(53,86,{'behv','lfps','pop'})
-% % save(['experiments_lfp_Schro_86_' name_exp], 'experiments', '-v7.3')
-% % clear experiments
-% % %
-% % experiments = experiment('firefly-monkey')
-% % experiments.AddSessions(53,93,{'behv','lfps','pop'})
-% % save(['experiments_lfp_Schro_93_' name_exp], 'experiments', '-v7.3')
-% % clear experiments
-% % %
-% % experiments = experiment('firefly-monkey')
-% % experiments.AddSessions(53,95,{'behv','lfps','pop'})
-% % save(['experiments_lfp_Schro_95_' name_exp], 'experiments', '-v7.3')
-% % clear experiments
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(53,86,{'behv','lfps','pop'})
+save(['experiments_lfp_Schro_86_' name_exp], 'experiments', '-v7.3')
+clear experiments
 %
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(53,93,{'behv','lfps','pop'})
+save(['experiments_lfp_Schro_93_' name_exp], 'experiments', '-v7.3')
+clear experiments
+%
+experiments = experiment('firefly-monkey')
+experiments.AddSessions(53,95,{'behv','lfps','pop'})
+save(['experiments_lfp_Schro_95_' name_exp], 'experiments', '-v7.3')
+clear experiments
+
 experiments = experiment('firefly-monkey')
 experiments.AddSessions(53,107,{'behv','lfps','pop'})
 save(['experiments_lfp_Schro_107_' name_exp], 'experiments', '-v7.3')
 clear experiments
-%
+
 experiments = experiment('firefly-monkey')
 experiments.AddSessions(53,108,{'behv','lfps','pop'})
 save(['experiments_lfp_Schro_108_' name_exp], 'experiments', '-v7.3')
