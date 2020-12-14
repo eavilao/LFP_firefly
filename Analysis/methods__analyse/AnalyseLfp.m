@@ -185,39 +185,66 @@ if event_potential
                     %% compute spectrogram lfp not band passed
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp');
                     stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_stop])-0.5 & ts < 1.5,:);
-                    stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_lfp_align = ts(ts > -max([events_temp.t_stop])-0.5 & ts < 1.5);
+                    stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_lfp_align = ts(ts > -max([events_temp.t_stop]) & ts < 1.5);
                     [stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.freq_spectrogram] = ...
                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.lfp_align,prs.spectrogram_movingwin,spectralparams);
-%                     figure; imagesc(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_spectrogram-1,...
-%                         stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.p_spectrogram')); axis xy;
-%                     set(gca,'xlim',[-0.75 0.75])
+                    %                     figure; imagesc(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_spectrogram-1,...
+                    %                         stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.p_spectrogram')); axis xy;
+                    %                     set(gca,'xlim',[-0.75 0.75])
                     %
                     %% compute spectrogram lfp theta
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp_theta');
                     stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_stop]) & ts < 1.5,:);
-                    stats.trialtype.(trialtypes{i})(j).events.stop.theta.ts_lfp_align = ts(ts > -max([events_temp.t_stop])-0.5 & ts < 1.5);
+                    stats.trialtype.(trialtypes{i})(j).events.stop.theta.ts_lfp_align = ts(ts > -max([events_temp.t_stop]) & ts < 1.5);
                     % %                     [stats.trialtype.(trialtypes{i})(j).events.stop.theta.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.theta.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.theta.freq_spectrogram] = ...
                     % %                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align,prs.spectrogram_movingwin,spectralparams);
                     %
                     %% compute spectrogram lfp beta
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp_beta');
                     stats.trialtype.(trialtypes{i})(j).events.stop.beta.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_stop]) & ts < 1.5,:);
-                    stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_lfp_align = ts(ts > -max([events_temp.t_stop])-0.5 & ts < 1.5);
+                    stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_lfp_align = ts(ts > -max([events_temp.t_stop]) & ts < 1.5);
                     [stats.trialtype.(trialtypes{i})(j).events.stop.beta.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.beta.freq_spectrogram] = ...
                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.beta.lfp_align,prs.spectrogram_movingwin,spectralparams);
-%                     figure; imagesc(stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_spectrogram-1,...
-%                         stats.trialtype.(trialtypes{i})(j).events.stop.beta.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.beta.p_spectrogram')); axis xy;
-%                     set(gca,'xlim',[-0.75 0.75]) %'ylim',[4 80])
+                    %                     figure; imagesc(stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_spectrogram-1,...
+                    %                         stats.trialtype.(trialtypes{i})(j).events.stop.beta.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.beta.p_spectrogram')); axis xy;
+                    %                     set(gca,'xlim',[-0.75 0.75]) %'ylim',[4 80])
                     
-                    %% compute spectrogram wideband
-                    %                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp_wideband');
-                    %                     stats.trialtype.(trialtypes{i})(j).events.stop.wideband.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_stop])-0.5 & ts < 1.5,:);
-                    %                     stats.trialtype.(trialtypes{i})(j).events.stop.wideband.ts_lfp_align = ts(ts > -max([events_temp.t_stop])-0.5 & ts < 1.5);
-                    % %                     [stats.trialtype.(trialtypes{i})(j).events.stop.wideband.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.wideband.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.wideband.freq_spectrogram] = ...
-                    % %                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.wideband.lfp_align,prs.spectrogram_movingwin,spectralparams);
-                    %                     %                     figure; imagesc((stats.trialtype.(trialtypes{i})(j).events.stop.ts_spectrogram)-1,stats.trialtype.(trialtypes{i})(j).events.stop.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.p_spectrogram'), [0 0.8e-04]); axis xy;
-                    %                     %                     set(gca,'xlim',[-0.5 0.5], 'ylim',[4 80])
-                    
+                    %%
+                    if extract_band_pass && strcmp(trialtypes{i},'reward')  %% under construction
+                        if j ==1   % incorrect
+                            % for every trial take 95th percentile value
+                            for ntrl = 1:sum(trlindx)
+                                
+                                stats.band_passed.stop.err.ts = stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_lfp_align;
+                                % theta
+                                this_theta = real(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align(:,ntrl));
+                                this_95_theta = prctile(this_theta,95);
+                                stats.band_passed.stop.err.trl(ntrl).theta.lfp_stop = this_theta;
+                                stats.band_passed.stop.err.trl(ntrl).theta_95_indx = this_theta > this_95_theta;
+                                
+                                % beta
+                                this_beta = real(stats.trialtype.(trialtypes{i})(j).events.stop.beta.lfp_align(:,ntrl));
+                                this_95_beta = prctile(this_beta,95);
+                                stats.band_passed.stop.err.trl(ntrl).beta.lfp_stop = this_beta;
+                                stats.band_passed.stop.err.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
+                            end
+                        else % correct
+                            for ntrl = 1:sum(trlindx)
+                                stats.band_passed.stop.corr.ts = stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_lfp_align;
+                                % theta
+                                this_theta = real(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align(:,ntrl));
+                                this_95_theta = prctile(this_theta,95);
+                                stats.band_passed.stop.corr.trl(ntrl).theta.lfp_stop = this_theta;
+                                stats.band_passed.stop.corr.trl(ntrl).theta_95_indx = this_theta > this_95_theta;
+                                
+                                % beta
+                                this_beta = real(stats.trialtype.(trialtypes{i})(j).events.stop.beta.lfp_align(:,ntrl));
+                                this_95_beta = prctile(this_beta,95);
+                                stats.band_passed.stop.corr.trl(ntrl).beta.lfp_stop = this_beta;
+                                stats.band_passed.stop.corr.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
+                            end
+                        end
+                    end
                 end
                 
                 %% aligned to reward
@@ -266,6 +293,7 @@ if event_potential
         end
     end
 end
+
 
 %% power spectral density
 if compute_psd
@@ -471,60 +499,70 @@ if analyse_beta
     end
 end
 
-if extract_band_pass
-    for i=1:ntrls
-        %          ts_align_target = trials_behv(i).continuous.ts-events(i).t_targ;
-        % %         if ts_align_target(end) > 0.5
-        %             this_ts = ts_align_target(ts_align_target > around_event(1) & ts_align_target < around_event(2) ,:); % choose 1s around event
-        %             stats.band_passed.target.ts = this_ts(1:235,:);
-        %             trials_theta(i).lfp = trials_lfps(i).lfp_theta(:); % read as column vector
-        %             this_theta_targ = real(trials_theta(i).lfp(ts_align_target > around_event(1) & ts_align_target < around_event(2),:)); % align to target
-        %             this_theta_targ = this_theta_targ(1:235,:); % hardcoded to avoid extra sample once in a while
-        %             this_95 = prctile(this_theta_targ,95);
-        %             stats.band_passed.target.trl(i).theta_95_indx = this_theta_targ > this_95;  % take 95th percentile value
-        %             % stats.band_passed.trl(i).theta_95 = this_theta_stop(this_theta_95_indx);
-        %             % stats.band_passed.trl(i).theta_95_ts = this_ts(this_theta_95_indx);
-        %             %% beta
-        %             trials_beta(i).lfp = trials_lfps(i).lfp_beta(:); % read as column vector
-        %             this_beta_targ = real(trials_beta(i).lfp(ts_align_target > around_event(1) & ts_align_target < around_event(2),:)); % align to target
-        %             this_beta_targ = this_beta_targ(1:333,:); % hardcoded to avoid extra sample once in a while
-        %             this_95 = prctile(this_beta_targ,95);
-        %             stats.band_passed.target.trl(i).beta_95_indx = this_beta_targ > this_95;  % take 95th percentile value
-        %             % stats.band_passed.target.trl(i).beta_95 = this_theta_targ(this_beta_95_indx);
-        %             % stats.band_passed.target.trl(i).beta_95_ts = this_ts(this_beta_95_indx);
-        % %         else
-        % %             %stats.band_passed.target.trl(i).theta_95 = NaN;
-        % %             stats.band_passed.target.trl(i).theta_95_ts = NaN;
-        % %             % stats.band_passed.trl(i).beta_95 = NaN;
-        % %             stats.band_passed.target.trl(i).beta_95_ts = NaN;
-        % %         end
-        
-        %% aligned to stop
-        ts_align_stop = trials_behv(i).continuous.ts-events(i).t_stop;
-        this_ts = ts_align_stop(ts_align_stop > around_event(1) & ts_align_stop < around_event(2) ,:); % choose 1s around event
-        if  this_ts(end)>=0.999 % ensure that there is 1 second around
-            %% theta
-            stats.band_passed.stop.ts = this_ts(1:300,:);
-            trials_theta(i).lfp = trials_lfps(i).lfp_theta(:); % read as column vector
-            this_theta_stop = real(trials_theta(i).lfp(ts_align_stop > around_event(1) & ts_align_stop < around_event(2),:)); % align to stop
-            stats.band_passed.stop.trl(i).theta.lfp_stop = this_theta_stop;
-            this_theta_stop = this_theta_stop(1:300,:); % hardcoded to avoid extra sample once in a while
-            this_95 = prctile(this_theta_stop,95);
-            stats.band_passed.stop.trl(i).theta_95_indx = this_theta_stop > this_95;  % take 95th percentile value
-            % stats.band_passed.stop.trl(i).theta_95 = this_theta_stop(stats.band_passed.stop.trl(i).theta_95_indx);
-            %% beta
-            trials_beta(i).lfp = trials_lfps(i).lfp_beta(:); % read as column vector
-            this_beta_stop = real(trials_beta(i).lfp(ts_align_stop > around_event(1) & ts_align_stop < around_event(2),:)); % align to stop
-            stats.band_passed.stop.trl(i).beta.lfp_stop = this_beta_stop;
-            this_beta_stop = this_beta_stop(1:300,:); % hardcoded to avoid extra sample once in a while
-            this_95 = prctile(this_beta_stop,95);
-            stats.band_passed.stop.trl(i).beta_95_indx = this_beta_stop > this_95;  % take 95th percentile value
-            % stats.band_passed.stop.trl(i).beta_95 = this_theta_stop(stats.band_passed.stop.trl(i).beta_95_indx);
-        else
-            % stats.band_passed.stop.trl(i).theta_95 = NaN;
-            stats.band_passed.stop.trl(i).theta_95_ts = NaN;
-            % stats.band_passed.stop.trl(i).beta_95 = NaN;
-            stats.band_passed.stop.trl(i).beta_95_ts = NaN;
-        end
-    end
-end
+% if extract_band_pass
+%     for i=1:ntrls
+%         %          ts_align_target = trials_behv(i).continuous.ts-events(i).t_targ;
+%         % %         if ts_align_target(end) > 0.5
+%         %             this_ts = ts_align_target(ts_align_target > around_event(1) & ts_align_target < around_event(2) ,:); % choose 1s around event
+%         %             stats.band_passed.target.ts = this_ts(1:235,:);
+%         %             trials_theta(i).lfp = trials_lfps(i).lfp_theta(:); % read as column vector
+%         %             this_theta_targ = real(trials_theta(i).lfp(ts_align_target > around_event(1) & ts_align_target < around_event(2),:)); % align to target
+%         %             this_theta_targ = this_theta_targ(1:235,:); % hardcoded to avoid extra sample once in a while
+%         %             this_95 = prctile(this_theta_targ,95);
+%         %             stats.band_passed.target.trl(i).theta_95_indx = this_theta_targ > this_95;  % take 95th percentile value
+%         %             % stats.band_passed.trl(i).theta_95 = this_theta_stop(this_theta_95_indx);
+%         %             % stats.band_passed.trl(i).theta_95_ts = this_ts(this_theta_95_indx);
+%         %             %% beta
+%         %             trials_beta(i).lfp = trials_lfps(i).lfp_beta(:); % read as column vector
+%         %             this_beta_targ = real(trials_beta(i).lfp(ts_align_target > around_event(1) & ts_align_target < around_event(2),:)); % align to target
+%         %             this_beta_targ = this_beta_targ(1:333,:); % hardcoded to avoid extra sample once in a while
+%         %             this_95 = prctile(this_beta_targ,95);
+%         %             stats.band_passed.target.trl(i).beta_95_indx = this_beta_targ > this_95;  % take 95th percentile value
+%         %             % stats.band_passed.target.trl(i).beta_95 = this_theta_targ(this_beta_95_indx);
+%         %             % stats.band_passed.target.trl(i).beta_95_ts = this_ts(this_beta_95_indx);
+%         % %         else
+%         % %             %stats.band_passed.target.trl(i).theta_95 = NaN;
+%         % %             stats.band_passed.target.trl(i).theta_95_ts = NaN;
+%         % %             % stats.band_passed.trl(i).beta_95 = NaN;
+%         % %             stats.band_passed.target.trl(i).beta_95_ts = NaN;
+%         % %         end
+%
+%         %% aligned to stop
+%         ts_align_stop = trials_behv(i).continuous.ts-events(i).t_stop;
+%         this_ts = ts_align_stop(ts_align_stop > around_event(1) & ts_align_stop < around_event(2) ,:); % choose 1s around event
+%         if  this_ts(end)>=0.999 % ensure that there is 1 second around
+%             %% theta
+%             stats.band_passed.stop.ts = this_ts(1:300,:);
+%             trials_theta(i).lfp = trials_lfps(i).lfp_theta(:); % read as column vectoropen addsess
+%             this_theta_stop = real(trials_theta(i).lfp(ts_align_stop > around_event(1) & ts_align_stop < around_event(2),:)); % align to stop
+%             stats.band_passed.stop.trl(i).theta.lfp_stop = this_theta_stop;
+%             this_theta_stop = this_theta_stop(1:300,:); % hardcoded to avoid extra sample once in a while
+%             this_95 = prctile(this_theta_stop,95);
+%             stats.band_passed.stop.trl(i).theta_95_indx = this_theta_stop > this_95;  % take 95th percentile value
+%             % stats.band_passed.stop.trl(i).theta_95 = this_theta_stop(stats.band_passed.stop.trl(i).theta_95_indx);
+%             %% beta
+%             trials_beta(i).lfp = trials_lfps(i).lfp_beta(:); % read as column vector
+%             this_beta_stop = real(trials_beta(i).lfp(ts_align_stop > around_event(1) & ts_align_stop < around_event(2),:)); % align to stop
+%             this_lfp_stop = real(trials_beta(i).lfp(ts_align_stop > around_event(1) & ts_align_stop < around_event(2),:)); % sanity check on raw lfp
+%             stats.band_passed.stop.trl(i).beta.lfp_stop = this_beta_stop;
+%             trials(i).lfp = trials_lfps(i).lfp(:); % read as column vector
+%             this_beta_stop = this_beta_stop(1:300,:); % hardcoded to avoid extra sample once in a while
+%             this_95 = prctile(this_beta_stop,95);
+%             stats.band_passed.stop.trl(i).beta_95_indx = this_beta_stop > this_95;  % take 95th percentile value
+%             % stats.band_passed.stop.trl(i).beta_95 = this_theta_stop(stats.band_passed.stop.trl(i).beta_95_indx);
+%
+%             % test
+%             [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop],'lfp_beta');
+%             lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop_bandpassed)';
+%             ts_stop = prs.ts.stop_bandpassed;
+%
+%
+%
+%         else
+%             % stats.band_passed.stop.trl(i).theta_95 = NaN;
+%             stats.band_passed.stop.trl(i).theta_95_ts = NaN;
+%             % stats.band_passed.stop.trl(i).beta_95 = NaN;
+%             stats.band_passed.stop.trl(i).beta_95_ts = NaN;
+%         end
+%     end
+% end

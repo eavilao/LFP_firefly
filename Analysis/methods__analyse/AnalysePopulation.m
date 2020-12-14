@@ -795,8 +795,8 @@ if prs.analyse_band_passed
         %% corr
         for ch = 1:length(ar)  % first 24 ch for MST if applicable
             for ntrl = 1:length(find(corr_indx))
-                stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).corr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.ts(lfps(ar(ch)).stats.band_passed.stop.trl(corr_trl(ntrl)).theta_95_indx); % extract timing of value (this is the important val)
-                stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.ts(lfps(ar(ch)).stats.band_passed.stop.trl(corr_trl(ntrl)).beta_95_indx); % extract timing of value(this is the important val)
+                stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).corr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.corr.ts(lfps(ar(ch)).stats.band_passed.stop.corr.trl(ntrl).theta_95_indx); % extract timing of value (this is the important val)
+                stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.corr.ts(lfps(ar(ch)).stats.band_passed.stop.corr.trl(ntrl).beta_95_indx); % extract timing of value(this is the important val)
             end
              % add psth per channel
             [stats.area.(unique_brain_areas{area}).band_pass.theta.corr.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.theta.corr.ts_rate_95(ch,:)] = ...
@@ -806,8 +806,8 @@ if prs.analyse_band_passed
             
             %% incorr
             for ntrl = 1:length(find(incorr_indx))
-                stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).incorr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.ts(lfps(ar(ch)).stats.band_passed.stop.trl(incorr_trl(ntrl)).theta_95_indx);
-                stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).incorr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.ts(lfps(ar(ch)).stats.band_passed.stop.trl(incorr_trl(ntrl)).beta_95_indx); % extract timing of value
+                stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).incorr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.err.ts(lfps(ar(ch)).stats.band_passed.stop.err.trl(ntrl).theta_95_indx);
+                stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).incorr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.err.ts(lfps(ar(ch)).stats.band_passed.stop.err.trl(ntrl).beta_95_indx); % extract timing of value
             end
              % add psth calc per channel
              [stats.area.(unique_brain_areas{area}).band_pass.theta.incorr.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.theta.incorr.ts_rate_95(ch,:)] = ...

@@ -126,6 +126,7 @@ prs.spkkrnlsize = round(10*prs.spkkrnlwidth);
 prs.ts.move = -1:prs.temporal_binwidth:5.5; % -1:prs.temporal_binwidth:3.5;
 prs.ts.target = -1:prs.temporal_binwidth:3.5;
 prs.ts.stop = -3.5:prs.temporal_binwidth:0.5;
+prs.ts.stop_bandpassed = -1.5:prs.temporal_binwidth:1.5;
 prs.ts.reward = -3.5:prs.temporal_binwidth:0.5;
 prs.peaktimewindow = [-0.5 0.5]; % time-window around the events within which to look for peak response
 prs.minpeakprominence.neural = 2; % minimum height of peak response relative to closest valley (spk/s)
