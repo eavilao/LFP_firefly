@@ -794,26 +794,26 @@ if prs.analyse_band_passed
         ar = find(unitindx); corr_trl = find(corr_indx); incorr_trl = find(incorr_indx);
         %% corr
         for ch = 1:length(ar)  % first 24 ch for MST if applicable
-            for ntrl = 1:length(find(corr_indx))
-                stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).corr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.corr.ts(lfps(ar(ch)).stats.band_passed.stop.corr.trl(ntrl).theta_95_indx); % extract timing of value (this is the important val)
-                stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.corr.ts(lfps(ar(ch)).stats.band_passed.stop.corr.trl(ntrl).beta_95_indx); % extract timing of value(this is the important val)
+            for ntrl = 1:sum(corr_indx)
+                stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).corr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.corr.ts(lfps(ar(ch)).stats.band_passed.stop.corr.trl(ntrl).theta_95_indx)'; % extract timing of value (this is the important val)
+                stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.corr.ts(lfps(ar(ch)).stats.band_passed.stop.corr.trl(ntrl).beta_95_indx)'; % extract timing of value(this is the important val)
             end
              % add psth per channel
             [stats.area.(unique_brain_areas{area}).band_pass.theta.corr.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.theta.corr.ts_rate_95(ch,:)] = ...
-                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).corr.trl, [-1:prs.temporal_binwidth:1], prs.temporal_binwidth);
+                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).corr.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
              [stats.area.(unique_brain_areas{area}).band_pass.beta.corr.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.beta.corr.ts_rate_95(ch,:)] = ...
-                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.trl, [-1:prs.temporal_binwidth:1], prs.temporal_binwidth);
+                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
             
             %% incorr
-            for ntrl = 1:length(find(incorr_indx))
-                stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).incorr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.err.ts(lfps(ar(ch)).stats.band_passed.stop.err.trl(ntrl).theta_95_indx);
-                stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).incorr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.err.ts(lfps(ar(ch)).stats.band_passed.stop.err.trl(ntrl).beta_95_indx); % extract timing of value
+            for ntrl = 1:sum(incorr_indx)
+                stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).incorr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.err.ts(lfps(ar(ch)).stats.band_passed.stop.err.trl(ntrl).theta_95_indx)';
+                stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).incorr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.err.ts(lfps(ar(ch)).stats.band_passed.stop.err.trl(ntrl).beta_95_indx)'; % extract timing of value
             end
              % add psth calc per channel
              [stats.area.(unique_brain_areas{area}).band_pass.theta.incorr.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.theta.incorr.ts_rate_95(ch,:)] = ...
-                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).incorr.trl, [-1:prs.temporal_binwidth:1], prs.temporal_binwidth);
+                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).incorr.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
              [stats.area.(unique_brain_areas{area}).band_pass.beta.incorr.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.beta.incorr.ts_rate_95(ch,:)] = ...
-                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).incorr.trl, [-1:prs.temporal_binwidth:1], prs.temporal_binwidth);
+                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).incorr.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
              
         end
     end
