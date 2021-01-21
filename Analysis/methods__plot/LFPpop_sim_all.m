@@ -9,7 +9,7 @@ save_exp_out = false; % save mat file without raw lfp signal
 
 extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
-do_PSD = true;  % extract power spectral densities
+do_PSD = false;  % extract power spectral densities
 save_spectro = false; % save spectrogram file?
 save_spectro_per_trial = false;
 save_spectro_per_trial_align_stop = false;
@@ -18,16 +18,17 @@ do_cohero = false; % extract coherograms
 do_cohero_band_passed = false; % extract coherograms per band
 doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
-save_lfp_band_pass = false; % extract band passed lfp signal only
-do_band_passed = false; % extract and analyse band passed signal
-do_band_passed_vs_accuracy = false;
+save_lfp_band_pass = true; % extract band passed lfp signal only
+do_band_passed = true; % extract and analyse band passed signal
+do_band_passed_vs_accuracy = true;
 
+name_output_exp_out_file = 'exp_out_lfp_stats_pop_2021_01_21_band_passed'; 
 name_output_file = 'lfp_band_passed_2020_10_07';
 
 %% Extract
 if extract_exp_out
-    path = 'D:\output_data';
-    cd(path)
+    %path = 'D:\output_data';
+    %cd(path)
     fprintf(['Time:  ' num2str(clock) '\n']);
     fnames = dir('experiments*.mat');
     cnt=1;
@@ -86,7 +87,7 @@ if extract_exp_out
         % save
         disp('Saving... . . .')
         fprintf(['Time:  ' num2str(clock) '\n']);
-        save('exp_out_lfp_stats_pop_2020_09_28_Ody_spectro_trial_stop','exp', '-v7.3');
+        save(name_output_exp_out_file,'exp', '-v7.3');
         % load train
         % sound(y,Fs)
         disp('           Saved! ')
