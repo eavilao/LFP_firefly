@@ -293,6 +293,7 @@ prs.event_potential = true;
 prs.compute_spectrum = true;
 prs.extract_band_passed = true; % AnalyseLFP.m
 prs.analyse_band_passed = true; % AnalysePopulation.m
+prs.band_pass_acc_thresh = 32.5; % distance in cm -- threshold for band pass vs accuracy
 prs.compute_psd = true;
 prs.lfp_eye = false; 
 prs.compute_spectrum_whole_trial = false;

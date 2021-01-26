@@ -787,11 +787,39 @@ if prs.analyse_band_passed
     % extract correct vs incorrect trials
     corr_indx = behv_stats.trialtype.reward(strcmp({behv_stats.trialtype.reward.val},'rewarded')).trlindx;
     incorr_indx = behv_stats.trialtype.reward(strcmp({behv_stats.trialtype.reward.val},'unrewarded')).trlindx;
-    % add variable with all 95th pct timings per channel per condition
+    
+    % for band passed vs accuracy
+    % get monkey and target position only for correct trials
+    monk_abs_x = behv_stats.pos_abs.x_monk(corr_indx); ntrls_correct = length(monk_abs_x);
+    monk_abs_y = behv_stats.pos_abs.y_monk(corr_indx);
+    r_targ = behv_stats.pos_final.r_targ(corr_indx);
+    theta_targ = behv_stats.pos_final.theta_targ(corr_indx)*pi/180;
+    x_targ = r_targ.*sin(theta_targ); % convert to cartesian
+    y_targ = r_targ.*cos(theta_targ);
+    % get end position for monkey
+    for indx = 1:ntrls_correct, x_monk(indx) = monk_abs_x{indx}(end-130); y_monk(indx) = monk_abs_y{indx}(end-130) + 37.5; end
+    % take out distance between monk position and target position in each trial
+    clear monk2targ
+    for indx = 1:ntrls_correct
+        monk2targ(indx) = sqrt((x_monk(indx) - x_targ(indx))^2 + (y_monk(indx) - y_targ(indx))^2);
+    end
+    % select close to target and far away from target
+    stats.indx_accuracy.low_half_indx = monk2targ < prs.band_pass_acc_thresh;
+    stats.indx_accuracy.upper_half_indx = monk2targ > prs.band_pass_acc_thresh;
+    
+    %% sanity check plots
+    % plot histogram
+    %             histogram(monk2targ,100);
+    %             title('End point to Target')
+    % plot monk2targ vs target linear and angular distance. 
+    % figure; hold on; plot(theta_targ, monk2targ, '.k', 'MarkerSize', 14); xlabel('Target position'); ylabel('Distance to target'); ylim([0 65]); title('Angular distance')
+    % figure; hold on; plot(r_targ, monk2targ, '.k', 'MarkerSize', 14); xlabel('Target position'); ylabel('Distance to target'); ylim([0 65]); title('Linear distance')
+    
+    %% add variable with all 95th pct timings per channel per condition
     for area = 1:num_brain_areas
         unitindx = strcmp({units.brain_area}, unique_brain_areas{area});
         % extract all 95th pct timings per channel
-        ar = find(unitindx); corr_trl = find(corr_indx); incorr_trl = find(incorr_indx);
+        ar = find(unitindx); corr_trl = find(corr_indx); incorr_trl = find(incorr_indx); low_half_indx = find(stats.indx_accuracy.low_half_indx); upper_half_indx = find(stats.indx_accuracy.upper_half_indx);
         %% corr
         for ch = 1:length(ar)  % first 24 ch for MST if applicable
             for ntrl = 1:sum(corr_indx)
@@ -804,6 +832,28 @@ if prs.analyse_band_passed
              [stats.area.(unique_brain_areas{area}).band_pass.beta.corr.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.beta.corr.ts_rate_95(ch,:)] = ...
                 BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
             
+            %% compute for band passed vs accuracy low half
+            for ntrl = 1:sum(stats.indx_accuracy.low_half_indx)
+                stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).corr.low_half.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.corr.ts(lfps(ar(ch)).stats.band_passed.stop.corr.trl(low_half_indx(ntrl)).theta_95_indx)'; % extract timing of value (this is the important val)
+                stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.low_half.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.corr.ts(lfps(ar(ch)).stats.band_passed.stop.corr.trl(low_half_indx(ntrl)).beta_95_indx)'; % extract timing of value(this is the important val)
+            end
+             % add psth per channel
+            [stats.area.(unique_brain_areas{area}).band_pass.theta.corr.low_half.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.theta.corr.low_half.ts_rate_95(ch,:)] = ...
+                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).corr.low_half.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
+             [stats.area.(unique_brain_areas{area}).band_pass.beta.corr.low_half.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.beta.corr.low_half.ts_rate_95(ch,:)] = ...
+                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.low_half.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
+            
+            % compute for band passed vs accuracy upper half
+            for ntrl = 1:sum(stats.indx_accuracy.upper_half_indx)
+                stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).corr.upper_half.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.corr.ts(lfps(ar(ch)).stats.band_passed.stop.corr.trl(upper_half_indx(ntrl)).theta_95_indx)'; % extract timing of value (this is the important val)
+                stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.upper_half.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.corr.ts(lfps(ar(ch)).stats.band_passed.stop.corr.trl(upper_half_indx(ntrl)).beta_95_indx)'; % extract timing of value(this is the important val)
+            end
+             % add psth per channel
+            [stats.area.(unique_brain_areas{area}).band_pass.theta.corr.upper_half.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.theta.corr.upper_half.ts_rate_95(ch,:)] = ...
+                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).corr.upper_half.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
+             [stats.area.(unique_brain_areas{area}).band_pass.beta.corr.upper_half.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.beta.corr.upper_half.ts_rate_95(ch,:)] = ...
+                BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).corr.upper_half.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
+            
             %% incorr
             for ntrl = 1:sum(incorr_indx)
                 stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).incorr.trl(ntrl).ch_95th_ts = lfps(ar(ch)).stats.band_passed.stop.err.ts(lfps(ar(ch)).stats.band_passed.stop.err.trl(ntrl).theta_95_indx)';
@@ -814,11 +864,9 @@ if prs.analyse_band_passed
                 BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.theta.chan(ch).incorr.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
              [stats.area.(unique_brain_areas{area}).band_pass.beta.incorr.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.beta.incorr.ts_rate_95(ch,:)] = ...
                 BandPassedAmp2Rate(stats.area.(unique_brain_areas{area}).band_pass.beta.chan(ch).incorr.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
-             
         end
     end
 end
-
 
 
 fprintf('**********End of LFP Pop Analyses********** \n');
