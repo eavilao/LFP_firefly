@@ -27,6 +27,7 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'PSD_move_together_modulation'
 % 'PSD_eye'
 % 'PSD_reward'
+% 'PSD_rewarded' ??
 % 'spectrogram_move'
 % 'spectrogram_target'
 % 'spectrogram_stop'
@@ -50,7 +51,8 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'sim_coherence_between_areas'
 % 'speed_dependent_LFP_activity_MST'
 % 'speed_dependent_LFP_activity_PPC'
-% 'trial_band_passed'
+% 'trial_band_passed_raster'
+% 'band_passed_amplitude' <-- this one uses experiments.m directly. load experiments.m and then monk = experiments; 
 % 'pop_psth_band_passed'
 % 'psth_peak_pop'
 % 'band_passed_vs_accuracy'
@@ -1983,7 +1985,7 @@ switch plot_type
             end
         end
         
-    case 'PSD_reward'
+    case 'PSD_rewarded'
         % cond 2 is correct trials
         for nmonk = 1:length(monk)
             areas = fieldnames(monk(1).pw.area);
@@ -3497,250 +3499,204 @@ switch plot_type
             xlabel('Linear velocit(cm/s)'); ylabel('\beta - frequency (Hz)');
             set(gca, 'xlim', [0 200], 'TickDir', 'out', 'FontSize', 22);
         end
-
-    case 'trial_band_passed'
+        
+    case 'trial_band_passed_raster'
         area = 'PFC'     % MST PPC PFC
+        win = [-1.5 1.5]; 
+        session = 1; 
         for m = 3  % 1:length(monk)
-            nsess = 1:length(monk(m).session);
-            for sess = 1:length(nsess)
-                corr = monk(m).behavior(sess).stats.trialtype.reward(strcmp({monk(m).behavior(sess).stats.trialtype.reward.val},'rewarded')).trlindx;
-                incorr = monk(m).behavior(sess).stats.trialtype.reward(strcmp({monk(m).behavior(sess).stats.trialtype.reward.val},'unrewarded')).trlindx;
-                behv_corr = monk(m).behavior(sess).trials(corr);
-                behv_incorr = monk(m).behavior(sess).trials(incorr);
-                pick_ch = randperm(length(monk(m).session(sess).area.(area).lfp)); 
-                %p = numSubplots(6); 
-                cnt=1;
-                for nlfp = 4 %pick_ch(1:5) %1:length(monk(m).session(sess).area.(area).lfp)
-                    trl_corr = monk(m).session(sess).area.(area).lfp(nlfp).trials(corr);
-                    trl_incorr = monk(m).session(sess).area.(area).lfp(nlfp).trials(incorr);
-                    % extract t_stop corr
-                    clear trl_end_corr trl_end_incorr
-                    for j = 1:length(behv_corr), trl_end_corr(j) = behv_corr(j).events.t_end; end
-                    for j = 1:length(behv_incorr), trl_end_incorr(j) = behv_incorr(j).events.t_end; end
-                    %% corr
-                    % align to t_stop and extract around stop time
-                    trl_corr_tspk = []; 
-                    for trl = 1:length(behv_corr)
-                        this_ts = behv_corr(trl).continuous.ts-trl_end_corr(trl);
-                        if this_ts(end)>0.5
-                            this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:333,:);
-                            this_lfp_corr = trl_corr(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr(trl,:) = this_lfp_corr(1:333,:);  %%%%%%%%%%% Choose band
-                            this_ninety = prctile(real(beta_corr(trl,:)),95); beta_corr_indx_90(trl,:) = real(beta_corr(trl,:))>this_ninety;
-                            trial_corr(trl).tspk = ts(trl,beta_corr_indx_90(trl,:))'; trl_corr_tspk = [trl_corr_tspk ; trial_corr(trl).tspk]; 
-                        else
-                            beta_corr(trl,:) = NaN(1,333); 
-                        end
-                    end
-                     %% take a psth of the 95th prcnt
-                    [rate_90_corr, ts_90_corr] = Spiketimes2Rate(trial_corr, [-1:0.02:1], 0.02);
-                    figure; hold on; colormap(jet);title('Correct')
-                    %subplot(p(1),p(2),cnt); hold on; colormap(jet)
-                    %subplot(1,5,cnt); hold on; colormap(jet)
-                    for trl = 1:length(behv_corr) %16:36 % 1:length(behv_corr)
-                        % plot(ts(trl,:),real(beta_corr(trl,:)))
-                        %plot(ts(trl,:),real(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:))))) % normalized
-                        %                         waterfall(ts(trl,:),trl,real(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:)))));
-                        %                         waterfall(ts(trl,:),trl,abs(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:)))));
-                       
-                        % waterfall(ts(trl,:),trl,real(beta_corr(trl,:)));
-                        waterfall(ts(trl,:),trl,abs(beta_corr(trl,:)));
-                        set(gca,'xLim',[-0.8 0.8], 'xTick',[-0.8 0 0.8], 'yTick', [], 'zTick',[])
-                    end
-                    % view(gca,[0 64.4]); grid off; axis square; vline(0,'k')
-                    view(gca,[0 82]); grid off; axis square; vline(0,'k'); ylim([0 trl]);
-                    cnt=cnt+1;
-                    
-                    % plot raster of time points above 95
-                    figure; hold on; 
-                    for trl = 1:size(beta_corr_indx_90,1)
-                    plot(ts(trl,beta_corr_indx_90(trl,:)),trl,'.k', 'MarkerSize',4)
-                    set(gca,'xlim',[-0.8 0.8],'TickDir', 'out', 'FontSize', 22); axis square; box off
-                    end
-                    ylim([0 trl]); vline(0,'-r')
-                    % print('raster_corr','-depsc2', '-painters', '-cmyk')
-                    %% incorrect 
-                    trl_incorr_tspk = []; 
-                     for trl = 1:length(behv_incorr)
-                        this_ts = behv_incorr(trl).continuous.ts-trl_end_incorr(trl);
-                        if this_ts(end)>0.5
-                            this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:333,:);
-                            this_lfp_incorr = trl_incorr(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_incorr(trl,:) = this_lfp_incorr(1:333,:);  %%%%%%%%%%% Choose band
-                            this_ninety = prctile(real(beta_incorr(trl,:)),95); beta_incorr_indx_90(trl,:) = real(beta_incorr(trl,:))>this_ninety;
-                            trial_incorr(trl).tspk = ts(trl,beta_incorr_indx_90(trl,:))'; trl_incorr_tspk = [trl_incorr_tspk ; trial_incorr(trl).tspk]; 
-                        else
-                            beta_incorr(trl,:) = NaN(1,333); 
-                        end
-                     end
-                    %% take a psth of the 95th prcnt
-                    [rate_90_incorr, ts_90_incorr] = Spiketimes2Rate(trial_incorr, [-1:0.02:1], 0.02);
-                    %%
-                    figure; hold on; colormap(jet); title('Incorrect')
-                    %subplot(p(1),p(2),cnt); hold on; colormap(jet)
-                    %subplot(1,5,cnt); hold on; colormap(jet)
-                    for trl = 1:length(behv_incorr) % 16:36 % 1:length(behv_incorr)
-                        % plot(ts(trl,:),real(beta_corr(trl,:)))
-                        %plot(ts(trl,:),real(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:))))) % normalized
-                        %                         waterfall(ts(trl,:),trl,real(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:)))));
-                        %                         waterfall(ts(trl,:),trl,abs(beta_corr(trl,:))/max(abs(real(beta_corr(trl,:)))));
-                       
-                        % waterfall(ts(trl,:),trl,real(beta_incorr(trl,:)));
-                         waterfall(ts(trl,:),trl,abs(beta_incorr(trl,:)));
-                         set(gca,'xLim',[-0.8 0.8], 'xTick',[-0.8 0 0.8], 'yTick', [], 'zTick',[])
-                    end
-                    % view(gca,[0 64.4]); grid off; axis square; vline(0,'k')
-                    view(gca,[0 82]); grid off; axis square; vline(0,'k'); ylim([0 trl]);
-                    
-                    % plot raster of time points above 95
-                    figure; hold on; 
-                    for trl = 1:size(beta_incorr_indx_90,1)
-                    plot(ts(trl,beta_incorr_indx_90(trl,:)),trl,'.k', 'MarkerSize',4)
-                    set(gca,'xlim',[-0.8 0.8],'TickDir', 'out', 'FontSize', 22); axis square; box off
-                    end
-                    ylim([0 trl]); vline(0,'-r'); 
-                    % print('raster_incorr','-depsc2', '-painters', '-cmyk')
-                    
-                    %plot psths
-                    figure; hold on
-                    plot(ts_90_corr,smooth(rate_90_corr,10),'g')
-                    plot(ts_90_incorr,smooth(rate_90_incorr,10),'k')
-                    set(gca,'xlim',[-0.8 0.8],'TickDir', 'out', 'FontSize', 22); axis square; box off
-                    title([area ' Channel ' num2str(nlfp)])
-                    cnt=cnt+1;
-                    
-                    % plot difference in psth
-                    figure; hold on; 
-                    plot(ts_90_corr,smooth(rate_90_corr./rate_90_incorr,10), 'k')
-                    set(gca,'xlim',[-0.8 0.8],'TickDir', 'out', 'FontSize', 22); axis square; box off
-                    hline(1, '--k')
-                    ylabel('Correct/Incorrect')
-                    xlabel('Time(s)')
-                    
-                    % plot histogram
-                    % normalize hists by max
-                    figure; hold on; 
-                    h_corr =  histogram(trl_corr_tspk,100, 'Normalization', 'pdf');
-                    h_incorr =  histogram(trl_incorr_tspk,100, 'Normalization', 'pdf');
-                    set (gca,'xlim',[-0.8 0.8], 'TickDir', 'out','FontSize', 18);
-
-                    figure; hold on
-                    h1 = histfit(trl_corr_tspk,40, 'kernel');
-                    h2 = histfit(trl_incorr_tspk,40, 'kernel');
-                    xlabel('Time (s)')
-                    ylabel('Count')
-                    set (gca,'xlim',[-0.8 0.8], 'TickDir', 'out','FontSize', 18);
-                    axis square; %alpha(0.5);
-                    set(h1(1),'FaceColor', [0 1 0], 'EdgeColor', 'none');
-                    set(h2(1),'FaceColor', [0 0 0],'EdgeColor', 'none');
-                    set(h1(2),'Color',[0 1 0]);
-                    set(h2(2),'Color',[0 0 0]);
-                    [~,max_h1] = max(h1(2).YData); vline(h1(2).XData(max_h1),'g');
-                    [~,max_h2] = max(h2(2).YData); vline(h2(2).XData(max_h2),'k');
-                    [h,p] = kstest2(trl_corr_tspk(trl_corr_tspk>-0.8 & trl_corr_tspk<0.8),trl_incorr_tspk(trl_incorr_tspk>-0.8 & trl_incorr_tspk<0.8))
-                    %[h,p] = ttest2(trl_corr_tspk(trl_corr_tspk>-0.8 & trl_corr_tspk<0.8),trl_incorr_tspk(trl_incorr_tspk>-0.8 & trl_incorr_tspk<0.8),'Vartype','unequal')
+            for nlfp = 11 %pick_ch(1:5) %1:length(monk(m).session(sess).area.(area).lfp)
+                %% corr
+                % gather
+                theta_corr_indx = []; theta_incorr_indx = [] ; beta_corr_indx = []; beta_incorr_indx = [];
+                ts_corr = monk(m).sess(session).area.(area).lfp(nlfp).stop.corr.ts; ts_incorr = monk(m).sess(session).area.(area).lfp(nlfp).stop.err.ts;
+                ntrl_corr = length(monk(m).sess(session).area.(area).lfp(nlfp).stop.corr.trl); ntrl_incorr = length(monk(m).sess(session).area.(area).lfp(nlfp).stop.err.trl);
+                for trl = 1:ntrl_corr, theta_corr_indx = logical([theta_corr_indx; monk(m).sess(session).area.(area).lfp(nlfp).stop.corr.trl(trl).theta_95_indx']); end % extract theta ts
+                for trl = 1:ntrl_incorr, theta_incorr_indx = logical([theta_incorr_indx; monk(m).sess(session).area.(area).lfp(nlfp).stop.err.trl(trl).theta_95_indx']); end
+                for trl = 1:ntrl_corr, beta_corr_indx = logical([beta_corr_indx; monk(m).sess(session).area.(area).lfp(nlfp).stop.corr.trl(trl).beta_95_indx']); end % extract theta ts
+                for trl = 1:ntrl_incorr, beta_incorr_indx = logical([beta_incorr_indx; monk(m).sess(session).area.(area).lfp(nlfp).stop.err.trl(trl).beta_95_indx']); end % extract theta ts
+                
+                % plot rasters
+                %% theta
+                figure; hold on;
+                for trl = 1:size(theta_corr_indx,1)
+                    plot(ts_incorr(theta_corr_indx(trl,:)),trl,'.k', 'MarkerSize',4)
+                    set(gca,'xlim',[win(1) win(2)],'TickDir', 'out', 'FontSize', 22); axis square; box off
                 end
+                ylim([0 trl]); vline(0,'-r'); title('correct theta')
+                % print('raster_theta_corr_PFC','-depsc2', '-painters', '-cmyk')
+                
+                figure; hold on;
+                for trl = 1:size(theta_incorr_indx,1)
+                    plot(ts_incorr(theta_incorr_indx(trl,:)),trl,'.k', 'MarkerSize',4)
+                    set(gca,'xlim',[win(1) win(2)],'TickDir', 'out', 'FontSize', 22); axis square; box off
+                end
+                ylim([0 trl]); vline(0,'-r'); title('incorrect theta')
+                % print('raster_theta_incorr_PFC','-depsc2', '-painters', '-cmyk')
+                
+                %% beta
+                figure; hold on;
+                for trl = 1:size(beta_corr_indx,1)
+                    plot(ts_corr(beta_corr_indx(trl,:)),trl,'.k', 'MarkerSize',4)
+                    set(gca,'xlim',[win(1) win(2)],'TickDir', 'out', 'FontSize', 22); axis square; box off
+                end
+                ylim([0 trl]); vline(0,'-r'); title('correct beta')
+                % print('raster_beta_corr_PFC','-depsc2', '-painters', '-cmyk')
+                
+                figure; hold on;
+                for trl = 1:size(beta_incorr_indx,1)
+                    plot(ts_incorr(beta_incorr_indx(trl,:)),trl,'.k', 'MarkerSize',4)
+                    set(gca,'xlim',[win(1) win(2)],'TickDir', 'out', 'FontSize', 22); axis square; box off
+                end
+                ylim([0 trl]); vline(0,'-r'); title('incorrect beta')
+                % print('raster_beta_incorr_PFC','-depsc2', '-painters', '-cmyk')
+                %% stats
             end
+            % plot psths
+            
         end
 
-    case 'band_passed_trial'
-        % load behavioral file --- saved separately
-        areaToLoad = 'PPC'
-        monkey = '1'; 
+    case 'band_passed_amplitude'
+        m = 1;
+        area = 'PPC' 
         band = 'beta'
-        win = [-0.5 0.5];
-        %% load and extract each file per area
-        fprintf(['Time:  ' num2str(clock) '\n']);
-        fnames = dir(['monk ' (monkey) ' * ' (areaToLoad) ' *.mat']);
-        r_corr = []; r_incorr = []; peak_t_corr = []; peak_t_incorr = [];
-        for sess = 1:length(fnames)
-            load(fnames(sess).name)
-            monk = dataToSave;
-            clear dataToSave
-            ts = monk.area.(areaToLoad).band_passed.(band).lfp(1).psth.ts_95_corr; ts_win_indx = ts>=win(1) & ts<=win(2); ts_win = ts(ts>=win(1) & ts<=win(2)); 
-            for ch = 1:length(monk.area.(areaToLoad).band_passed.(band).lfp)
-                r_corr(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.rate_95_corr; [~,indx_max_corr] = max(r_corr(ch,ts_win_indx)); peak_t_corr(ch,sess) = ts_win(indx_max_corr);
-                r_incorr(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.rate_95_incorr; [~,indx_max_incorr] = max(r_incorr(ch,ts_win_indx)); peak_t_incorr(ch,sess) = ts_win(indx_max_incorr);
-            end
-        end
+        win = [-1.5 1.5]; 
+        unitindx = strcmp({monk.sessions.lfps.brain_area}, area);
+        % extract all 95th pct timings per channel
+        ar = find(unitindx);
+        ch = 11; %ch=6; 9 11best 30
+        
+        % correct trials
+        ntrl = size(monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(2).events.stop.(band).lfp_align,2); 
+        ts_corr = monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(2).events.stop.(band).ts_lfp_align; ts_win_corr = ts_corr(ts_corr>win(1) & ts_corr<=win(2));
+        beta_corr = monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(2).events.stop.(band).lfp_align(ts_corr>win(1) & ts_corr<=win(2),:)'; 
+        % incorrect trials
+        ntrl = size(monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(1).events.stop.(band).lfp_align,2); 
+        ts_incorr = monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(1).events.stop.(band).ts_lfp_align; ts_win_incorr = ts_incorr(ts_incorr>win(1) & ts_incorr<=win(2));
+        beta_incorr = monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(1).events.stop.(band).lfp_align(ts_incorr>win(1) & ts_incorr<=win(2),:)'; 
+        
+        % plot correct
+       figure('Position', [2116 396 445 330]); hold on;
+       for trl = 1:ntrl %16:36
+           waterfall(ts_win_corr,trl,abs(beta_corr(trl,:)));
+           % set(gca,'xLim',[-0.8 0.8], 'xTick',[-0.8 0 0.8], 'yTick', [], 'zTick',[])
+            set(gca,'xLim',[win(1) win(2)], 'xTick',[win(1) 0 win(2)], 'yTick', [], 'zTick',[], 'CLim', [0 130])
+       end
+       view(gca,[0 85.5]); % view(gca,[0 80]); %view(gca,[0 82]); 
+       grid off; axis square; vline(0,'k'); ylim([0 trl]); title([area ' ' band ' correct']); 
+
+        % plot incorrect
+       figure('Position', [2116 396 445 330]); hold on;
+       for trl = 1:ntrl %16:36
+           waterfall(ts_win_incorr,trl,abs(beta_incorr(trl,:)));
+           % set(gca,'xLim',[-0.8 0.8], 'xTick',[-0.8 0 0.8], 'yTick', [], 'zTick',[])
+           set(gca,'xLim',[win(1) win(2)], 'xTick',[win(1) 0 win(2)], 'yTick', [], 'zTick',[], 'CLim', [0 130])
+       end
+       view(gca,[0 85.5]); % view(gca,[0 80]); %view(gca,[0 82]); 
+       grid off; axis square; vline(0,'k'); ylim([0 trl]); title([area ' ' band ' incorrect']); 
+       
+%        %plot psths
+%                     figure; hold on
+%                     plot(ts_90_corr,smooth(rate_90_corr,10),'g')
+%                     plot(ts_90_incorr,smooth(rate_90_incorr,10),'k')
+%                     set(gca,'xlim',[-0.8 0.8],'TickDir', 'out', 'FontSize', 22); axis square; box off
+%                     title([area ' Channel ' num2str(nlfp)])
+%                     
+%                     % plot difference in psth
+%                     figure; hold on; 
+%                     plot(ts_90_corr,smooth(rate_90_corr./rate_90_incorr,10), 'k')
+%                     set(gca,'xlim',[-0.8 0.8],'TickDir', 'out', 'FontSize', 22); axis square; box off
+%                     hline(1, '--k')
+%                     ylabel('Correct/Incorrect')
+%                     xlabel('Time(s)')
+%                     
+%                     % plot histogram
+%                     % normalize hists by max
+%                     figure; hold on; 
+%                     h_corr =  histogram(trl_corr_tspk,100, 'Normalization', 'pdf');
+%                     h_incorr =  histogram(trl_incorr_tspk,100, 'Normalization', 'pdf');
+%                     set (gca,'xlim',[-0.8 0.8], 'TickDir', 'out','FontSize', 18);
+
             
     case 'pop_psth_band_passed'
-        % load behavioral file --- saved separately
-        areaToLoad = 'PPC'
-        monkey = '1'; 
-        band = 'beta'
-        win = [-0.5 0.5];
-        %% load and extract each file per area
-        fprintf(['Time:  ' num2str(clock) '\n']);
-        fnames = dir(['monk ' (monkey) ' * ' (areaToLoad) ' *.mat']);
-        r_corr = []; r_incorr = []; peak_t_corr = []; peak_t_incorr = [];
-        for sess = 1:length(fnames)
-            load(fnames(sess).name)
-            monk = dataToSave;
-            clear dataToSave
-            ts = monk.area.(areaToLoad).band_passed.(band).lfp(1).psth.ts_95_corr; ts_win_indx = ts>=win(1) & ts<=win(2); ts_win = ts(ts>=win(1) & ts<=win(2)); 
-            for ch = 1:length(monk.area.(areaToLoad).band_passed.(band).lfp)
-                r_corr(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.rate_95_corr; [~,indx_max_corr] = max(r_corr(ch,ts_win_indx)); peak_t_corr(ch,sess) = ts_win(indx_max_corr);
-                r_incorr(ch,:,sess) = monk.area.(areaToLoad).band_passed.(band).lfp(ch).psth.rate_95_incorr; [~,indx_max_incorr] = max(r_incorr(ch,ts_win_indx)); peak_t_incorr(ch,sess) = ts_win(indx_max_incorr);
-            end
-            
-            % mean and sem
-            r_corr_mu(sess,:) = mean(r_corr(:,:,sess));
-            r_corr_sem(sess,:) = std(r_corr(:,:,sess))/sqrt(size(r_corr(:,:,sess),1));
-            r_incorr_mu(sess,:) = mean(r_incorr(:,:,sess));
-            r_incorr_sem(sess,:) = std(r_incorr(:,:,sess))/sqrt(size(r_incorr(:,:,sess),1));
-            %% plot all channels
+        ar = 'PPC'     % MST PPC PFC
+        band = 'theta'
+        win = [-1.5 1.5];
+        m = 3  % 1:length(monk)
+        for nsess = 1:length(monk(m).sess)
+        %% corr
+        % gather
+        ts = monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.ts_rate_95(1,:);
+        r_corr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.rate_95);
+        r_corr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.rate_95)/sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.rate_95,1));
+        r_incorr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.incorr.rate_95);
+        r_incorr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.incorr.rate_95)/sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.incorr.rate_95,1));
+        
+        % plot abs change in power
+        % theta
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.corr.rate_95,1), pre_max_corr_th(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.corr.rate_95(ch,ts>-1 & ts<0)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.incorr.rate_95,1), pre_max_incorr_th(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.incorr.rate_95(ch,ts>-1 & ts<0)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.corr.rate_95,1), post_max_corr_th(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.corr.rate_95(ch,ts>0 & ts<1)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.incorr.rate_95,1), post_max_incorr_th(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.incorr.rate_95(ch,ts>0 & ts<1)); end
+        % beta
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.rate_95,1), pre_max_corr_be(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.rate_95(ch,ts>-1 & ts<0)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.incorr.rate_95,1), pre_max_incorr_be(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.incorr.rate_95(ch,ts>-1 & ts<0)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.corr.rate_95,1), post_max_corr_be(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.rate_95(ch,ts>0 & ts<1)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.incorr.rate_95,1), post_max_incorr_be(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.incorr.rate_95(ch,ts>0 & ts<1)); end
+
+        
+        
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.rate_95,1), [~,indx_t_corr(ch)] = max(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.rate_95(ch,:)); end ; 
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.incorr.rate_95,1), [~,indx_t_incorr(ch)] = max(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.incorr.rate_95(ch,:)); end ; 
+        peak_t_corr(nsess,:) = ts(indx_t_corr);
+        peak_t_incorr(nsess,:) = ts(indx_t_incorr);
+        
+        % plot one channel
+        ch = 11; 
+        figure; hold on; 
+        plot(ts,smooth(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.rate_95(ch,:),8), 'g')
+        plot(ts,smooth(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.incorr.rate_95(ch,:),8), 'k')
+        set(gca, 'xlim', [-1.5 1.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+        title([(ar) ' ch ' num2str(ch)])
+        xlabel('Time(s)'); vline(0,'-r');
+        
+        % plot mean +/- sem psth per area for corr and incorr per session
             figure(1); hold on
-            subplot(1,length(fnames),sess); hold on
-            for ii = 1:size(r_corr(:,:,sess),1), plot(ts,smooth(r_corr(ii,:,sess)), 'g'); end
-            for ii = 1:size(r_incorr(:,:,sess),1)plot(ts,smooth(r_incorr(ii,:,sess)), 'k'); end
-            set(gca, 'xlim', [-0.95 0.95], 'TickDir', 'out', 'FontSize', 22); axis square; box off
-            vline(0,'-r'); title([(areaToLoad) ' ' num2str(sess)])
-            
-            % plot mean +/- sem psth per area for corr and incorr
-            figure(2); hold on
-            subplot(1,length(fnames),sess); hold on
-            shadedErrorBar(ts,smooth(r_corr_mu(sess,:)),r_corr_sem(sess,:), 'lineprops', 'g')
-            shadedErrorBar(ts,smooth(r_incorr_mu(sess,:)),r_incorr_sem(sess,:), 'lineprops', 'k')
-            set(gca, 'xlim', [-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
-            title([(areaToLoad) ' ' num2str(sess)])
+            subplot(1,length(nsess),nsess); hold on
+            shadedErrorBar(ts,smooth(r_corr(nsess,:),8),r_corr_sem(nsess,:), 'lineprops', 'g')
+            shadedErrorBar(ts,smooth(r_incorr(nsess,:),8),r_incorr_sem(nsess,:), 'lineprops', 'k')
+            set(gca, 'xlim', [-1.5 1.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+            title([(ar) ' ' num2str(nsess)])
             xlabel('Time(s)'); vline(0,'-r');
             
-%             figure(3); hold on
-%             shadedErrorBar(ts,smooth(r_corr_mu(sess,:)),r_corr_sem(sess,:), 'lineprops', 'g')
-%             shadedErrorBar(ts,smooth(r_incorr_mu(sess,:)),r_incorr_sem(sess,:), 'lineprops', 'k')
-%             set(gca, 'xlim', [-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
-%             title(['MST ' num2str(sess)])
-%             xlabel('Time(s)'); vline(0,'-r');
             %% bar mean plots
-            figure(4); hold on
-            errorbar(sess, mean(peak_t_corr(:,sess)),std(peak_t_corr(:,sess)), 'og', 'MarkerSize', 20)
-            errorbar(sess+0.25, mean(peak_t_incorr(:,sess)),std(peak_t_incorr(:,sess)), 'ok', 'MarkerSize', 20)
-            set(gca, 'xlim', [0.5 sess+0.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+            figure(3); hold on
+            errorbar(nsess, mean(peak_t_corr(nsess,:)),std(peak_t_corr(nsess,:)), 'og', 'MarkerSize', 20)
+            errorbar(nsess+0.25, mean(peak_t_incorr(nsess,:)),std(peak_t_incorr(nsess,:)), 'ok', 'MarkerSize', 20)
+            set(gca, 'xlim', [0.5 nsess+0.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
            
             %% Ratio plot
-            figure(5); hold on
-            subplot(1,length(fnames),sess); hold on
-            plot(ts,smooth(r_corr_mu(sess,:))./smooth(r_incorr_mu(sess,:)), 'k', 'LineWidth',1)
-            set(gca, 'xlim', [-0.5 0.5],'ylim',[0 4],'yTick',[0 1 4], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+            figure(4); hold on
+            subplot(1,length(nsess),nsess); hold on
+            plot(ts,smooth(r_corr(nsess,:))./smooth(r_incorr(nsess,:)), 'k', 'LineWidth',1)
+            set(gca, 'xlim', [-1.5 1.5],'ylim',[0 4],'yTick',[0 1 4], 'TickDir', 'out', 'FontSize', 22); axis square; box off
             ylabel('Correct / Incorrect'); xlabel('Time(s)')
             hline(1,'--r')
-            
-            % clear variable and load next one
-        end
+        end 
+        
         % plot summary for all sessions for this monkey 
         % just bar plot and ratio
         %% ratios
-        figure(6); hold on
-        for sess = 1:length(fnames)
-            plot(ts,smooth(r_corr_mu(sess,:))./smooth(r_incorr_mu(sess,:)),'Color', [0.5 0.5 0.5], 'LineWidth',1);
+        figure(5); hold on
+        for sess = 1:length(nsess)
+            plot(ts,smooth(r_corr(sess,:))./smooth(r_incorr(sess,:)),'Color', [0.5 0.5 0.5], 'LineWidth',1);
         end
-        corr_mu = mean(r_corr_mu); incorr_mu = mean(r_incorr_mu); 
+        corr_mu = mean(r_corr); incorr_mu = mean(r_incorr); 
         plot(ts,smooth(corr_mu./incorr_mu), 'k', 'LineWidth',2);
-        set(gca, 'xlim', [-0.5 0.5],'ylim',[0.5 4], 'TickDir', 'out', 'FontSize', 22); axis square; box off
-        ylabel('Correct / Incorrect'); xlabel('Time(s)'); %hline(1,'--r')
-        % save pop data for this monkey
-        save(['monkey_' num2str(monkey) '_' areaToLoad '_band_' band '_r_pop'],'r_corr_mu','r_incorr_mu','peak_t_corr', 'peak_t_incorr')
-
+        set(gca, 'xlim', [-0.5 0.5],'ylim',[-1 4], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+        ylabel('Correct / Incorrect'); xlabel('Time(s)'); hline(1,'--r')
         
+
     case 'psth_peak_pop'
         areaToLoad = 'PPC'
         band = 'beta'
@@ -3903,6 +3859,5 @@ switch plot_type
         fprintf(['Time:  ' num2str(clock) '\n']);
         fnames = dir('tspk_acc_monkey_*.mat')
         load(fnames)
-        
 
 end

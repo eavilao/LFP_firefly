@@ -5,7 +5,8 @@ function LFPpop_sim_all(exp)
 
 %% Choose what to analyze and save
 extract_exp_out = true; % load experiments.m file and extract
-save_exp_out = true; % save mat file without raw lfp signal
+save_exp_out = false; % save mat file without raw lfp signal
+save_pop = false; % if this is true it will only extract pop
 
 extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
@@ -18,12 +19,14 @@ do_cohero = false; % extract coherograms
 do_cohero_band_passed = false; % extract coherograms per band
 doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
-save_lfp_band_pass = true; % extract band passed lfp signal only
-do_band_passed = true; % extract and analyse band passed signal
-do_band_passed_vs_accuracy = true;
+extract_band_pass_signal = false; 
+save_band_pass_analysis = true; % extract band passed lfp signal only (used only for plotting)
+do_band_passed = false; % extract and analyse band passed signal
+do_band_passed_vs_accuracy = false;
+do_band_passed_pop = save_pop; 
 
-name_output_exp_out_file = 'exp_out_lfp_stats_pop_2021_01_21_band_passed_3sess'; 
-name_output_file = 'lfp_band_passed_2020_10_07_3sess';
+name_output_exp_out_file = 'exp_out_lfp_stats_pop_2021_02_09_band_passed_only_pop_3sess'; 
+name_output_file = 'lfp_band_passed_2021_02_09_band_passed_pop';
 
 %% Extract
 if extract_exp_out
@@ -53,29 +56,35 @@ if extract_exp_out
                 end
                 
                 %% extract per area
-                if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 91
-                    if do_band_passed
-                        exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
-                        exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
-                        exp(cnt).area.PFC.signal = experiments.sessions(sess).lfps(indx_PFC); % extract lfp signal and band passed signal
-                    else
-                        exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
-                        exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
-                        exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
-                    end
+                if save_pop
                     exp(cnt).behavior = [experiments.sessions(sess).behaviours];
+                    exp(cnt).pop = experiments.sessions(sess).populations.lfps.stats;
+                    exp(cnt).monk_id = experiments.sessions(sess).monk_id;
                 else
-                    if do_band_passed
-                        exp(cnt).area.MST.signal = []; exp(cnt).area.MST.signal = experiments.sessions(sess).lfps(indx_MST); % extract lfp signal and band passed signal
-                        exp(cnt).area.PPC.signal = experiments.sessions(sess).lfps(indx_PPC); % extract lfp signal and band passed signal
+                    if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 91
+                        if save_band_pass_analysis
+                            mst_ch = find(indx_MST); ppc_ch = find(indx_PPC); pfc_ch = find(indx_PFC);
+                            for ch = 1:sum(indx_MST), exp(cnt).area.MST.band_passed(ch) = experiments.sessions(sess).lfps(mst_ch(ch)).stats.band_passed;end % extract band passed signal
+                            for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.band_passed(ch) = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.band_passed;end
+                            for ch = 1:sum(indx_PFC), exp(cnt).area.PFC.band_passed(ch) = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.band_passed;end
+                        else
+                            exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
+                            exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
+                            exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
+                        end
                     else
-                        exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
-                        exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
+                        if save_band_pass_analysis
+                            mst_ch = find(indx_MST); ppc_ch = find(indx_PPC);
+                            for ch = 1:sum(indx_MST), exp(cnt).area.MST.band_passed(ch) = experiments.sessions(sess).lfps(mst_ch(ch)).stats.band_passed;end % extract band passed signal
+                            for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.band_passed(ch) = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.band_passed;end
+                        else
+                            exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
+                            exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
+                        end
                     end
                     exp(cnt).behavior = [experiments.sessions(sess).behaviours];
+                    exp(cnt).monk_id = experiments.sessions(sess).monk_id;
                 end
-                exp(cnt).pop = experiments.sessions(sess).populations.lfps.stats;
-                exp(cnt).monk_id = experiments.sessions(sess).monk_id; % extract lfp signal and band passed signal
             end
             cnt=cnt+1;
         end
@@ -669,7 +678,8 @@ if do_ERP
 end
 
 %% Analyses on band passed trials
-if save_lfp_band_pass
+
+if save_band_pass_analysis
     monks = unique([exp.monk_id]); clear p_monk
     for ii = 1:length(monks)
         m = [exp.monk_id] == monks(ii); p_monk = exp(m);
@@ -677,192 +687,37 @@ if save_lfp_band_pass
             areas = fieldnames(p_monk(s).area);
             for a = 1:length(areas)
                 for trl = 1:length(p_monk)
-                    monk(ii).sess(s).area.(areas{a}).lfp = p_monk(s).area.(areas{a}).signal;
+                    monk(ii).sess(s).area.(areas{a}).lfp = p_monk(s).area.(areas{a}).band_passed;
                 end
             end
         end
     end
 end
 
-%%
-if do_band_passed_vs_accuracy
-    disp('                 band passed vs accuracy . . .     ')
-    fprintf(['Time:  ' num2str(clock) '\n']);
-    monks = unique([exp.monk_id]);
-    for m = 1:length(monks)
-        ii = [exp.monk_id] == monks(m); p_monk = exp(ii);
-        nsess = 1:length(p_monk);
-        for s = 1:length(nsess)
-            corr = p_monk(s).behavior.stats.trialtype.reward(strcmp({p_monk(s).behavior.stats.trialtype.reward.val},'rewarded')).trlindx;
-            incorr = p_monk(s).behavior.stats.trialtype.reward(strcmp({p_monk(s).behavior.stats.trialtype.reward.val},'unrewarded')).trlindx;
-            behv_corr = p_monk(s).behavior.trials(corr);
-            % get monkey and target position only for correct trials
-            monk_abs_x = p_monk(s).behavior.stats.pos_abs.x_monk(corr); ntrls_correct = length(monk_abs_x);
-            monk_abs_y = p_monk(s).behavior.stats.pos_abs.y_monk(corr);
-            r_targ = p_monk(s).behavior.stats.pos_final.r_targ(corr);
-            theta_targ = p_monk(s).behavior.stats.pos_final.theta_targ(corr)*pi/180;
-            x_targ = r_targ.*sin(theta_targ); % convert to cartesian
-            y_targ = r_targ.*cos(theta_targ);
-            % get end position for monkey
-            for indx = 1:ntrls_correct, x_monk(indx) = monk_abs_x{indx}(end-130); y_monk(indx) = monk_abs_y{indx}(end-130) + 37.5; end
-            % take out distance between monk position and target position in each trial
-            clear monk2targ
-            for indx = 1:ntrls_correct
-                monk2targ(indx) = sqrt((x_monk(indx) - x_targ(indx))^2 + (y_monk(indx) - y_targ(indx))^2);
-            end
-            % select close to target and far away from target
-            %             low_third_indx = monk2targ < 21.66;
-            %             middle_third_indx = monk2targ > 21.66 & monk2targ < 43.32;
-            %             upper_third_indx = monk2targ > 43.32;
-            
-            low_third_indx = monk2targ < 32.5;
-            middle_third_indx = monk2targ > 32.5;
-            % upper_third_indx = monk2targ > 32.5;
-            
-            % plot histogram
-            %             histogram(monk2targ,100);
-            %             title('End point to Target')
-            areas = fieldnames(p_monk(s).area); nareas = length(areas);
-            for ar = 1:nareas
-                for nlfp = 1:length(p_monk(s).area.(areas{ar}).signal)
-                    if size(p_monk(s).area.(areas{ar}).signal,2) ~= 0
-                        
-                        trls_corr = p_monk(s).area.(areas{ar}).signal(nlfp).trials(corr);
-                        trl_corr_low = trls_corr(low_third_indx); behv_low = behv_corr(low_third_indx);
-                        trl_corr_middle = trls_corr(middle_third_indx); behv_middle = behv_corr(middle_third_indx);
-                        trl_corr_upper = trls_corr(upper_third_indx); behv_upper = behv_corr(upper_third_indx);
-                        % extract t_stop corr
-                        clear trl_end_corr_low trl_end_corr_middle trl_end_corr_upper
-                        for j = 1:length(trl_corr_low), trl_end_corr_low(j) = behv_low(j).events.t_end; end
-                        for j = 1:length(trl_corr_middle), trl_end_corr_middle(j) = behv_middle(j).events.t_end; end
-                        for j = 1:length(trl_corr_upper), trl_end_corr_upper(j) = behv_upper(j).events.t_end; end
-                        
-                        %% corr theta low
-                        % align to t_stop and extract around stop time
-                        clear theta_corr_indx_95 ts
-                        for trl = 1:length(trl_corr_low)
-                            this_ts = behv_low(trl).continuous.ts-trl_end_corr_low(trl);
-                            if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
-                                this_lfp_corr = trl_corr_low(trl).lfp_theta(this_ts>-1 & this_ts<1); theta_corr_low(trl,:) = this_lfp_corr(1:300,:);  %%%%%%%%%%%%%%% Choose band
-                                this_ninety = prctile(real(theta_corr_low(trl,:)),95); theta_corr_indx_95(trl,:) = real(theta_corr_low(trl,:))>this_ninety;
-                                monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).low.trl_corr(trl).tspk = ts(trl,theta_corr_indx_95(trl,:))';
-                            else
-                                monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).low.trl_corr(trl).tspk = single(NaN(size(monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).low.trl_corr(trl-1).tspk)));
-                            end
-                        end
-                        monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).low.trl_corr(trl).ts = ts;
-                        % take a psth of the 95th prcnt
-                        [monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).psth.low.rate_95_corr, monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).psth.low.ts_95_corr] = ...
-                            Spiketimes2Rate(monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).low.trl_corr, [-1:0.02:1], 0.05);
-                        clear theta_corr_indx_95 ts
-                        %% corr theta middle
-                        % align to t_stop and extract around stop time
-                        for trl = 1:length(trl_corr_middle)
-                            this_ts = behv_middle(trl).continuous.ts-trl_end_corr_middle(trl);
-                            if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
-                                this_lfp_corr = trl_corr_middle(trl).lfp_theta(this_ts>-1 & this_ts<1); theta_corr_middle(trl,:) = this_lfp_corr(1:300,:); %%%%%%%%%%%%%%% Choose band
-                                this_ninety = prctile(real(theta_corr_middle(trl,:)),95); theta_corr_indx_95(trl,:) = real(theta_corr_middle(trl,:))>this_ninety;
-                                monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).middle.trl_corr(trl).tspk = ts(trl,theta_corr_indx_95(trl,:))';
-                            else
-                                monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).middle.trl_corr(trl).tspk = single(NaN(size(monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).middle.trl_corr(trl-1).tspk)));
-                            end
-                        end
-                        monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).middle.trl_corr(trl).ts = ts;
-                        % take a psth of the 95th prcnt
-                        [monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).psth.middle.rate_95_corr, monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).psth.middle.ts_95_corr] = ...
-                            Spiketimes2Rate(monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).middle.trl_corr, [-1:0.02:1], 0.05);
-                        clear theta_corr_indx_95 ts
-                        %% corr theta upper
-                        % align to t_stop and extract around stop time
-                        for trl = 1:length(trl_corr_upper)
-                            this_ts = behv_upper(trl).continuous.ts-trl_end_corr_upper(trl);
-                            if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
-                                this_lfp_corr = trl_corr_upper(trl).lfp_theta(this_ts>-1 & this_ts<1); theta_corr_upper(trl,:) = this_lfp_corr(1:300,:);  %%%%%%%%%%%%%%% Choose band
-                                this_ninety = prctile(real(theta_corr_upper(trl,:)),95); theta_corr_indx_95(trl,:) = real(theta_corr_upper(trl,:))>this_ninety;
-                                monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).upper.trl_corr(trl).tspk = ts(trl,theta_corr_indx_95(trl,:))';
-                            else
-                                monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).upper.trl_corr(trl).tspk = single(NaN(size(monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).upper.trl_corr(trl-1).tspk)));
-                            end
-                        end
-                        monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).upper.trl_corr(trl).ts = ts;
-                        % take a psth of the 95th prcnt
-                        [monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).psth.upper.rate_95_corr, monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).psth.upper.ts_95_corr] = ...
-                            Spiketimes2Rate(monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).upper.trl_corr, [-1:0.02:1], 0.05);
-                        clear theta_corr_indx_95 ts
-                        %% corr beta low
-                        % align to t_stop and extract around stop time
-                        for trl = 1:length(trl_corr_low)
-                            this_ts = behv_low(trl).continuous.ts-trl_end_corr_low(trl);
-                            if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
-                                this_lfp_corr = trl_corr_low(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr_low(trl,:) = this_lfp_corr(1:333,:);  %%%%%%%%%%%%%%% Choose band
-                                this_ninety = prctile(real(beta_corr_low(trl,:)),95); beta_corr_indx_95(trl,:) = real(beta_corr_low(trl,:))>this_ninety;
-                                monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).low.trl_corr(trl).tspk = ts(trl,beta_corr_indx_95(trl,:))';
-                            else
-                                monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).low.trl_corr(trl).tspk = single(NaN(size(monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).low.trl_corr(trl-1).tspk)));
-                            end
-                        end
-                        monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).low.trl_corr(trl).ts = ts;
-                        % take a psth of the 95th prcnt
-                        [monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).psth.low.rate_95_corr_low, monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).psth.low.ts_95_corr] = ...
-                            Spiketimes2Rate(monk(m).sess(s).area.(areas{ar}).band_passed.theta.lfp(nlfp).low.trl_corr, [-1:0.02:1], 0.05);
-                        clear beta_corr_indx_95 ts
-                        %% corr beta middle
-                        % align to t_stop and extract around stop time
-                        for trl = 1:length(trl_corr_middle)
-                            this_ts = behv_middle(trl).continuous.ts-trl_end_corr_middle(trl);
-                            if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
-                                this_lfp_corr = trl_corr_middle(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr_middle(trl,:) = this_lfp_corr(1:300,:); %%%%%%%%%%%%%%% Choose band
-                                this_ninety = prctile(real(beta_corr_middle(trl,:)),95); beta_corr_indx_95(trl,:) = real(beta_corr_middle(trl,:))>this_ninety;
-                                monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).middle.trl_corr(trl).tspk = ts(trl,beta_corr_indx_95(trl,:))';
-                            else
-                                monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).middle.trl_corr(trl).tspk = single(NaN(size(monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).middle.trl_corr(trl-1).tspk)));
-                            end
-                        end
-                        monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).middle.trl_corr(trl).ts = ts;
-                        % take a psth of the 95th prcnt
-                        [monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).psth.middle.rate_95_corr, monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).psth.middle.ts_95_corr] = ...
-                            Spiketimes2Rate(monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).middle.trl_corr, [-1:0.02:1], 0.05);
-                        clear beta_corr_indx_95 ts
-                        %% corr beta  upper
-                        % align to t_stop and extract around stop time
-                        for trl = 1:length(trl_corr_upper)
-                            this_ts = behv_upper(trl).continuous.ts-trl_end_corr_upper(trl);
-                            if this_ts(end)>0.9
-                                this_ts_win = this_ts(this_ts>-1 & this_ts<1); ts(trl,:) = this_ts_win(1:300,:);
-                                this_lfp_corr = trl_corr_upper(trl).lfp_beta(this_ts>-1 & this_ts<1); beta_corr_upper(trl,:) = this_lfp_corr(1:300,:);  %%%%%%%%%%%%%%% Choose band
-                                this_ninety = prctile(real(beta_corr_upper(trl,:)),95); beta_corr_indx_95(trl,:) = real(beta_corr_upper(trl,:))>this_ninety;
-                                monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).upper.trl_corr(trl).tspk = ts(trl,beta_corr_indx_95(trl,:))';
-                            else
-                                monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).upper.trl_corr(trl).tspk = single(NaN(size(monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).upper.trl_corr(trl-1).tspk)));
-                            end
-                        end
-                        monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).upper.trl_corr(trl).ts = ts;
-                        % take a psth of the 95th prcnt
-                        [monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).psth.upper.rate_95_corr, monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).psth.upper.ts_95_corr] = ...
-                            Spiketimes2Rate(monk(m).sess(s).area.(areas{ar}).band_passed.beta.lfp(nlfp).upper.trl_corr, [-1:0.02:1], 0.05);
-                        
-                        disp(['>>>>>       Monkey ' num2str(m) ' area ' (areas{ar}) ' channel ' num2str(nlfp)  ' done       <<<<<' ])
-                        fprintf(['Time:  ' num2str(clock) '\n']);
-                    end
-                end
-                % save per monkey per session to have smaller files and save time
-                if ~isempty(nlfp)
-                    dataToSave = monk(m).sess(s);
-                    disp(['    Saving monkey ' num2str(m)])
-                    % fprintf(['Time:  ' num2str(clock) '\n']);
-                    save(['monk ' num2str(m) ' band_passedVSaccuracyHalf area ' (areas{ar}) ' sess ' num2str(s) ], 'dataToSave', '-v7.3');
-                    disp(['    Done! Clearing memory... .  .  '])
-                    clear dataToSave
-                    monk(m).sess(s) = [];
+%% only extract data for raster 
+if do_band_passed
+    
+end 
+
+if do_band_passed_pop
+    monks = unique([exp.monk_id]); clear p_monk
+    for ii = 1:length(monks)
+        m = [exp.monk_id] == monks(ii); p_monk = exp(m);
+        for s = 1:length(p_monk)
+            areas = fieldnames(p_monk(s).pop.area);
+            for a = 1:length(areas)
+                for trl = 1:length(p_monk)
+                    monk(ii).sess(s).pop = p_monk(s).pop;
                 end
             end
         end
     end
+end
+
+%% only extract data for raster
+if do_band_passed_vs_accuracy
+              
+                       
 end
 
 %% Save
