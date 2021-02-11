@@ -3650,19 +3650,27 @@ switch plot_type
         %% plot one channel
         ch = 11; 
         % theta
-        figure; hold on; 
+        figure('Name', 'Theta'); hold on; 
         plot(ts,smooth(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.corr.rate_95(ch,:),8), 'g')
         plot(ts,smooth(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.incorr.rate_95(ch,:),8), 'k')
         set(gca, 'xlim', [-1.5 1.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
         title([(ar) ' ch ' num2str(ch)])
         xlabel('Time(s)'); vline(0,'-r');
+        % ratio
+        figure('Name', 'Theta'); hold on; 
+        plot(ts,smooth(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.corr.rate_95(ch,:),8)./smooth(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.incorr.rate_95(ch,:),8), 'k', 'LineWidth',2)
+        set(gca, 'xlim', [-1.5 1.5],'ylim',[0 2],'yTick',[0 1 2], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+        ylabel('Correct / Incorrect'); xlabel('Time(s)')
+        hline(1,'--r')
+        
         % beta
-        figure; hold on; 
+        figure('Name', 'Beta'); hold on; 
         plot(ts,smooth(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.corr.rate_95(ch,:),8), 'g')
         plot(ts,smooth(monk(m).sess(nsess).pop.area.(ar).band_pass.beta.incorr.rate_95(ch,:),8), 'k')
         set(gca, 'xlim', [-1.5 1.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
         title([(ar) ' ch ' num2str(ch)])
         xlabel('Time(s)'); vline(0,'-r');
+        
         
         
         %% plot mean +/- sem psth per area for corr and incorr per session
