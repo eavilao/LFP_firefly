@@ -850,7 +850,7 @@ if prs.analyse_band_passed
             end
              % add psth per channel
             [stats.area.(unique_brain_areas{area}).band_pass.theta.corr.upper_half.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.theta.corr.upper_half.ts_rate_95(ch,:)] = ...
-                BandPassedAmp2Rate(theta_corr.upper_half.trl, [-2:prs.temporal_binwidth:1], prs.temporal_binwidth);
+                BandPassedAmp2Rate(theta_corr.upper_half.trl, [-2:prs.temporal_binwidth:2], prs.temporal_binwidth);
              [stats.area.(unique_brain_areas{area}).band_pass.beta.corr.upper_half.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.beta.corr.upper_half.ts_rate_95(ch,:)] = ...
                 BandPassedAmp2Rate(beta_corr.upper_half.trl, [-2:prs.temporal_binwidth:2], prs.temporal_binwidth);
             
