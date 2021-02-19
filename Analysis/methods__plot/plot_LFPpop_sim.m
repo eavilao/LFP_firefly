@@ -3926,8 +3926,8 @@ switch plot_type
         save(['monkey_' monkey '_' areaToLoad '_' band '_tspk_all'], 'tspk_corr_all', 'tspk_incorr_all'); 
         
     case 'band_passed_vs_accuracy'
-        ar = 'PPC'     % MST PPC PFC
-        band = 'theta'
+        ar = 'PFC'     % MST PPC PFC
+        band = 'beta'
         win = [-1.5 1.5];
         % m = 2  % 1:length(monk)
         r_corr_all = []; 
@@ -3937,7 +3937,7 @@ switch plot_type
         mod_indx_corr = []; 
         mod_indx_incorr = []; 
         
-        for m = [1 3] % [1 3]; % 1:length(monk)
+        for m = 3 % [1 3]; % 1:length(monk)
        
             for nsess = 1:length(monk(m).sess)
         %% corr
