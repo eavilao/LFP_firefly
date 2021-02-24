@@ -21,12 +21,10 @@ doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
 extract_band_pass_signal = false; 
 save_band_pass_analysis = false; % extract band passed lfp signal only (used only for plotting)
-do_band_passed = false; % extract and analyse band passed signal
-do_band_passed_vs_accuracy = false;
 do_band_passed_pop = save_pop; 
 
-name_output_exp_out_file = 'exp_out_lfp_stats_pop_2021_02_09_band_passed_only_pop_3sess'; 
-name_output_file = 'lfp_band_passed_2021_02_09_band_passed_pop';
+name_output_exp_out_file = 'exp_out_lfp_stats_pop_2021_02_23_band_passed_only_pop_3sess'; 
+name_output_file = 'lfp_band_passed_2021_02_23_band_passed_pop';
 
 %% Extract
 if extract_exp_out
@@ -695,10 +693,6 @@ if save_band_pass_analysis
 end
 
 %% only extract data for raster 
-if do_band_passed
-    
-end 
-
 if do_band_passed_pop
     monks = unique([exp.monk_id]); clear p_monk
     for ii = 1:length(monks)
@@ -712,12 +706,6 @@ if do_band_passed_pop
             end
         end
     end
-end
-
-%% only extract data for raster
-if do_band_passed_vs_accuracy
-              
-                       
 end
 
 %% Save
