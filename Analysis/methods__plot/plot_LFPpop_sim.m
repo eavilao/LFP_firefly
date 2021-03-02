@@ -3926,9 +3926,10 @@ switch plot_type
         save(['monkey_' monkey '_' areaToLoad '_' band '_tspk_all'], 'tspk_corr_all', 'tspk_incorr_all'); 
         
     case 'band_passed_vs_accuracy'
-        ar = 'PFC'     % MST PPC PFC
-        band = 'beta'
+        ar = 'PPC'     % MST PPC PFC
+        band = 'theta'
         win = [-1.5 1.5];
+        ev = 'reward'
         % m = 2  % 1:length(monk)
         r_corr_all = []; 
         r_incorr_all = []; 
@@ -3937,30 +3938,30 @@ switch plot_type
         mod_indx_corr = []; 
         mod_indx_incorr = []; 
         
-        for m = 3 % [1 3]; % 1:length(monk)
+        for m = 1 % [1 3]; % 1:length(monk)
        
             for nsess = 1:length(monk(m).sess)
         %% corr
         % gather
-        ts = monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.ts_rate_95(1,:);
-        r_corr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95);
-        r_corr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95)/sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95,1));
-        r_incorr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95);
-        r_incorr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95)/sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95,1));
+        ts = monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.ts_rate_95(1,:);
+        r_corr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95);
+        r_corr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95)/sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95,1));
+        r_incorr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95);
+        r_incorr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95)/sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95,1));
         
         % plot change in power
-        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95,1), pre_max_corr(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95(ch,ts>-1 & ts<0)); end
-        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95,1), pre_max_incorr(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95(ch,ts>-1 & ts<0)); end
-        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95,1), post_max_corr(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95(ch,ts>0 & ts<1)); end
-        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95,1), post_max_incorr(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95(ch,ts>0 & ts<1)); end
-        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95,1), pre_min_corr(ch) = min(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95(ch,ts>-1 & ts<0)); end
-        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95,1), pre_min_incorr(ch) = min(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95(ch,ts>-1 & ts<0)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95,1), pre_max_corr(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95(ch,ts>-1 & ts<0)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95,1), pre_max_incorr(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95(ch,ts>-1 & ts<0)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95,1), post_max_corr(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95(ch,ts>0 & ts<1)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95,1), post_max_incorr(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95(ch,ts>0 & ts<1)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95,1), pre_min_corr(ch) = min(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95(ch,ts>-1 & ts<0)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95,1), pre_min_incorr(ch) = min(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95(ch,ts>-1 & ts<0)); end
 
         % extract max vals
-        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95,1), [~,indx_t_corr(ch)] = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95(ch,:)); end  
-        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95,1), [~,indx_t_incorr(ch)] = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95(ch,:)); end  
-        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95,1), [~,indx_min_corr(ch)] = min(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.low_half.rate_95(ch,ts>-1 & ts<0)); end
-        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95,1), [~,indx_min_incorr(ch)] = min(monk(m).sess(nsess).pop.area.(ar).band_pass.(band).corr.upper_half.rate_95(ch,ts>-1 & ts<0)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95,1), [~,indx_t_corr(ch)] = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95(ch,:)); end  
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95,1), [~,indx_t_incorr(ch)] = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95(ch,:)); end  
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95,1), [~,indx_min_corr(ch)] = min(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.low_half.rate_95(ch,ts>-1 & ts<0)); end
+        for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95,1), [~,indx_min_incorr(ch)] = min(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.upper_half.rate_95(ch,ts>-1 & ts<0)); end
         
         peak_t_corr(nsess,:) = ts(indx_t_corr);
         peak_t_incorr(nsess,:) = ts(indx_t_incorr);
@@ -4004,44 +4005,44 @@ switch plot_type
         %% plot mean +/- sem psth per area for corr and incorr per session
             figure(1); hold on
             %subplot(1,length(nsess),nsess); hold on
-            shadedErrorBar(ts,smooth(r_corr(nsess,:),8),r_corr_sem(nsess,:), 'lineprops', 'g')
-            shadedErrorBar(ts,smooth(r_incorr(nsess,:),8),r_incorr_sem(nsess,:), 'lineprops', 'k')
+            shadedErrorBar(ts,smooth(r_corr(nsess,:),8),r_corr_sem(nsess,:), 'lineprops', 'r')
+            shadedErrorBar(ts,smooth(r_incorr(nsess,:),8),r_incorr_sem(nsess,:), 'lineprops', 'b')
             set(gca, 'xlim', [-1.5 1.5],'yLim', [0 20],'yTick', [0 20], 'TickDir', 'out', 'FontSize', 22); axis square; box off
-            title([(ar) ' ' num2str(nsess)]); ylim([2 20])
+            title([(ar) ' ' num2str(nsess)]); 
             xlabel('Time(s)'); vline(0,'-r');
             
             %% plot pre and post max th
             figure; hold on
             % correct
-            plot(1, pre_max_corr','.g', 'MarkerSize', 12)
-            plot(2, post_max_corr','.g', 'MarkerSize', 12)
+            plot(1, pre_max_corr','.r', 'MarkerSize', 12)
+            plot(2, post_max_corr','.r', 'MarkerSize', 12)
 %             for i = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.corr.rate_95,1)
 %                 plot([1 2], [pre_max_corr_th(i) post_max_corr_th(i)],'Color', [0.7 0.7 0.7]);
 %             end
-            plot([1 2],[mean(pre_max_corr) mean(post_max_corr)], '-g', 'LineWidth',2)
-            plot(1, mean(pre_max_corr), '.g', 'MarkerSize', 30)
-            plot(2, mean(post_max_corr), '.g', 'MarkerSize', 30)
+            plot([1 2],[mean(pre_max_corr) mean(post_max_corr)], '-r', 'LineWidth',2)
+            plot(1, mean(pre_max_corr), '.r', 'MarkerSize', 30)
+            plot(2, mean(post_max_corr), '.r', 'MarkerSize', 30)
             set(gca, 'xTick', [], 'TickDir', 'out', 'FontSize', 22); axis square; box off;ylim([5 30]);
             % incorrect
-            plot(1.1, pre_max_incorr','.k', 'MarkerSize', 12)
-            plot(2.1, post_max_incorr','.k', 'MarkerSize', 12)
+            plot(1.1, pre_max_incorr','.b', 'MarkerSize', 12)
+            plot(2.1, post_max_incorr','.b', 'MarkerSize', 12)
 %             for i = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.theta.corr.rate_95,1)
 %                 plot([1 2], [pre_max_corr_th(i) post_max_corr_th(i)],'Color', [0.7 0.7 0.7]);
 %             end
-            plot([1.1 2.1],[mean(pre_max_incorr) mean(post_max_incorr)], '-k', 'LineWidth',2)
-            plot(1.1, mean(pre_max_incorr), '.k', 'MarkerSize', 30)
-            plot(2.1, mean(post_max_incorr), '.k', 'MarkerSize', 30)
+            plot([1.1 2.1],[mean(pre_max_incorr) mean(post_max_incorr)], '-b', 'LineWidth',2)
+            plot(1.1, mean(pre_max_incorr), '.b', 'MarkerSize', 30)
+            plot(2.1, mean(post_max_incorr), '.b', 'MarkerSize', 30)
             set(gca, 'xTick', [], 'TickDir', 'out', 'FontSize', 22); axis square; box off; ylim([5 30]);
 
             %% bar mean plots
             figure(3); hold on
-            errorbar(nsess, mean(peak_t_corr(nsess,:)),std(peak_t_corr(nsess,:)), 'og', 'MarkerSize', 20)
-            errorbar(nsess+0.25, mean(peak_t_incorr(nsess,:)),std(peak_t_incorr(nsess,:)), 'ok', 'MarkerSize', 20)
+            errorbar(nsess, mean(peak_t_corr(nsess,:)),std(peak_t_corr(nsess,:)), 'or', 'MarkerSize', 20)
+            errorbar(nsess+0.25, mean(peak_t_incorr(nsess,:)),std(peak_t_incorr(nsess,:)), 'ob', 'MarkerSize', 20)
             set(gca, 'xlim', [0.5 nsess+0.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
             
             %% Ratio plot
             figure; hold on
-            plot(ts,smooth(r_corr(nsess,:),3)./smooth(r_incorr(nsess,:),3), 'k', 'LineWidth',2)
+            plot(ts,smooth(r_corr(nsess,:),3)./smooth(r_incorr(nsess,:),3), 'b', 'LineWidth',2)
             set(gca, 'xlim', [-1.5 1.5],'ylim',[0 2.5],'yTick',[0 1 2], 'TickDir', 'out', 'FontSize', 22); axis square; box off
             ylabel('Correct / Incorrect'); xlabel('Time(s)')
             hline(1,'--k')
@@ -4070,7 +4071,7 @@ switch plot_type
             
             if strcmp(ar,'MST')
                 figure(11); hold on
-                errorbar(nsess,mean(mean(peak_t_corr)), mean(std(peak_t_corr)/sqrt(size(peak_t_corr,1))),'og', 'MarkerSize', 15)
+                errorbar(nsess,mean(mean(peak_t_corr)), mean(std(peak_t_corr)/sqrt(size(peak_t_corr,1))),'or', 'MarkerSize', 15)
                 errorbar(nsess+0.2,mean(mean(peak_t_incorr)), mean(std(peak_t_incorr)/sqrt(size(peak_t_incorr,1))),'ok', 'MarkerSize', 15)
                 set(gca, 'xlim', [0 3.2],'yLim',[-1 1.4],'yTick',[-1 0 1], 'TickDir', 'out', 'FontSize', 22); axis square; box off
                 hline(0,'--k'); ylabel('stop time'); title(['monk ' num2str(m)])
@@ -4081,14 +4082,14 @@ switch plot_type
         if ar == 'PPC' | ar == 'PFC'
             % psth
             figure; hold on
-            shadedErrorBar(ts,smooth(mean(r_corr),8),mean(r_corr_sem), 'lineprops', 'g')
-            shadedErrorBar(ts,smooth(mean(r_incorr),8),mean(r_incorr_sem), 'lineprops', 'k')
+            shadedErrorBar(ts,smooth(mean(r_corr),8),mean(r_corr_sem), 'lineprops', 'r')
+            shadedErrorBar(ts,smooth(mean(r_incorr),8),mean(r_incorr_sem), 'lineprops', 'b')
             set(gca, 'xlim', [-1.5 1.5], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 20], 'yTick', [0 10 20]); axis square; box off
             xlabel('Time(s)'); vline(0,'-k');
             
             % ratio
             figure; hold on
-            plot(ts,smooth(mean(r_corr)./mean(r_incorr),8), '-k', 'LineWidth',2)
+            plot(ts,smooth(mean(r_corr)./mean(r_incorr),8), '-b', 'LineWidth',2)
             %plot(ts,mean(r_corr)./mean(r_incorr), '-k', 'LineWidth',2)
             set(gca, 'xlim', [-1.5 1.5],'ylim',[0.5 1.5],'yTick',[0 0.5 1 1.5 2 3], 'TickDir', 'out', 'FontSize', 22); axis square; box off
             ylabel('Correct / Incorrect'); xlabel('Time(s)')
@@ -4097,15 +4098,15 @@ switch plot_type
  
         % plot mean peak for all sessions
         figure(18); hold on
-        errorbar(m,mean(mean(peak_t_corr)), mean(std(peak_t_corr)/sqrt(size(peak_t_corr,1))),'og', 'MarkerSize', 15)
-        errorbar(m+0.2,mean(mean(peak_t_incorr)), mean(std(peak_t_incorr)/sqrt(size(peak_t_incorr,1))),'ok', 'MarkerSize', 15)
+        errorbar(m,mean(mean(peak_t_corr)), mean(std(peak_t_corr)/sqrt(size(peak_t_corr,1))),'or', 'MarkerSize', 15)
+        errorbar(m+0.2,mean(mean(peak_t_incorr)), mean(std(peak_t_incorr)/sqrt(size(peak_t_incorr,1))),'ob', 'MarkerSize', 15)
         set(gca, 'xlim', [0 3.2],'yLim',[-1 1.4],'yTick',[-1 0 1], 'TickDir', 'out', 'FontSize', 22); axis square; box off
         hline(0,'--k'); ylabel('stop time'); title(['monk ' num2str(m)])
         
         % plot mean trough for all sessions
         figure(12); hold on
-        errorbar(m,mean(mean(min_t_corr)), mean(std(min_t_corr)/sqrt(size(min_t_corr,1))),'og', 'MarkerSize', 15)
-        errorbar(m+0.2,mean(mean(min_t_incorr)), mean(std(min_t_incorr)/sqrt(size(min_t_incorr,1))),'ok', 'MarkerSize', 15)
+        errorbar(m,mean(mean(min_t_corr)), mean(std(min_t_corr)/sqrt(size(min_t_corr,1))),'or', 'MarkerSize', 15)
+        errorbar(m+0.2,mean(mean(min_t_incorr)), mean(std(min_t_incorr)/sqrt(size(min_t_incorr,1))),'ob', 'MarkerSize', 15)
         set(gca, 'xlim', [0 3.2],'yLim',[-1.5 1],'yTick',[-1.5 0 1], 'TickDir', 'out', 'FontSize', 22); axis square; box off
         hline(0,'--k'); ylabel('stop time'); title(['monk ' num2str(m)])
         
@@ -4114,14 +4115,14 @@ switch plot_type
         
         %% plot all monks
         figure; hold on
-        shadedErrorBar(ts,smooth(mean(r_corr_all),8),smooth(std(r_corr_all)/sqrt(size(r_corr_all,1))), 'lineprops', 'g')
-        shadedErrorBar(ts,smooth(mean(r_incorr_all),8),smooth(std(r_incorr_all)/sqrt(size(r_incorr_all,1))), 'lineprops', 'k')
+        shadedErrorBar(ts,smooth(mean(r_corr_all),8),smooth(std(r_corr_all)/sqrt(size(r_corr_all,1))), 'lineprops', 'r')
+        shadedErrorBar(ts,smooth(mean(r_incorr_all),8),smooth(std(r_incorr_all)/sqrt(size(r_incorr_all,1))), 'lineprops', 'b')
         set(gca, 'xlim', [-1.2 1.2], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 16], 'yTick', [0 16]); axis square; box off
         xlabel('Time(s)'); vline(0,'-k');
         if strcmp(ar,'MST')
             figure; hold on
-            plot(ts,smooth(mean(r_corr_all),8),'g', 'LineWidth',2)
-            plot(ts,smooth(mean(r_incorr_all),8),'k', 'LineWidth',2)
+            plot(ts,smooth(mean(r_corr_all),8),'r', 'LineWidth',2)
+            plot(ts,smooth(mean(r_incorr_all),8),'b', 'LineWidth',2)
             set(gca, 'xlim', [-1.5 1.5], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 20], 'yTick', [0 20]); axis square; box off
             xlabel('Time(s)'); vline(0,'-k');
         end
