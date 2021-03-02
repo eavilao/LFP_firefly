@@ -3504,8 +3504,8 @@ switch plot_type
         area = 'PFC'     % MST PPC PFC
         win = [-1.5 1.5]; 
         session = 1; 
-        for m = 3  % 1:length(monk)
-            for nlfp = 11 %pick_ch(1:5) %1:length(monk(m).session(sess).area.(area).lfp)
+        for m = 1  % 1:length(monk)
+            for nlfp = 1 %pick_ch(1:5) %1:length(monk(m).session(sess).area.(area).lfp)
                 %% corr
                 % gather
                 theta_corr_indx = []; theta_incorr_indx = [] ; beta_corr_indx = []; beta_incorr_indx = [];
