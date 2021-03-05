@@ -89,13 +89,13 @@ if event_potential
                                 % theta
                                 this_theta = abs(stats.trialtype.(trialtypes{i})(j).events.move.theta.lfp_align(:,ntrl));
                                 this_95_theta = prctile(this_theta,95);
-                                stats.band_passed.move.err.trl(ntrl).theta.lfp_move = this_theta;
+                                % stats.band_passed.move.err.trl(ntrl).theta.lfp_move = this_theta;
                                 stats.band_passed.move.err.trl(ntrl).theta_95_indx = this_theta > this_95_theta;
                                 
                                 % beta
                                 this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.move.beta.lfp_align(:,ntrl));
                                 this_95_beta = prctile(this_beta,95);
-                                stats.band_passed.move.err.trl(ntrl).beta.lfp_move = this_beta;
+                                % stats.band_passed.move.err.trl(ntrl).beta.lfp_move = this_beta;
                                 stats.band_passed.move.err.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                             end
                         else % correct
@@ -104,13 +104,13 @@ if event_potential
                                 % theta
                                 this_theta = abs(stats.trialtype.(trialtypes{i})(j).events.move.theta.lfp_align(:,ntrl));
                                 this_95_theta = prctile(this_theta,95);
-                                stats.band_passed.move.corr.trl(ntrl).theta.lfp_move = this_theta;
+                                % stats.band_passed.move.corr.trl(ntrl).theta.lfp_move = this_theta;
                                 stats.band_passed.move.corr.trl(ntrl).theta_95_indx = this_theta > this_95_theta;
                                 
                                 % beta
                                 this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.move.beta.lfp_align(:,ntrl));
                                 this_95_beta = prctile(this_beta,95);
-                                stats.band_passed.move.corr.trl(ntrl).beta.lfp_move = this_beta;
+                                % stats.band_passed.move.corr.trl(ntrl).beta.lfp_move = this_beta;
                                 stats.band_passed.move.corr.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                             end
                         end
@@ -163,13 +163,13 @@ if event_potential
                                 % theta
                                 this_theta = abs(stats.trialtype.(trialtypes{i})(j).events.target.theta.lfp_align(:,ntrl));
                                 this_95_theta = prctile(this_theta,95);
-                                stats.band_passed.target.err.trl(ntrl).theta.lfp_target = this_theta;
+                                % stats.band_passed.target.err.trl(ntrl).theta.lfp_target = this_theta;
                                 stats.band_passed.target.err.trl(ntrl).theta_95_indx = this_theta > this_95_theta;
                                 
                                 % beta
                                 this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.target.beta.lfp_align(:,ntrl));
                                 this_95_beta = prctile(this_beta,95);
-                                stats.band_passed.target.err.trl(ntrl).beta.lfp_target = this_beta;
+                                % stats.band_passed.target.err.trl(ntrl).beta.lfp_target = this_beta;
                                 stats.band_passed.target.err.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                             end
                         else % correct
@@ -178,13 +178,13 @@ if event_potential
                                 % theta
                                 this_theta = abs(stats.trialtype.(trialtypes{i})(j).events.target.theta.lfp_align(:,ntrl));
                                 this_95_theta = prctile(this_theta,95);
-                                stats.band_passed.target.corr.trl(ntrl).theta.lfp_target = this_theta;
+                                % stats.band_passed.target.corr.trl(ntrl).theta.lfp_target = this_theta;
                                 stats.band_passed.target.corr.trl(ntrl).theta_95_indx = this_theta > this_95_theta;
                                 
                                 % beta
                                 this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.target.beta.lfp_align(:,ntrl));
                                 this_95_beta = prctile(this_beta,95);
-                                stats.band_passed.target.corr.trl(ntrl).beta.lfp_target = this_beta;
+                                % stats.band_passed.target.corr.trl(ntrl).beta.lfp_target = this_beta;
                                 stats.band_passed.target.corr.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                             end
                         end
@@ -248,13 +248,13 @@ if event_potential
                                 % theta
                                 this_theta = abs(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align(:,ntrl));
                                 this_95_theta = prctile(this_theta,95);
-                                stats.band_passed.stop.err.trl(ntrl).theta.lfp_stop = this_theta;
+                                % stats.band_passed.stop.err.trl(ntrl).theta.lfp_stop = this_theta;
                                 stats.band_passed.stop.err.trl(ntrl).theta_95_indx = this_theta > this_95_theta;
                                 
                                 % beta
                                 this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.stop.beta.lfp_align(:,ntrl));
                                 this_95_beta = prctile(this_beta,95);
-                                stats.band_passed.stop.err.trl(ntrl).beta.lfp_stop = this_beta;
+                                % stats.band_passed.stop.err.trl(ntrl).beta.lfp_stop = this_beta;
                                 stats.band_passed.stop.err.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                             end
                         else % correct
@@ -263,18 +263,19 @@ if event_potential
                                 % theta
                                 this_theta = abs(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align(:,ntrl));
                                 this_95_theta = prctile(this_theta,95);
-                                stats.band_passed.stop.corr.trl(ntrl).theta.lfp_stop = this_theta;
+                                % stats.band_passed.stop.corr.trl(ntrl).theta.lfp_stop = this_theta;
                                 stats.band_passed.stop.corr.trl(ntrl).theta_95_indx = this_theta > this_95_theta;
                                 
                                 % beta
                                 this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.stop.beta.lfp_align(:,ntrl));
                                 this_95_beta = prctile(this_beta,95);
-                                stats.band_passed.stop.corr.trl(ntrl).beta.lfp_stop = this_beta;
+                                % stats.band_passed.stop.corr.trl(ntrl).beta.lfp_stop = this_beta;
                                 stats.band_passed.stop.corr.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                             end
                         end
                     end
                 end
+                
                 
                 %% aligned to reward
                 if any(strcmp(gettuning,'reward'))
@@ -313,13 +314,13 @@ if event_potential
                                 % theta
                                 this_theta = abs(stats.trialtype.(trialtypes{i})(j).events.reward.theta.lfp_align(:,ntrl));
                                 this_95_theta = prctile(this_theta,95);
-                                stats.band_passed.reward.err.trl(ntrl).theta.lfp_reward = this_theta;
+                                % stats.band_passed.reward.err.trl(ntrl).theta.lfp_reward = this_theta;
                                 stats.band_passed.reward.err.trl(ntrl).theta_95_indx = this_theta > this_95_theta;
                                 
                                 % beta
                                 this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.reward.beta.lfp_align(:,ntrl));
                                 this_95_beta = prctile(this_beta,95);
-                                stats.band_passed.reward.err.trl(ntrl).beta.lfp_reward = this_beta;
+                                % stats.band_passed.reward.err.trl(ntrl).beta.lfp_reward = this_beta;
                                 stats.band_passed.reward.err.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                             end
                         else % correct
@@ -328,13 +329,13 @@ if event_potential
                                 % theta
                                 this_theta = abs(stats.trialtype.(trialtypes{i})(j).events.reward.theta.lfp_align(:,ntrl));
                                 this_95_theta = prctile(this_theta,95);
-                                stats.band_passed.reward.corr.trl(ntrl).theta.lfp_reward = this_theta;
+                                % stats.band_passed.reward.corr.trl(ntrl).theta.lfp_reward = this_theta;
                                 stats.band_passed.reward.corr.trl(ntrl).theta_95_indx = this_theta > this_95_theta;
                                 
                                 % beta
                                 this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.reward.beta.lfp_align(:,ntrl));
                                 this_95_beta = prctile(this_beta,95);
-                                stats.band_passed.reward.corr.trl(ntrl).beta.lfp_reward = this_beta;
+                                % stats.band_passed.reward.corr.trl(ntrl).beta.lfp_reward = this_beta;
                                 stats.band_passed.reward.corr.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                             end
                         end

@@ -51,6 +51,7 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'sim_coherence_between_areas'
 % 'speed_dependent_LFP_activity_MST'
 % 'speed_dependent_LFP_activity_PPC'
+% 'band_passed_signal' <-- this one uses experiments.m directly. load experiments.m
 % 'trial_band_passed_raster'
 % 'band_passed_amplitude' <-- this one uses experiments.m directly. load experiments.m and then monk = experiments; 
 % 'pop_psth_band_passed'
@@ -3500,12 +3501,37 @@ switch plot_type
             set(gca, 'xlim', [0 200], 'TickDir', 'out', 'FontSize', 22);
         end
         
+    case 'band_passed_signal'
+        type = 'reward' 
+        j = 2; % 1=unrewarded  2=rewarded
+        trls = 31:41;
+        % load experiments file
+        %% theta
+        for ii=trls
+            figure;
+            plot(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,real(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii)))
+            hold on
+            plot(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,abs(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii)))
+            %hline(prctile(abs(experiments.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii)),95))
+            xlim([min(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts) 1.5]); set(gca,'TickDir', 'out', 'YTick', []); box off;
+        end
+        
+        %% beta
+        for ii=trls
+            figure;
+            plot(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,real(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.beta.lfp_align(:,ii)))
+            hold on
+            plot(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,abs(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.beta.lfp_align(:,ii)))
+            hline(prctile(abs(experiments.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.beta.lfp_align(:,ii)),90))
+            xlim([min(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts) 1.5]); set(gca,'TickDir', 'out', 'YTick', []); box off;
+        end
+        
     case 'trial_band_passed_raster'
-        area = 'PFC'     % MST PPC PFC
-        win = [-1.5 1.5]; 
-        session = 1; 
+        area = 'PPC'     % MST PPC PFC
+        win = [-1.5 1.5];
+        session = 1;
         for m = 1  % 1:length(monk)
-            for nlfp = 1 %pick_ch(1:5) %1:length(monk(m).session(sess).area.(area).lfp)
+            for nlfp = 11 %pick_ch(1:5) %1:length(monk(m).session(sess).area.(area).lfp) % ch23 for MST % ch11 for PPC % ch4 for PFC
                 %% corr
                 % gather
                 theta_corr_indx = []; theta_incorr_indx = [] ; beta_corr_indx = []; beta_incorr_indx = [];
@@ -3520,19 +3546,21 @@ switch plot_type
                 %% theta
                 figure; hold on;
                 for trl = 1:size(theta_corr_indx,1)
-                    plot(ts_incorr(theta_corr_indx(trl,:)),trl,'.k', 'MarkerSize',4)
+                    plot(ts_corr(theta_corr_indx(trl,:)),trl,'.k', 'MarkerSize',4)
                     set(gca,'xlim',[win(1) win(2)],'TickDir', 'out', 'FontSize', 22); axis square; box off
                 end
                 ylim([0 trl]); vline(0,'-r'); title('correct theta')
-                % print('raster_theta_corr_PFC','-depsc2', '-painters', '-cmyk')
-                
+                axis off
+                print('raster_theta_corr_PPC','-depsc2', '-painters', '-cmyk')
+
                 figure; hold on;
                 for trl = 1:size(theta_incorr_indx,1)
                     plot(ts_incorr(theta_incorr_indx(trl,:)),trl,'.k', 'MarkerSize',4)
                     set(gca,'xlim',[win(1) win(2)],'TickDir', 'out', 'FontSize', 22); axis square; box off
                 end
                 ylim([0 trl]); vline(0,'-r'); title('incorrect theta')
-                % print('raster_theta_incorr_PFC','-depsc2', '-painters', '-cmyk')
+                axis off
+                print('raster_theta_incorr_PPC','-depsc2', '-painters', '-cmyk')
                 
                 %% beta
                 figure; hold on;
@@ -3541,7 +3569,8 @@ switch plot_type
                     set(gca,'xlim',[win(1) win(2)],'TickDir', 'out', 'FontSize', 22); axis square; box off
                 end
                 ylim([0 trl]); vline(0,'-r'); title('correct beta')
-                % print('raster_beta_corr_PFC','-depsc2', '-painters', '-cmyk')
+                axis off
+                print('raster_beta_corr_PPC','-depsc2', '-painters', '-cmyk')
                 
                 figure; hold on;
                 for trl = 1:size(beta_incorr_indx,1)
@@ -3549,17 +3578,16 @@ switch plot_type
                     set(gca,'xlim',[win(1) win(2)],'TickDir', 'out', 'FontSize', 22); axis square; box off
                 end
                 ylim([0 trl]); vline(0,'-r'); title('incorrect beta')
-                % print('raster_beta_incorr_PFC','-depsc2', '-painters', '-cmyk')
+                axis off
+                print('raster_beta_incorr_PPC','-depsc2', '-painters', '-cmyk')
                 %% stats
             end
-            % plot psths
-            
         end
 
     case 'band_passed_amplitude'
         m = 1;
         area = 'PPC' 
-        band = 'beta'
+        band = 'theta'
         win = [-1.5 1.5]; 
         unitindx = strcmp({monk.sessions.lfps.brain_area}, area);
         % extract all 95th pct timings per channel
@@ -3569,16 +3597,20 @@ switch plot_type
         % correct trials
         ntrl = size(monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(2).events.stop.(band).lfp_align,2); 
         ts_corr = monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(2).events.stop.(band).ts_lfp_align; ts_win_corr = ts_corr(ts_corr>win(1) & ts_corr<=win(2));
-        beta_corr = monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(2).events.stop.(band).lfp_align(ts_corr>win(1) & ts_corr<=win(2),:)'; 
+        % lfp_corr = monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(2).events.stop.(band).lfp_align(ts_corr>win(1) & ts_corr<=win(2),:)'; 
+        lfp_corr = abs(monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(2).events.stop.(band).lfp_align)'; 
+        
         % incorrect trials
         ntrl = size(monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(1).events.stop.(band).lfp_align,2); 
         ts_incorr = monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(1).events.stop.(band).ts_lfp_align; ts_win_incorr = ts_incorr(ts_incorr>win(1) & ts_incorr<=win(2));
-        beta_incorr = monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(1).events.stop.(band).lfp_align(ts_incorr>win(1) & ts_incorr<=win(2),:)'; 
+        % lfp_incorr = monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(1).events.stop.(band).lfp_align(ts_incorr>win(1) & ts_incorr<=win(2),:)'; 
+        lfp_incorr = abs(monk(m).sessions.lfps(ar(ch)).stats.trialtype.reward(1).events.stop.(band).lfp_align)'; 
         
         % plot correct
        figure('Position', [2116 396 445 330]); hold on;
        for trl = 1:ntrl %16:36
-           waterfall(ts_win_corr,trl,abs(beta_corr(trl,:)));
+          waterfall(ts_corr(ts_corr>win(1) & ts_corr<=win(2)),trl,lfp_corr(trl,ts_corr>win(1) & ts_corr<=win(2)));
+          % waterfall(ts_corr,trl,lfp_corr(trl,:));
            % set(gca,'xLim',[-0.8 0.8], 'xTick',[-0.8 0 0.8], 'yTick', [], 'zTick',[])
             set(gca,'xLim',[win(1) win(2)], 'xTick',[win(1) 0 win(2)], 'yTick', [], 'zTick',[], 'CLim', [0 130])
        end
@@ -3589,7 +3621,7 @@ switch plot_type
         % plot incorrect
        figure('Position', [2116 396 445 330]); hold on;
        for trl = 1:ntrl %16:36
-           waterfall(ts_win_incorr,trl,abs(beta_incorr(trl,:)));
+          waterfall(ts_incorr(ts_incorr>win(1) & ts_incorr<=win(2)),trl,lfp_incorr(trl,ts_incorr>win(1) & ts_incorr<=win(2)));
            % set(gca,'xLim',[-0.8 0.8], 'xTick',[-0.8 0 0.8], 'yTick', [], 'zTick',[])
            set(gca,'xLim',[win(1) win(2)], 'xTick',[win(1) 0 win(2)], 'yTick', [], 'zTick',[], 'CLim', [0 130])
        end

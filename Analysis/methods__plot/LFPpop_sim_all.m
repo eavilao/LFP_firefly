@@ -22,7 +22,7 @@ do_ERP = false; % extract ERPs (evoked LFPs)
 save_band_pass_analysis = false; % extract band passed lfp signal only (used only for plotting)
 do_band_passed_pop = save_pop; 
 name_output_exp_out_file = 'exp_out_lfp_stats_pop_2021_02_23_band_passed_only_pop_3sess'; 
-name_output_file = 'lfp_band_passed_2021_02_23_band_passed_raster_abs_indx_95_pop_test_PPC';
+name_output_file = 'lfp_band_passed_2021_03_03_band_passed_pop_Schro_107';
 
 %% Extract
 if extract_exp_out
