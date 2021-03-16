@@ -12,7 +12,7 @@ extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
 do_PSD = false;  % extract power spectral densities
 save_spectro = false; % save spectrogram file?
-save_spectro_per_trial = false;
+save_spectro_per_trial = true;
 save_spectro_per_trial_align_stop = false;
 avg_monks = false; % average for all monkeys?
 do_cohero = false; % extract coherograms
@@ -20,9 +20,9 @@ do_cohero_band_passed = false; % extract coherograms per band
 doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
 save_band_pass_analysis = false; % extract band passed lfp signal only (used only for plotting)
-do_band_passed_pop = save_pop; 
+do_band_passed_pop = false; 
 name_output_exp_out_file = 'exp_out_lfp_stats_pop_2021_02_23_band_passed_only_pop_3sess'; 
-name_output_file = 'lfp_band_passed_2021_03_03_band_passed_pop_Schro_107';
+name_output_file = 'lfp_spectro_trial_2021_03_13_2sess_test';
 
 %% Extract
 if extract_exp_out

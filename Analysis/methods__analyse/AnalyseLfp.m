@@ -276,10 +276,36 @@ if event_potential
                     end
                 end
                 
+                if analyse_phase
+                    if j ==1   % incorrect
+                        for ntrl = 1:sum(trlindx)
+                            stats.band_passed.stop.err.ts = stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_lfp_align;
+                            % theta
+                            this_theta = real(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align(:,ntrl));
+                            theta_phase = angle(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align(:,ntrl));
+                            
+                            figure; hold on
+                            plot(stats.band_passed.stop.err.ts,this_theta)
+                            plot(stats.band_passed.stop.err.ts,theta_phase)
+                            
+                            % beta
+                            this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.stop.beta.lfp_align(:,ntrl));
+                        end
+                    else
+                        for ntrl = 1:sum(trlindx)
+                            stats.band_passed.stop.err.ts = stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_lfp_align;
+                            % theta
+                            this_theta = abs(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align(:,ntrl));
+                            
+                            % beta
+                            this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.stop.beta.lfp_align(:,ntrl));
+                        end
+                    end
+                end
                 
                 %% aligned to reward
                 if any(strcmp(gettuning,'reward'))
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew],'lfp');
+                   [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew], 'lfp');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.reward)';
                     stats.trialtype.(trialtypes{i})(j).events.reward.potential_mu = nanmean(lfps_temp2);
                     stats.trialtype.(trialtypes{i})(j).events.reward.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
@@ -296,15 +322,34 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.reward.beta.potential_mu = nanmean(lfps_temp2);
                     stats.trialtype.(trialtypes{i})(j).events.reward.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.reward.beta.time = prs.ts.reward;
-                    %% align band passed signal to event theta
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_theta');
-                    stats.trialtype.(trialtypes{i})(j).events.reward.theta.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_rew])-0.5 & ts < 2,:);
-                    stats.trialtype.(trialtypes{i})(j).events.reward.theta.ts_lfp_align = ts(ts > -max([events_temp.t_move])-0.5 & ts < 2);
                     
-                    %% align band passed signal to event beta
-                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_beta');
-                    stats.trialtype.(trialtypes{i})(j).events.reward.beta.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_rew])-0.5 & ts < 2,:);
-                    stats.trialtype.(trialtypes{i})(j).events.reward.beta.ts_lfp_align = ts(ts > -max([events_temp.t_rew])-0.5 & ts < 2);
+                    %% compute spectrogram lfp not band passed
+                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew], 'lfp');
+                    stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_rew])-0.5 & ts < 2,:);
+                    stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.ts_lfp_align = ts(ts > -max([events_temp.t_rew])-0.5 & ts < 2);
+                    [stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.freq_spectrogram] = ...
+                        mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.lfp_align,prs.spectrogram_movingwin,spectralparams);
+                    %                     figure; imagesc(stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.ts_spectrogram-1,...
+                    %                         stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.p_spectrogram')); axis xy;
+                    %                     set(gca,'xlim',[-0.75 0.75])
+                    %
+                    %% compute spectrogram lfp theta
+                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew], 'lfp_theta');
+                    stats.trialtype.(trialtypes{i})(j).events.reward.theta.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_rew])-0.5 & ts < 2,:);
+                    stats.trialtype.(trialtypes{i})(j).events.reward.theta.ts_lfp_align = ts(ts > -max([events_temp.t_rew])-0.5 & ts < 2);
+                    % %                     [stats.trialtype.(trialtypes{i})(j).events.reward.theta.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.reward.theta.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.reward.theta.freq_spectrogram] = ...
+                    % %                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.reward.theta.lfp_align,prs.spectrogram_movingwin,spectralparams);
+                    %
+                    %% compute spectrogram lfp beta
+                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew], 'lfp_beta');
+                    stats.trialtype.(trialtypes{i})(j).events.reward.beta.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_stop])-0.5 & ts < 2,:);
+                    stats.trialtype.(trialtypes{i})(j).events.reward.beta.ts_lfp_align = ts(ts > -max([events_temp.t_stop])-0.5 & ts < 2);
+                    [stats.trialtype.(trialtypes{i})(j).events.reward.beta.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.reward.beta.freq_spectrogram] = ...
+                        mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.reward.beta.lfp_align,prs.spectrogram_movingwin,spectralparams);
+                    %                     figure; imagesc(stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_spectrogram-1,...
+                    %                         stats.trialtype.(trialtypes{i})(j).events.stop.beta.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.beta.p_spectrogram')); axis xy;
+                    %                     set(gca,'xlim',[-0.75 0.75]) %'ylim',[4 80])
+                    
                     %%
                     if extract_band_pass && strcmp(trialtypes{i},'reward')
                         if j ==1   % incorrect

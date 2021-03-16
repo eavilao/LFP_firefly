@@ -2627,7 +2627,7 @@ switch plot_type
         theta = [4 12];
         low_beta = [12 20];
         high_beta = [20 30];
-        for nmonk = 2 %1:length(monk)
+        for nmonk = 1 %1:length(monk)
             for nsess = 1:length(monk(nmonk).sess)
                 for cond = 2
                     areas = fieldnames(monk(nmonk).sess(nsess).trialtype.(type)(1).area); % get areas
