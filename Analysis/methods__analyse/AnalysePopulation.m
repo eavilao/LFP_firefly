@@ -875,6 +875,69 @@ if prs.analyse_band_passed
     end
 end
 
+if prs.analyse_phase
+    fprintf('********** Analyses on LFP phases ********** \n');
+    fprintf(['Time:  ' num2str(clock) '\n']);
+    %% all of these are aligned to stop
+    unique_brain_areas = unique({units.brain_area}); num_brain_areas = numel(unique_brain_areas);
+    gettuning = prs.tuning_events;
+    for area = 1:num_brain_areas
+        for type = 2 %1:length(trialtypes)
+            for ev = 1:length(gettuning)
+                unitindx = strcmp({units.brain_area}, unique_brain_areas{area});
+                ar = find(unitindx);
+                % extract phase for each time point and compute phase clustering (phase locking)
+                nconds = length(behv_stats.trialtype);
+                for cond = 1:nconds
+                    for ch = 1:length(ar)
+                        ntrl = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.lfp_align,2);
+                        t_temp = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ts_lfp_align;
+                        % gather angles at each time point for each electrode
+                        % theta
+                        theta_angle = angle(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.lfp_align);
+                        % beta
+                        beta_angle = angle(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.lfp_align);
+                        % Compute phase clustering for all trials in one timepoint for each electrode: abs(mean(exp(1i*angles_at_one_time_point_across_trials)));
+                        if ~isempty(theta_angle)
+                            for tmp_indx = 1:length(t_temp)
+                                stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).theta.itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * theta_angle(tmp_indx,:) ) ) ) ;
+                                stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * beta_angle(tmp_indx,:) ) ) ) ;
+                            end
+                            
+                            % plot sanity check
+                            %                     figure; hold on
+                            %                     plot(t_temp,stats.trialtype.reward(cond).events.(gettuning{ev}).chan(ch).theta.itpc);
+                            %                     plot(t_temp,stats.trialtype.reward(cond).events.(gettuning{ev}).chan(ch).beta.itpc);
+                            
+                            % compute Rayleigh test for non-uniformiuty of circular
+                            % data for each time point
+                            for tmp_indx = 1:length(t_temp)
+                                [stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).theta.pval_circ(tmp_indx), stats.trialtype.reward(cond).events.(gettuning{ev}).chan(ch).theta.z_val_circ(tmp_indx)]...
+                                    = circ_rtest(theta_angle(tmp_indx,:));
+                                
+                                [stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.pval_circ(tmp_indx), stats.trialtype.reward(cond).events.(gettuning{ev}).chan(ch).beta.z_val_circ(tmp_indx)]...
+                                    = circ_rtest(beta_angle(tmp_indx,:));
+                            end
+                            %                     % plot polar plot and histogram
+                            %                     figure(1); hold on; set(gcf, 'Position',[1 704 1919 401]); title(['channel ' num2str(ch)])
+                            %                     for i = 1:length(timepoints)
+                            %                         subplot(4,10,i)
+                            %                         polarplot([zeros(1,ntrl);squeeze(stats.area.(unique_brain_areas{area}).band.beta.reward(cond).angle(1,:,i))],[zeros(1,ntrl); ones(1,ntrl)],'k', 'LineWidth', 0.01);
+                            %                         thetaticks(0:90:315)
+                            %
+                            %                         hold on; subplot(4,10,i+10)
+                            %                         histogram(rad2deg(squeeze(stats.area.(unique_brain_areas{area}).band.beta.reward(cond).angle(1,:,i))),20)
+                            %                         set(gca, 'xlim', [-180 180], 'xTick', []); box off
+                            %                         xlabel([ num2str(timepoints(i)) 's'])
+                            %                     end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
 
 fprintf('**********End of LFP Pop Analyses********** \n');
 fprintf(['Time:  ' num2str(clock) '\n']);
