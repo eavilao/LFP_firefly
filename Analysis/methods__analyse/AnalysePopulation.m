@@ -1,4 +1,4 @@
-mefunction stats = AnalysePopulation(units,trials_behv,behv_stats,lfps,prs)
+function stats = AnalysePopulation(units,trials_behv,behv_stats,lfps,prs)
 
 nunits = length(units);
 dt = prs.dt; % sampling resolution (s)
