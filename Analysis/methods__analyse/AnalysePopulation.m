@@ -902,20 +902,18 @@ if prs.analyse_phase
                         %% Compute phase clustering for all trials in one timepoint for each electrode: abs(mean(exp(1i*angles_at_one_time_point_across_trials)));
                         if ~isempty(theta_angle)
                             for tmp_indx = 1:length(t_temp_theta)
-                                stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).theta.itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * theta_angle(tmp_indx,:) ) ) ) ;
+                                theta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * theta_angle(tmp_indx,:) ) ) ) ;
                                 % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
-                            stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).theta.itpc_pval = ...
-                                exp(-ntrl * (stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).theta.itpc(tmp_indx,:))^2); 
+                                theta(ch).itpc_pval = exp(-ntrl * (theta(ch).itpc(tmp_indx,:))^2);
                             end
                         end
                         %
                         
                         if ~isempty(beta_angle)
                             for tmp_indx = 1:length(t_temp_beta)
-                                stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * beta_angle(tmp_indx,:) ) ) ) ;
-                             % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
-                            stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.itpc_pval = ...
-                                exp(-ntrl * (stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.itpc(tmp_indx,:))^2); 
+                                beta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * beta_angle(tmp_indx,:) ) ) ) ;
+                                % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
+                                beta(ch).itpc_pval = exp(-ntrl * (beta(ch).itpc(tmp_indx,:))^2);
                             end
                         end
                         % plot sanity check
@@ -957,9 +955,9 @@ if prs.analyse_phase
             % average itpc for all channels and store
             try
                 for ch = 1:length(ar)
-                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.angles(ch,:) = stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).theta.itpc;
+                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.angles(ch,:) = theta(ch).itpc;
                     stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ts = t_temp_theta;
-                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.angles(ch,:) = stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.itpc;
+                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.angles(ch,:) = beta(ch).itpc;
                     stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ts = t_temp_beta;
                 end
                 % theta

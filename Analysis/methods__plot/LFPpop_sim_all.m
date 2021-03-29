@@ -20,10 +20,10 @@ do_cohero_band_passed = false; % extract coherograms per band
 doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
 save_band_pass_analysis = false; % extract band passed lfp signal only (used only for plotting)
-do_band_passed_pop = false; 
-do_phases
-name_output_exp_out_file = 'exp_out_lfp_stats_pop_2021_02_23_band_passed_only_pop_3sess'; 
-name_output_file = 'lfp_spectro_trial_2021_03_13_2sess_test';
+do_band_passed_pop = false;  % needs pop
+do_phases = true; % needs pop
+name_output_exp_out_file = 'exp_out_lfp_phase_2021_03_29'; 
+name_output_file = 'lfp_phase_2021_03_29_one_sess_Schro';
 
 %% Extract
 if extract_exp_out
@@ -707,9 +707,20 @@ if do_band_passed_pop
     end
 end
 
+if do_phases
+    monks = unique([exp.monk_id]); clear p_monk
+    for ii = 1:length(monks)
+        m = [exp.monk_id] == monks(ii); p_monk = exp(m);
+        for s = 1:length(p_monk)
+            monk(ii).sess(s).pop = p_monk(s).pop;
+        end
+    end
+end
+
 %% Save
 % This file is needed to plot in plotLFPpop_sim.m
 
+%% 
 disp('                 Done, saving . . .     ')
 fprintf(['Time:  ' num2str(clock) '\n']);
 save(name_output_file, 'monk', '-v7.3')

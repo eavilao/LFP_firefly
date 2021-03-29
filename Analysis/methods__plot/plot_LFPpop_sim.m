@@ -4124,4 +4124,29 @@ switch plot_type
             set(ax(1),'YLim',[-100 100], 'YTick', []); set(ax(2),'YLim',[-180 180])
             xlim([min(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts) 1.5]); set(gca,'TickDir', 'out', 'YTick', []); box off;
         end
+        
+    case 'phase_colormap_trial' % not great over time
+        area =  'MST' %fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
+        type = 'reward'
+        event = 'stop'
+        band = 'beta'
+        j = 2; % 1 = incorrect ;; 2 = correct
+        unitindx = strcmp({monk.sessions.lfps.brain_area}, area);
+        ar = find(unitindx);
+        win = [-1.5 1.5];
+        unitindx = strcmp({monk.sessions.lfps.brain_area}, area);
+        ch = 11; 
+        
+        ts = monk(1).sessions.lfps(ar(ch)).stats.trialtype.(type)(j).events.(event).beta.ts_lfp_align;
+        ntrl = size(monk(1).sessions.lfps(ar(ch)).stats.trialtype.(type)(j).events.(event).beta.lfp_align,2);
+        for ii=1:ntrl
+            phase(ii,:) = rad2deg(angle(monk(1).sessions.lfps(ar(ch)).stats.trialtype.(type)(j).events.(event).beta.lfp_align(:,ii)));
+        end
+
+        %% plot
+        figure; hold on; colormap(parula);
+        imagesc(ts,1:size(phase),abs(phase)); colorbar;
+        set(gca,'xlim',[-0.1 0.1],'ylim',[0 size(phase,1)], 'FontSize', 22)
+        ylabel('trial number'); xlabel('Stop Time (s)'); axis square; vline(0,'-w'); vline(0,'-w');
+        
 end
