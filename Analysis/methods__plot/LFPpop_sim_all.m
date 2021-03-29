@@ -21,6 +21,7 @@ doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
 save_band_pass_analysis = false; % extract band passed lfp signal only (used only for plotting)
 do_band_passed_pop = false; 
+do_phases
 name_output_exp_out_file = 'exp_out_lfp_stats_pop_2021_02_23_band_passed_only_pop_3sess'; 
 name_output_file = 'lfp_spectro_trial_2021_03_13_2sess_test';
 

@@ -56,6 +56,8 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'band_passed_amplitude' <-- this one uses experiments.m directly. load experiments.m and then monk = experiments;
 % 'pop_psth_band_passed'
 % 'band_passed_vs_accuracy'
+% 'band_passed_phase_trial' <-- this one uses experiments.m directly. load experiments.m and then monk = experiments;
+% 'phase_colormap_trial'
 
 
 % print('-painters', '-depsc2', 'raster')
@@ -4097,5 +4099,29 @@ switch plot_type
 %         errorbar(1,mean(mean(peak_t_corr_all)), std(peak_t_corr_all),'.r', 'MarkerSize', 40, 'CapSize', 0); % plot(1,peak_t_corr_all, 'og', 'MarkerSize', 10);
 %         errorbar(1.2,mean(mean(peak_t_incorr_all)), std(peak_t_incorr_all),'ob', 'MarkerSize', 10,'CapSize', 0); % plot(1.2,peak_t_incorr_all, 'ok', 'MarkerSize', 10); 
 %         set(gca, 'xlim', [0.5 nsess+0.5],'yLim',[-1.5 1.5],'yTick',[-1.5 0 1.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
-       
+
+    case 'band_passed_phase_trial' 
+        type = 'reward'
+        j = 2; % 1=unrewarded  2=rewarded
+        trls = 31:41;
+        % load experiments file
+        %% theta
+        for ii=trls
+            figure; hold on
+            [ax,h1,h2] = plotyy(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,real(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii)),...
+                monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,rad2deg(angle(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii))))
+            % plot(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,abs(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii)))
+            set(ax(1),'YLim',[-100 100], 'YTick', []); set(ax(2),'YLim',[-180 180])
+            xlim([min(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts) 1.5]); set(gca,'TickDir', 'out', 'YTick', []); box off;
+        end
+        
+        %% beta
+        for ii=trls
+            figure; hold on
+            [ax,h1,h2] = plotyy(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,real(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.beta.lfp_align(:,ii)),...
+                monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,rad2deg(angle(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.beta.lfp_align(:,ii))))
+            % plot(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,abs(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii)))
+            set(ax(1),'YLim',[-100 100], 'YTick', []); set(ax(2),'YLim',[-180 180])
+            xlim([min(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts) 1.5]); set(gca,'TickDir', 'out', 'YTick', []); box off;
+        end
 end

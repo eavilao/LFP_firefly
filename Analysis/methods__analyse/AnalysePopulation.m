@@ -925,15 +925,18 @@ if prs.analyse_phase
                         
                         %% compute Rayleigh test for non-uniformiuty of circular
                         % data for each time point
-                        for tmp_indx = 1:length(t_temp_theta)
-                            [stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).theta.pval_circ(tmp_indx), stats.area.(unique_brain_areas{area}).trialtype.reward(cond).events.(gettuning{ev}).chan(ch).theta.z_val_circ(tmp_indx)]...
-                                = circ_rtest(theta_angle(tmp_indx,:));
+                        if ~isempty(theta_angle)
+                            for tmp_indx = 1:length(t_temp_theta)
+                                [stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).theta.pval_circ(tmp_indx), stats.area.(unique_brain_areas{area}).trialtype.reward(cond).events.(gettuning{ev}).chan(ch).theta.z_val_circ(tmp_indx)]...
+                                    = circ_rtest(theta_angle(tmp_indx,:));
+                            end
                         end
-                        for tmp_indx = 1:length(t_temp_beta)
-                            [stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.pval_circ(tmp_indx), stats.area.(unique_brain_areas{area}).trialtype.reward(cond).events.(gettuning{ev}).chan(ch).beta.z_val_circ(tmp_indx)]...
-                                = circ_rtest(beta_angle(tmp_indx,:));
+                        if ~isempty(beta_angle)
+                            for tmp_indx = 1:length(t_temp_beta)
+                                [stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.pval_circ(tmp_indx), stats.area.(unique_brain_areas{area}).trialtype.reward(cond).events.(gettuning{ev}).chan(ch).beta.z_val_circ(tmp_indx)]...
+                                    = circ_rtest(beta_angle(tmp_indx,:));
+                            end
                         end
-                        
                         
                         
                         %                     % plot polar plot and histogram
