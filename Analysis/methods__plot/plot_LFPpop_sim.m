@@ -3669,8 +3669,7 @@ switch plot_type
         for m = 1%:length(monk)  % [1 3] % 1:length(monk)
             
             for nsess = 1:length(monk(m).sess)
-                %% corr
-                % gather
+                %% gather
                 ts = monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.ts_rate_95(1,:);
                 r_corr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95);
                 r_corr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95)/sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95,1));
@@ -4102,27 +4101,28 @@ switch plot_type
 
     case 'band_passed_phase_trial' 
         type = 'reward'
+        event = 'stop'
         j = 2; % 1=unrewarded  2=rewarded
         trls = 31:41;
         % load experiments file
         %% theta
         for ii=trls
             figure; hold on
-            [ax,h1,h2] = plotyy(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,real(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii)),...
-                monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,rad2deg(angle(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii))))
+            [ax,h1,h2] = plotyy(monk.sessions.lfps(41).stats.band_passed.(event).corr.ts,real(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.(event).theta.lfp_align(:,ii)),...
+                monk.sessions.lfps(41).stats.band_passed.(event).corr.ts,angle(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.(event).theta.lfp_align(:,ii)));
             % plot(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,abs(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii)))
-            set(ax(1),'YLim',[-100 100], 'YTick', []); set(ax(2),'YLim',[-180 180])
-            xlim([min(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts) 1.5]); set(gca,'TickDir', 'out', 'YTick', []); box off;
+            set(ax(1),'YLim',[-110 110], 'YTick', []); set(ax(2),'YLim',[-4 4],'YTick', []);
+            xlim([-1.5 1.5]); set(gca,'TickDir', 'out', 'YTick', []); box off;
         end
         
         %% beta
         for ii=trls
             figure; hold on
-            [ax,h1,h2] = plotyy(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,real(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.beta.lfp_align(:,ii)),...
-                monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,rad2deg(angle(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.beta.lfp_align(:,ii))))
+            [ax,h1,h2] = plotyy(monk.sessions.lfps(41).stats.band_passed.(event).corr.ts,real(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.(event).beta.lfp_align(:,ii)),...
+                monk.sessions.lfps(41).stats.band_passed.(event).corr.ts,rad2deg(angle(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.(event).beta.lfp_align(:,ii)))); 
             % plot(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts,abs(monk.sessions.lfps(41).stats.trialtype.(type)(j).events.stop.theta.lfp_align(:,ii)))
-            set(ax(1),'YLim',[-100 100], 'YTick', []); set(ax(2),'YLim',[-180 180])
-            xlim([min(monk.sessions.lfps(41).stats.band_passed.stop.corr.ts) 1.5]); set(gca,'TickDir', 'out', 'YTick', []); box off;
+            set(ax(1),'YLim',[-100 100], 'YTick', []); set(ax(2),'YLim',[-4 4]);
+            xlim([-1.5 1.5]); set(gca,'TickDir', 'out', 'YTick', []); box off;
         end
         
     case 'phase_colormap_trial' % not great over time
@@ -4133,7 +4133,7 @@ switch plot_type
         j = 2; % 1 = incorrect ;; 2 = correct
         unitindx = strcmp({monk.sessions.lfps.brain_area}, area);
         ar = find(unitindx);
-        win = [-1.5 1.5];
+        win = [-0.05 0.05];
         unitindx = strcmp({monk.sessions.lfps.brain_area}, area);
         ch = 11; 
         
@@ -4146,7 +4146,86 @@ switch plot_type
         %% plot
         figure; hold on; colormap(parula);
         imagesc(ts,1:size(phase),abs(phase)); colorbar;
-        set(gca,'xlim',[-0.1 0.1],'ylim',[0 size(phase,1)], 'FontSize', 22)
+        set(gca,'xlim',[win(1) win(2)],'ylim',[0 size(phase,1)], 'FontSize', 22)
         ylabel('trial number'); xlabel('Stop Time (s)'); axis square; vline(0,'-w'); vline(0,'-w');
+        
+    case 'phase_polar_hist'
+        % extract 
+        
+        figure(1); hold on; set(gcf, 'Position',[1 704 1919 401]); title(['channel ' num2str(ch)])
+        for i = 1:length(timepoints)
+            subplot(4,10,i)
+            polarplot([zeros(1,ntrl);squeeze(stats.area.(unique_brain_areas{area}).band.beta.reward(cond).angle(1,:,i))],[zeros(1,ntrl); ones(1,ntrl)],'k', 'LineWidth', 0.01);
+            thetaticks(0:90:315)
+            
+            hold on; subplot(4,10,i+10)
+            histogram(rad2deg(squeeze(stats.area.(unique_brain_areas{area}).band.beta.reward(cond).angle(1,:,i))),20)
+            set(gca, 'xlim', [-180 180], 'xTick', []); box off
+            xlabel([ num2str(timepoints(i)) 's'])
+        end
+        
+    case 'mean_itpc'
+        ar = 'PPC'     % MST PPC PFC
+        band = 'beta'
+        win = [-1.5 1.5];
+        ev = 'stop'
+        
+        itpc_corr_all = []; itpc_incorr_all = []; t_max_itpc_corr = []; t_max_itpc_incorr = []; itpc_corr_sem_all= []; itpc_incorr_sem_all = []; 
+        for m = 1:length(monk)  % [1 3] % 1:length(monk) 
+            clear itpc_corr itpc_incorr itpc_corr_sem itpc_incorr_sem
+            for nsess = 1:length(monk(m).sess)
+                ts_corr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ts; ts_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ts;
+                %% correct 
+                % itpc_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_mu; itpc_corr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_sem(1, nsess,ts_incorr>win(1) & ts_incorr<win(2)));
+                itpc_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_mu']); itpc_corr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_sem']);
+                % store
+                ts_corr_win = ts_corr(ts_corr>win(1) & ts_corr<win(2)); 
+                itpc_corr_all = [itpc_corr_all ; itpc_corr(nsess,ts_corr>win(1) & ts_corr<win(2))]; 
+                itpc_corr_sem_all = [itpc_corr_sem_all ; itpc_corr_sem(nsess,ts_corr>win(1) & ts_corr<win(2))]; 
+                % extract max vals and time
+                [~,indx_t_corr] = max(itpc_corr(nsess,ts_corr>win(1) & ts_corr<win(2))); 
+                
+                %% incorrect
+                % itpc_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ang_itpc_mu; itpc_incorr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ang_itpc_sem(1,nsess,ts_incorr>win(1) & ts_incorr<win(2));
+                itpc_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).([(band) '_ang_itpc_mu']); itpc_incorr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).([(band) '_ang_itpc_sem']);
+                % store
+                ts_incorr_win = ts_incorr(ts_incorr>win(1) & ts_incorr<win(2))
+                itpc_incorr_all = [itpc_incorr_all ; itpc_incorr(nsess,ts_incorr>win(1) & ts_incorr<win(2))];
+                itpc_incorr_sem_all = [itpc_incorr_sem_all ; itpc_corr_sem(nsess,ts_incorr>win(1) & ts_incorr<win(2))]; 
+                 % extract max vals and time
+                [~,indx_t_incorr] =  max(itpc_incorr(nsess,ts_incorr>win(1) & ts_incorr<win(2))); 
+               
+                t_max_itpc_corr = [t_max_itpc_corr ; ts_corr(indx_t_corr)];
+                t_max_itpc_incorr = [t_max_itpc_incorr ; ts_incorr(indx_t_incorr)];
+            end 
+            % plot for each monkey
+            figure; hold on
+            shadedErrorBar(ts_corr, itpc_corr,itpc_corr_sem,'lineprops', 'g')
+            shadedErrorBar(ts_incorr, itpc_incorr,itpc_incorr_sem, 'lineprops', 'k')
+            set(gca,'xlim',[win(1) win(2)],'ylim',[0 0.2], 'yTick',[0 0.1 0.2], 'FontSize', 22); axis square
+            ylabel('phase clustering'); xlabel('time (s)')
+            title(['monkey ' num2str(m)])
+        end
+
+        % plot mean for all monkeys
+        figure; hold on
+        shadedErrorBar(ts_corr, mean(itpc_corr_all), mean(itpc_corr_sem_all), 'lineprops', 'g')
+        shadedErrorBar(ts_incorr, mean(itpc_incorr_all),mean(itpc_incorr_sem_all),'lineprops', 'k')
+        set(gca,'xlim',[win(1) win(2)],'ylim',[0 0.2], 'yTick',[0 0.1 0.2], 'FontSize', 22); axis square
+        ylabel('phase clustering'); xlabel('time (s)'); title('all monks')
+        
+        % plot mean max itpc +/- sem
+        plot t_max_itpc_corr
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
 end
