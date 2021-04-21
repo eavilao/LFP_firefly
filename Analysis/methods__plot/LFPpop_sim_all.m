@@ -23,7 +23,7 @@ save_band_pass_analysis = false; % extract band passed lfp signal only (used onl
 do_band_passed_pop = false;  % needs pop
 do_phases = true; % needs pop
 name_output_exp_out_file = 'exp_out_lfp_phase_2021_03_29'; 
-name_output_file = 'lfp_phase_2021_03_29_one_sess_Schro_Quigley';
+name_output_file = 'lfp_phase_2021_04_05_phase_all_monks';
 
 %% Extract
 if extract_exp_out
