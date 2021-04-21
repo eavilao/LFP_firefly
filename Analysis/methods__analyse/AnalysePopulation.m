@@ -586,7 +586,7 @@ end
 
 %% compute spectrogram for each trial for all channels (average all channels per trial) and per channel aligned to movement stop
 if prs.compute_spectrum_whole_trial_align_stop
-    fprintf('**********Computing coherogram for the whole trial between LFPs********** \n');
+    fprintf('**********Computing spectrogram for the whole trial between LFPs********** \n');
     fprintf(['Time:  ' num2str(clock) '\n']);
     spectralparams.tapers = prs.spectrum_tapers;
     spectralparams.Fs = 1/dt;
@@ -623,7 +623,7 @@ end
 
 %% compute spectrogram for each trial for all channels (average all channels per trial) and per channel aligned to movement stop for each band separately
 if prs.compute_spectrum_whole_trial_align_stop_per_band
-    fprintf('**********Computing coherogram for the whole trial between LFPs********** \n');
+    fprintf('**********Computing spectrogram for the whole trial between LFPs********** \n');
     fprintf(['Time:  ' num2str(clock) '\n']);
     spectralparams.tapers = prs.spectrum_tapers;
     spectralparams.Fs = 1/dt;
@@ -900,6 +900,7 @@ if prs.analyse_phase
                         theta_angle = angle(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.lfp_align);
                         % beta
                         beta_angle = angle(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.lfp_align);
+                        %%%%%%%%%   f = instantaneous_frequency( amplitude (abs(x)), Fs ); % f contains "instantaneous frequency"
                         %% Compute phase clustering for all trials in one timepoint for each electrode: abs(mean(exp(1i*angles_at_one_time_point_across_trials)));
                         if ~isempty(theta_angle)
                             for tmp_indx = 1:length(t_temp_theta)
@@ -985,6 +986,108 @@ if prs.analyse_phase
         end
     end
 end
+
+
+if prs.traveling_wave
+   %%  from Muller Lab https://github.com/mullerlab/wave-matlab/ %%
+   % Compute traveling wave only for array data
+   unique_brain_areas = unique({units.brain_area}); num_brain_areas = numel(unique_brain_areas);
+   for area = 1:num_brain_areas
+       unitindx = strcmp({units.brain_area}, unique_brain_areas{area});
+       ar = find(unitindx);
+       %% reformat lfp data to use wave-matlab
+       % store lfp aligned data to 3-D matrix (mean lfp x electrode_site x electrode_site)
+       ind2row = @(i,j) min(i,j) + (max(i,j)-1)*(max(i,j)-2)/2;
+       spatial_coher = []; spatial_phase = [];
+       for i=2:nunits
+           for j=1:i-1
+               stats.trialtype.(trialtypes{type})(cond).crosslfp.spatial_coher(:,i,j) = stats.trialtype.(trialtypes{type})(cond).crosslfp.coher(:,ind2row(i,j));
+               stats.trialtype.(trialtypes{type})(cond).crosslfp.spatial_phase(:,i,j) = stats.trialtype.(trialtypes{type})(cond).crosslfp.phase(:,ind2row(i,j));
+           end
+       end
+       stats.trialtype.(trialtypes{type})(cond).crosslfp.spatial_coher(:,end,end+1) = 0; % pad column of zeros to squarify the matrix
+       stats.trialtype.(trialtypes{type})(cond).crosslfp.spatial_phase(:,end,end+1) = 0;
+            
+            
+   [rows,cols,~] = size( data(1).x ); channels = rows*cols;
+   [X,Y] = meshgrid( 1:cols, 1:rows ); % create grid
+   
+% electrode = prs.electrode_type;
+%     nlfps = 96;
+%     [xloc,yloc] = map_utaharray([],electrode);
+%     [channel_id,electrode_id] = MapChannel2Electrode(electrode);
+%     [~,indx] = sort(electrode_id); reorderindx = channel_id(indx);
+%     lfps = lfps(reorderindx);
+%     for i=1:nlfps
+%         lfp(i,:) = mean(lfps(i));
+%         locations =   subplot(10,10,10*(xloc(i)-1) + yloc(i));
+%     end
+    
+    
+    
+    
+    
+    for ii =  1:trl
+    %% wideband filter
+    
+    xf = bandpass_filter( data(ii).x, parameters.f(1), parameters.f(2), ...
+        parameters.filter_order, parameters.Fs );
+    
+    %% GP representation
+    p = generalized_phase( xf, parameters.Fs, parameters.lp );
+    
+     %% find evaluation points
+    evaluation_points = ...
+        find_evaluation_points( p, parameters.evaluation_angle, parameters.tol );
+    
+    % plotting 1 - evaluation points
+    if options.plot, plot_evaluation_points( p, evaluation_points ); end
+    
+     % calculate phase gradient
+    [pm,pd,dx,dy] = phase_gradient_complex_multiplication( p, parameters.pixel_spacing );
+    
+    % divergence calculation
+    source = find_source_points( evaluation_points, X, Y, dx, dy );  
+    
+    % phase correlation with distance (\rho_{\phi,d} measure)
+    rho = zeros( 1, length(evaluation_points) );
+    for jj = 1:length(evaluation_points)
+        
+        ph = angle( p(:,:,evaluation_points(jj)) );
+        rho(jj) = phase_correlation_distance( ph, source(:,jj), parameters.pixel_spacing );
+        
+    end
+    
+    % plotting 2 - wave examples
+    if options.plot, plot_wave_examples( xf(:,:,start_time:stop_time), options, ii, evaluation_points, source, rho ); end
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    end 
+    
+   end
+  
+    
+end
+
+if prs.analyse_phase_phase
+   
+  
+end
+
 
 fprintf('**********End of LFP Pop Analyses********** \n');
 fprintf(['Time:  ' num2str(clock) '\n']);
