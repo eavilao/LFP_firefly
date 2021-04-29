@@ -729,8 +729,11 @@ else
             end
             
         case 'phase_dist'
-            phi = pop_lfps.stats.crosslfp.phase;
-            f = pop_lfps.stats.crosslfp.freq;
+            % phi = pop_lfps.stats.crosslfp.phase;
+            % f = pop_lfps.stats.crosslfp.freq;
+            phi = pop_lfps.stats.trialtype.reward(1).crosslfp.phase; 
+            f = pop_lfps.stats.trialtype.reward(1).crosslfp.freq;
+            electrode = electrode{2}; nlfps = 96; 
             [xloc,yloc] = map_utaharray([],electrode); [channel_id,electrode_id] = MapChannel2Electrode(electrode);
             switch electrode
                 case 'utah96'
@@ -810,7 +813,8 @@ else
                     phasediffs = mean(squeeze(spatial_phasediff(:,:,beta)),2);
                     [phasediffs_sorted,phaseorder] = sort(phasediffs);
                     electrode_id_sorted = electrode_id(phaseorder);
-                    cmap = cool(nlfps/2);
+                    % cmap = cool(nlfps/2);
+                    cmap = winter(nlfps/2);
                     figure; hold on;
                     subplot(1,2,1); hold on;
                     for i=1:nlfps/2
@@ -826,11 +830,11 @@ else
                     % fill in the edges of the array (for smoothing utah96)
                     %                     zloc(1,1) = 0.5*(zloc(1,2) + zloc(2,1)); zloc(1,end) = 0.5*(zloc(1,end-1) + zloc(2,end));
                     %                     zloc(end,1) = 0.5*(zloc(end-1,1) + zloc(end,2)); zloc(end,end) = 0.5*(zloc(end,end-1) + zloc(end-1,end));
-                    axis([0 11 0 11]); axis off; colormap(cool); colorbar;
+                    axis([0 11 0 11]); axis off; colormap(winter); colorbar; % colormap(cool); colorbar;
                     maxtimelag = ((phasediffs_sorted(end) - phasediffs_sorted(1))/(2*pi))*(1/beta_peak)*1e3;
                     colorbar('Ticks',[0,1],'TickLabels',{[num2str(0) ' ms'],[num2str(round(maxtimelag*10)/10) ' ms']},'Fontsize',14);
                     %             DrawPhaseArrows([xloc yloc],electrode_id_sorted);
-                    figure; imagesc(imresize(zloc,10)); colormap(cool);
+                    figure; imagesc(imresize(zloc,10));  colormap(winter); %colormap(cool);
                     %% velocity
                     spatial_phasediff_beta = squeeze(spatial_phasediff(:,:,beta)); spatial_phasediff_beta = spatial_phasediff_beta(:);
                     spatial_dists = unique(spatial_dist);

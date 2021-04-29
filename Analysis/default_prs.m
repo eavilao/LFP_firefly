@@ -300,22 +300,14 @@ prs.lfp_eye = false;
 prs.compute_spectrum_whole_trial = false;
 prs.compute_spectrum_whole_trial_align_stop = false; 
 prs.compute_spectrum_whole_trial_align_stop_per_band = false;
-prs.analyse_phase = true;  
+prs.analyse_phase = false;  
 prs.analyse_theta = false; % compute tunings
 prs.analyse_alpha = false; % compute tunings
 prs.analyse_beta = false; % compute tunings
 prs.analyse_wideband = false; % compute tunings
-prs.compute_coherencyLFP = false;
+prs.compute_coherencyLFP = true;
 prs.compute_coherogram = false;
 prs.compute_coherogram_band_passed = false; 
-% traveling wave
-prs.traveling_wave = true;
-prs.filter_order = 4; 
-prs.f = [5 40]; % filter parameters
-prs.pixel_spacing = 0.4; % spacing between electrodes [mm]
-prs.lp = 0; % cutoff for negative frequency detection [Hz]
-prs.evaluation_angle = pi; prs.tol = 0.2; % evaluation pointstraveling wave
-
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;
