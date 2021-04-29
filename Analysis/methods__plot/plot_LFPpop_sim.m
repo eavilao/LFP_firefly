@@ -58,6 +58,8 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'band_passed_vs_accuracy'
 % 'band_passed_phase_trial' <-- this one uses experiments.m directly. load experiments.m and then monk = experiments;
 % 'phase_colormap_trial'
+% 'phase_polar_hist'
+% 'mean_itpc'
 
 
 % print('-painters', '-depsc2', 'raster')
@@ -4150,12 +4152,17 @@ switch plot_type
         ylabel('trial number'); xlabel('Stop Time (s)'); axis square; vline(0,'-w'); vline(0,'-w');
         
     case 'phase_polar_hist'
-        % extract 
+        %% check where is the time of max itpc 
         
+        
+        %% extract phases for that timepoint 
+        
+        
+        %% plot 
         figure(1); hold on; set(gcf, 'Position',[1 704 1919 401]); title(['channel ' num2str(ch)])
         for i = 1:length(timepoints)
             subplot(4,10,i)
-            polarplot([zeros(1,ntrl);squeeze(stats.area.(unique_brain_areas{area}).band.beta.reward(cond).angle(1,:,i))],[zeros(1,ntrl); ones(1,ntrl)],'k', 'LineWidth', 0.01);
+            polarplot([zeros(1,ntrl); squeeze(stats.area.(unique_brain_areas{area}).band.beta.reward(cond).angle(1,:,i))],[zeros(1,ntrl); ones(1,ntrl)],'k', 'LineWidth', 0.01);
             thetaticks(0:90:315)
             
             hold on; subplot(4,10,i+10)
@@ -4165,67 +4172,79 @@ switch plot_type
         end
         
     case 'mean_itpc'
-        ar = 'PPC'     % MST PPC PFC
-        band = 'beta'
+        ar = 'PFC'     % MST PPC PFC
+        band = 'theta'
         win = [-1.5 1.5];
         ev = 'stop'
         
         itpc_corr_all = []; itpc_incorr_all = []; t_max_itpc_corr = []; t_max_itpc_incorr = []; itpc_corr_sem_all= []; itpc_incorr_sem_all = []; 
-        for m = 1:length(monk)  % [1 3] % 1:length(monk) 
+        
+        for m = 3  % [1 3] % 1:length(monk) 
+           
             clear itpc_corr itpc_incorr itpc_corr_sem itpc_incorr_sem
             for nsess = 1:length(monk(m).sess)
-                ts_corr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ts; ts_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ts;
+                ts_corr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ts; 
+                ts_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ts;
                 %% correct 
-                % itpc_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_mu; itpc_corr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_sem(1, nsess,ts_incorr>win(1) & ts_incorr<win(2)));
-                itpc_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_mu']); itpc_corr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_sem']);
+%                 % Z-score
+%                 for nCh = 1:size(monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc,1)
+%                 phase_clust_corr(nCh,:) = (monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc(nCh,ts_corr>win(1) & ts_corr<win(2))-...
+%                     nanmean(monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc(:,ts_corr>win(1) & ts_corr<win(2))))./std(monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc(:,ts_corr>win(1) & ts_corr<win(2)));
+%                 end
+                %
+                phase_clust_corr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_mu(1,ts_corr>win(1) & ts_corr<win(2));
+                itpc_corr(nsess,:) = phase_clust_corr(1:500); % making sure all vectors are the same length because of extra sample here and there
+                phase_clust_corr_sem = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_sem(1,ts_corr>win(1) & ts_corr<win(2));
+                itpc_corr_sem(nsess,:) = phase_clust_corr_sem(1:500); 
+                % itpc_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_mu']); itpc_corr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_sem']);
                 % store
-                ts_corr_win = ts_corr(ts_corr>win(1) & ts_corr<win(2)); 
-                itpc_corr_all = [itpc_corr_all ; itpc_corr(nsess,ts_corr>win(1) & ts_corr<win(2))]; 
-                itpc_corr_sem_all = [itpc_corr_sem_all ; itpc_corr_sem(nsess,ts_corr>win(1) & ts_corr<win(2))]; 
-                % extract max vals and time
-                [~,indx_t_corr] = max(itpc_corr(nsess,ts_corr>win(1) & ts_corr<win(2))); 
+                ts_corr_win = ts_corr(ts_corr>win(1) & ts_corr<win(2)); ts_corr_win = ts_corr_win(1:500); 
+                itpc_corr_all = [itpc_corr_all ; itpc_corr]; 
+                itpc_corr_sem_all = [itpc_corr_sem_all ; itpc_corr_sem]; 
+                % extract max val time
+                [~,indx_t_corr] = max(itpc_corr(nsess,:)); 
                 
                 %% incorrect
-                % itpc_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ang_itpc_mu; itpc_incorr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ang_itpc_sem(1,nsess,ts_incorr>win(1) & ts_incorr<win(2));
-                itpc_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).([(band) '_ang_itpc_mu']); itpc_incorr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).([(band) '_ang_itpc_sem']);
+                phase_clust_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ang_itpc_mu(1,ts_incorr>win(1) & ts_incorr<win(2));
+                itpc_incorr(nsess,:) = phase_clust_incorr(1:500); % making sure all vectors are the same length because of extra sample here and there
+                phase_clust_incorr_sem = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ang_itpc_sem(1,ts_incorr>win(1) & ts_incorr<win(2));
+                itpc_incorr_sem(nsess,:) = phase_clust_incorr_sem(1:500); 
+                % itpc_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).([(band) '_ang_itpc_mu']); itpc_incorr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).([(band) '_ang_itpc_sem']);
                 % store
-                ts_incorr_win = ts_incorr(ts_incorr>win(1) & ts_incorr<win(2))
-                itpc_incorr_all = [itpc_incorr_all ; itpc_incorr(nsess,ts_incorr>win(1) & ts_incorr<win(2))];
-                itpc_incorr_sem_all = [itpc_incorr_sem_all ; itpc_corr_sem(nsess,ts_incorr>win(1) & ts_incorr<win(2))]; 
-                 % extract max vals and time
-                [~,indx_t_incorr] =  max(itpc_incorr(nsess,ts_incorr>win(1) & ts_incorr<win(2))); 
+                ts_incorr_win = ts_incorr(ts_incorr>win(1) & ts_incorr<win(2)); ts_incorr_win = ts_incorr_win(1:500); 
+                itpc_incorr_all = [itpc_incorr_all ; itpc_incorr];
+                itpc_incorr_sem_all = [itpc_incorr_sem_all ; itpc_corr_sem]; 
+                 % extract max val time
+                [~,indx_t_incorr] =  max(itpc_incorr(nsess,:)); 
                
-                t_max_itpc_corr = [t_max_itpc_corr ; ts_corr(indx_t_corr)];
-                t_max_itpc_incorr = [t_max_itpc_incorr ; ts_incorr(indx_t_incorr)];
+                t_max_itpc_corr = [t_max_itpc_corr ; ts_corr_win(indx_t_corr)];
+                t_max_itpc_incorr = [t_max_itpc_incorr ; ts_incorr_win(indx_t_incorr)];
             end 
             % plot for each monkey
             figure; hold on
-            shadedErrorBar(ts_corr, itpc_corr,itpc_corr_sem,'lineprops', 'g')
-            shadedErrorBar(ts_incorr, itpc_incorr,itpc_incorr_sem, 'lineprops', 'k')
-            set(gca,'xlim',[win(1) win(2)],'ylim',[0 0.2], 'yTick',[0 0.1 0.2], 'FontSize', 22); axis square
+            for nsess = 1:length(monk)
+            shadedErrorBar(ts_corr_win, itpc_corr(nsess,:),itpc_corr_sem(nsess,:),'lineprops', 'g');
+            shadedErrorBar(ts_incorr_win, itpc_incorr(nsess,:),itpc_incorr_sem(nsess,:), 'lineprops', 'k')
+            end 
+            set(gca,'ylim',[0 0.2], 'yTick',[0 0.1 0.2], 'FontSize', 22); axis square
             ylabel('phase clustering'); xlabel('time (s)')
             title(['monkey ' num2str(m)])
         end
 
+        
         % plot mean for all monkeys
         figure; hold on
-        shadedErrorBar(ts_corr, mean(itpc_corr_all), mean(itpc_corr_sem_all), 'lineprops', 'g')
-        shadedErrorBar(ts_incorr, mean(itpc_incorr_all),mean(itpc_incorr_sem_all),'lineprops', 'k')
-        set(gca,'xlim',[win(1) win(2)],'ylim',[0 0.2], 'yTick',[0 0.1 0.2], 'FontSize', 22); axis square
-        ylabel('phase clustering'); xlabel('time (s)'); title('all monks')
+        shadedErrorBar(ts_corr_win, mean(itpc_corr_all)/max(mean(itpc_corr_all)), mean(itpc_corr_sem_all), 'lineprops', 'g'); [~,indx_max_corr]=max(mean(itpc_corr_all)); 
+        shadedErrorBar(ts_incorr_win,  mean(itpc_incorr_all)/max(mean(itpc_incorr_all)), mean(itpc_incorr_sem_all),'lineprops', 'k'); [~,indx_max_incorr]=max(mean(itpc_incorr_all)); 
+        set(gca,'xlim',[win(1) win(2)],'ylim',[0 1], 'yTick',[0 0.5 1], 'FontSize', 22); axis square; vline(ts_corr_win(indx_max_corr),'g'); vline(ts_incorr_win(indx_max_incorr),'k');
+        ylabel('phase clustering'); xlabel([ev ' time (s)']); title('all monks')
         
         % plot mean max itpc +/- sem
-        plot t_max_itpc_corr
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        figure; hold on; 
+        errorbar(1,mean(t_max_itpc_corr),std(t_max_itpc_corr), '.g', 'MarkerSize', 20, 'CapSize',0)
+        errorbar(2,mean(t_max_itpc_incorr),std(t_max_itpc_incorr), '.k', 'MarkerSize', 20, 'CapSize',0)
+        set(gca,'xlim',[0.5 2.5],'ylim',[-1.5 1.5], 'yTick',[-1 0 1],'xTick', [], 'FontSize', 22); axis square; 
+        ylabel ([ev ' time (s)'])
+
         
 end
