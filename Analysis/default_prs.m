@@ -300,12 +300,12 @@ prs.lfp_eye = false;
 prs.compute_spectrum_whole_trial = false;
 prs.compute_spectrum_whole_trial_align_stop = false; 
 prs.compute_spectrum_whole_trial_align_stop_per_band = false;
-prs.analyse_phase = false;  
+prs.analyse_phase = true;
 prs.analyse_theta = false; % compute tunings
 prs.analyse_alpha = false; % compute tunings
 prs.analyse_beta = false; % compute tunings
 prs.analyse_wideband = false; % compute tunings
-prs.compute_coherencyLFP = true;
+prs.compute_coherencyLFP = false;
 prs.compute_coherogram = false;
 prs.compute_coherogram_band_passed = false; 
 
