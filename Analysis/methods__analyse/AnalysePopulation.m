@@ -996,37 +996,37 @@ if prs.analyse_phase
     %% compute phase locking value across areas (plv, Lachaux 1999)
     for area1 = 1:num_brain_areas
         for area2 = find(1:num_brain_areas ~= area1)
-            for ev = 3 %1:length(gettuning)
+            for ev = 1:length(gettuning)
                 for cond = 1:nconds
                     ntrls = sum(behv_stats.trialtype.reward(cond).trlindx);
-                    if (ev == 4 && cond == 1)
+                    if (ev == 4 && cond == 1) % no reward in cond==1
                         stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).(['ch' num2str(ch_area1) '_to_' num2str(ch_area2)]) = NaN;
                     else
+                        clear e_theta theta_plv e_beta beta_plv
+                        cnt = 1;
                         for ch_area1 = 1:length(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).chan)   % ch in one area
                             for ch_area2 = 1:length(stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).chan)
-                                % calculate number of combinations for row assignment
-                                n_row = size(combvec(1:length(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).chan), ...
-                                    1:length(stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).chan)),2);
-                                for row_num = 1:n_row
-                                    for tmp_indx = 1:length(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).theta.angle_mu(ch_area1,:,1))
-                                        %% theta
-                                        theta_plv(row_num,tmp_indx) = abs( sum( exp( 1i*(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).theta.angle_mu(ch_area1,tmp_indx,:)...
-                                            - stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).theta.angle_mu(ch_area2,tmp_indx,:)))))/ntrls;
-                                        %% beta
-                                        beta_plv(row_num,tmp_indx) = abs( sum( exp( 1i*(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).beta.angle_mu(ch_area1,tmp_indx,:)...
-                                            - stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).beta.angle_mu(ch_area2,tmp_indx,:)))))/ntrls;
-                                    end
-                                end
-                                %% average for all rows
                                 % theta
-                                stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).theta.PLV_mu = nanmean(theta_plv);
-                                stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).theta.PLV_sem = std(theta_plv)/sqrt(size(theta_plv,2));
-                                 
-                                % beta
-                                stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).beta.PLV_mu = nanmean(beta_plv);
-                                stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).beta.PLV_sem = std(beta_plv)/sqrt(size(beta_plv,2));
+                                e_theta = squeeze(exp( 1i*(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).theta.angle_mu(ch_area1,:,:)...
+                                    - stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).theta.angle_mu(ch_area2,:,:))));
+                                theta_plv(cnt,:) = abs(sum(e_theta,2)) / ntrls;
+                                % z-score
+                                %% beta
+                                e_beta = squeeze(exp( 1i*(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).beta.angle_mu(ch_area1,:,:)...
+                                    - stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).beta.angle_mu(ch_area2,:,:))));
+                                beta_plv(cnt,:) = abs(sum(e_beta,2)) / ntrls;
+                                cnt=cnt+1;
                             end
                         end
+                        %% average for all rows
+                        % theta
+                        stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).theta.PLV_mu = nanmean(theta_plv);
+                        stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).theta.PLV_sem = std(theta_plv)/sqrt(size(theta_plv,2));
+                        
+                        % beta
+                        stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).beta.PLV_mu = nanmean(beta_plv);
+                        stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).beta.PLV_sem = std(beta_plv)/sqrt(size(beta_plv,2));
+                        
                     end
                 end
             end
