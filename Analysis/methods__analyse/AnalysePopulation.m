@@ -891,7 +891,7 @@ if prs.analyse_phase
                 for cond = 1:nconds
                     clear theta theta_angle beta beta_angle
                     for ch = 1:length(ar)
-                        ntrl = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.lfp_align,2);
+                        ntrls = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(1).events.(gettuning{ev}).beta.lfp_align,2); % % match trial number. PLV is sensitive to trial num
                         t_temp_theta = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ts_lfp_align;
                         t_temp_beta = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ts_lfp_align;
                         f = lfps(1).stats.trialtype.reward(2).spectrum.freq; 
@@ -906,21 +906,21 @@ if prs.analyse_phase
                         % store to later compute plv across areas
                         stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.angle_mu(ch,:,:) = beta_angle;
                         %%%%%%%%%   f = instantaneous_frequency( amplitude (abs(x)), Fs ); % f contains "instantaneous frequency"
-                        %% Compute phase clustering for all trials in one timepoint for each electrode: abs(mean(exp(1i*angles_at_one_time_point_across_trials))) and then z-score
+                        %% Compute phase clustering for all trials in one timepoint for each electrode: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))
                         if ~isempty(theta_angle)
                                 for tmp_indx = 1:length(t_temp_theta)
-                                    theta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * theta_angle(tmp_indx,:) ) ) ) ; 
+                                    theta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * theta_angle(tmp_indx,1:ntrls) ) ) ) ; 
                                     % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
-                                    theta(ch).itpc_pval = exp(-ntrl * (theta(ch).itpc(tmp_indx,:))^2);
+                                    theta(ch).itpc_pval = exp(-ntrls * (theta(ch).itpc(tmp_indx,1:ntrls))^2);
                             end
                         end
                         %
                         
                         if ~isempty(beta_angle)
                             for tmp_indx = 1:length(t_temp_beta)
-                                beta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * beta_angle(tmp_indx,:) ) ) ) ; 
+                                beta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * beta_angle(tmp_indx,1:ntrls) ) ) ) ; 
                                 % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
-                                beta(ch).itpc_pval = exp(-ntrl * (beta(ch).itpc(tmp_indx,:))^2);
+                                beta(ch).itpc_pval = exp(-ntrls * (beta(ch).itpc(tmp_indx,1:ntrls))^2);
                             end
                         end
                         % plot sanity check
@@ -933,13 +933,13 @@ if prs.analyse_phase
                         if ~isempty(theta_angle)
                             for tmp_indx = 1:length(t_temp_theta)
                                 [stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).theta.pval_circ(tmp_indx), stats.area.(unique_brain_areas{area}).trialtype.reward(cond).events.(gettuning{ev}).chan(ch).theta.z_val_circ(tmp_indx)]...
-                                    = circ_rtest(theta_angle(tmp_indx,:));
+                                    = circ_rtest(theta_angle(tmp_indx,1:ntrls));
                             end
                         end
                         if ~isempty(beta_angle)
                             for tmp_indx = 1:length(t_temp_beta)
                                 [stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.pval_circ(tmp_indx), stats.area.(unique_brain_areas{area}).trialtype.reward(cond).events.(gettuning{ev}).chan(ch).beta.z_val_circ(tmp_indx)]...
-                                    = circ_rtest(beta_angle(tmp_indx,:));
+                                    = circ_rtest(beta_angle(tmp_indx,1:ntrls));
                             end
                         end
                         
@@ -998,7 +998,7 @@ if prs.analyse_phase
         for area2 = find(1:num_brain_areas ~= area1)
             for ev = 1:length(gettuning)
                 for cond = 1:nconds
-                    ntrls = sum(behv_stats.trialtype.reward(cond).trlindx);
+                    ntrls = sum(behv_stats.trialtype.reward(1).trlindx); % match trial number. PLV is sensitive to trial num
                     if (ev == 4 && cond == 1) % no reward in cond==1
                         stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).(['ch' num2str(ch_area1) '_to_' num2str(ch_area2)]) = NaN;
                     else
@@ -1007,13 +1007,13 @@ if prs.analyse_phase
                         for ch_area1 = 1:length(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).chan)   % ch in one area
                             for ch_area2 = 1:length(stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).chan)
                                 % theta
-                                e_theta = squeeze(exp( 1i*(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).theta.angle_mu(ch_area1,:,:)...
-                                    - stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).theta.angle_mu(ch_area2,:,:))));
+                                e_theta = squeeze(exp( 1i*(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).theta.angle_mu(ch_area1,:,1:ntrls)...
+                                    - stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).theta.angle_mu(ch_area2,:,1:ntrls))));
                                 theta_plv(cnt,:) = abs(sum(e_theta,2)) / ntrls;
                                 % z-score
                                 %% beta
-                                e_beta = squeeze(exp( 1i*(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).beta.angle_mu(ch_area1,:,:)...
-                                    - stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).beta.angle_mu(ch_area2,:,:))));
+                                e_beta = squeeze(exp( 1i*(stats.area.(unique_brain_areas{area1}).trialtype.reward(cond).events.(gettuning{ev}).beta.angle_mu(ch_area1,:,1:ntrls)...
+                                    - stats.area.(unique_brain_areas{area2}).trialtype.reward(cond).events.(gettuning{ev}).beta.angle_mu(ch_area2,:,1:ntrls))));
                                 beta_plv(cnt,:) = abs(sum(e_beta,2)) / ntrls;
                                 cnt=cnt+1;
                             end
