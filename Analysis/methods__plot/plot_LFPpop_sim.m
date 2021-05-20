@@ -31,7 +31,7 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'spectrogram_move'
 % 'spectrogram_target'
 % 'spectrogram_stop'
-% 'spectrogram_reward_density'
+% 'spectrogram_reward_density' 
 % 'spectrogram_reward_density_all_theta'
 % 'spectrogram_reward_density_all_theta_diff'
 % 'spectrogram_reward_density_all_beta'
@@ -45,6 +45,7 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'coherogram_stop'
 % 'coherogram_reward_PPC_MST'
 % 'coherogram_target_stop_PPC_MST'
+% 'coherogram_target_stop_PPC_MST_diff'
 % 'coherence_dist'
 % 'coherence_dist_all'
 % 'coherence_dist_reward_density'
@@ -59,7 +60,7 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'band_passed_phase_trial' <-- this one uses experiments.m directly. load experiments.m and then monk = experiments;
 % 'phase_colormap_trial'
 % 'phase_polar_hist'
-% 'mean_itpc'
+% 'mean_plv'
 
 
 % print('-painters', '-depsc2', 'raster')
@@ -87,6 +88,7 @@ switch plot_type
         
     case 'behavior_steering'
         %% behavioural data
+        t_v_targ_all = []; t_w_targ_all = [];
         for m = 1:length(monk)
             for sess = 1:length(monk(m).behavior)
                 correct = monk(m).behavior(sess).stats.trialtype.reward(strcmp({monk(m).behavior(sess).stats.trialtype.reward.val},'rewarded')).trlindx;
@@ -109,15 +111,15 @@ switch plot_type
                     rew_v = behv_correct(j).continuous.v(this_ts_reward>-0.51 & this_ts_reward<0.51); rew_w = behv_correct(j).continuous.w(this_ts_reward>-0.51 & this_ts_reward<0.51);
                     
                     % store
-                    %                     v_this_move(j,:) = move_v(1:169);
-                    %                     v_this_targ(j,:) = targ_v(1:269); % so dirrrty...yuuuk. Extra sample, somewhere.
-                    %                     v_this_stop(j,:) = stop_v(1:169);
-                    %                     v_this_rew(j,:) = rew_v(1:169);
-                    %
-                    %                     w_this_move(j,:) = abs(move_w(1:169));
-                    %                     w_this_targ(j,:) = abs(targ_w(1:269));
-                    %                     w_this_stop(j,:) = abs(stop_w(1:169));
-                    %                     w_this_rew(j,:) = abs(rew_w(1:169));
+                    v_this_move(j,:) = move_v(1:169);
+                    v_this_targ(j,:) = targ_v(1:269); % so dirrrty...yuuuk. Extra sample, somewhere.
+                    v_this_stop(j,:) = stop_v(1:169);
+                    v_this_rew(j,:) = rew_v(1:169);
+                    
+                    w_this_move(j,:) = abs(move_w(1:169));
+                    w_this_targ(j,:) = abs(targ_w(1:269));
+                    w_this_stop(j,:) = abs(stop_w(1:169));
+                    w_this_rew(j,:) = abs(rew_w(1:169));
                     
                     %% velocity distribution per session
                     t_v_targ(j) = behv_correct(j).continuous.v(this_ts>-0.001 & this_ts<0.005);
@@ -127,15 +129,15 @@ switch plot_type
                 ts = ts_win(1:169); % ts_win(1:169);
                 ts_win_targ = ts_win_targ(1:269);
                 
-                v_sess_move(sess,:) = nanmean(v_this_move);
-                v_sess_targ(sess,:) = nanmean(v_this_targ);
-                v_sess_stop(sess,:) = nanmean(v_this_stop);
-                v_sess_reward(sess,:) = nanmean(v_this_rew);
+                v_sess_move(m,sess,:) = nanmean(v_this_move);
+                v_sess_targ(m,sess,:) = nanmean(v_this_targ);
+                v_sess_stop(m,sess,:) = nanmean(v_this_stop);
+                v_sess_reward(m,sess,:) = nanmean(v_this_rew);
                 
-                w_sess_move(sess,:) = nanmean(w_this_move);
-                w_sess_targ(sess,:) = nanmean(w_this_targ);
-                w_sess_stop(sess,:) = nanmean(w_this_stop);
-                w_sess_reward(sess,:) = nanmean(w_this_rew);
+                w_sess_move(m,sess,:) = nanmean(w_this_move);
+                w_sess_targ(m,sess,:) = nanmean(w_this_targ);
+                w_sess_stop(m,sess,:) = nanmean(w_this_stop);
+                w_sess_reward(m,sess,:) = nanmean(w_this_rew);
                 
                 % plot per distribution of velocties when target is on per
                 % session
@@ -148,12 +150,18 @@ switch plot_type
                 histogram(t_w_targ,35, 'DisplayStyle', 'bar');
                 set(gca,'TickDir', 'out', 'FontSize', 22); box off;
                 xlabel('Angular velocity cm/s');
+                
+                t_v_targ_all = [t_v_targ_all ; t_v_targ'];
+                t_w_targ_all = [t_w_targ_all ; t_w_targ'];
             end
+            
         end
         
         %% plot move
         figure; hold on;
-        [ax,~,~] = plotyy(ts, mean(v_sess_move),ts, mean(w_sess_move))
+        % [ax,~,~] = plotyy(ts, mean(squeeze(v_sess_move(:,)),ts, mean(w_sess_move));
+        for m = 1:length(monk), v_sess_mu(m,:) = nanmean(squeeze(v_sess_move(m,:,:))); w_sess_mu(m,:) = nanmean(squeeze(w_sess_move(m,:,:))) ; end 
+        [ax,~,~] = plotyy(ts,mean(v_sess_mu),ts,mean(w_sess_mu));                 
         set(ax(1),'YLim',[0 200]);
         set(ax(2),'YLim',[0 45]);
         set(gca,'xlim',[-0.5 0.5],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off;
@@ -161,22 +169,27 @@ switch plot_type
         
         %% plot target
         figure; hold on;
-        [ax,~,~] = plotyy(ts_win_targ, mean(v_sess_targ),ts_win_targ, mean(w_sess_targ));
+        % [ax,~,~] = plotyy(ts_win_targ, mean(v_sess_targ),ts_win_targ, mean(w_sess_targ));
+        for m = 1:length(monk), v_sess_targ_mu(m,:) = nanmean(squeeze(v_sess_targ(m,:,:))); w_sess_targ_mu(m,:) = nanmean(squeeze(w_sess_targ(m,:,:))) ; end 
+        [ax,~,~] = plotyy(ts_win_targ,mean(v_sess_targ_mu),ts_win_targ,mean(w_sess_targ_mu));                 
         set(ax(1),'YLim',[0 200]);
         set(ax(2),'YLim',[0 45]);
         set(gca,'xlim',[-0.2 0.8],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off;
         vline(0.3,'k'); vline(0,'k'); axis square;
         
-        figure; plot(ts_win_targ, mean(v_sess_targ))
+        %figure; plot(ts_win_targ, mean(v_sess_targ))
+        figure; plot(ts_win_targ, mean(v_sess_targ_mu))
         set(gca,'xlim',[0.05 0.55],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off; axis square; ylim([0 200]); vline(0.3,'k'); vline(0,'k');
-        figure;plot(ts_win_targ, mean(w_sess_targ))
+        figure;plot(ts_win_targ, mean(w_sess_targ_mu))
         set(gca,'xlim',[0.05 0.55],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off; axis square; ylim([0 45]); vline(0.3,'k'); vline(0,'k');
         %% Velocity distribution at target onset per session
         
         
         %% plot stop
         figure; hold on;
-        [ax,~,~] = plotyy(ts, mean(v_sess_stop),ts, mean(w_sess_stop))
+        % [ax,~,~] = plotyy(ts, mean(v_sess_stop),ts, mean(w_sess_stop))
+        for m = 1:length(monk), v_sess_stop_mu(m,:) = nanmean(squeeze(v_sess_stop(m,:,:))); w_sess_stop_mu(m,:) = nanmean(squeeze(w_sess_stop(m,:,:))) ; end 
+        [ax,~,~] = plotyy(ts,mean(v_sess_stop_mu),ts,mean(w_sess_stop_mu));                 
         set(ax(1),'YLim',[0 200]);
         set(ax(2),'YLim',[0 45]);
         set(gca,'xlim',[-0.5 0.5],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off;
@@ -184,7 +197,9 @@ switch plot_type
         
         %% plot reward
         figure; hold on;
-        [ax,~,~] = plotyy(ts, mean(v_sess_reward),ts, mean(w_sess_reward))
+        % [ax,~,~] = plotyy(ts, mean(v_sess_reward),ts, mean(w_sess_reward))
+        for m = 1:length(monk), v_sess_reward_mu(m,:) = nanmean(squeeze(v_sess_reward(m,:,:))); w_sess_reward_mu(m,:) = nanmean(squeeze(w_sess_reward(m,:,:))) ; end 
+        [ax,~,~] = plotyy(ts,mean(v_sess_reward_mu),ts,mean(w_sess_reward_mu));                 
         set(ax(1),'YLim',[0 200]);
         set(ax(2),'YLim',[0 45]);
         set(gca,'xlim',[-0.5 0.5],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off;
@@ -220,6 +235,7 @@ switch plot_type
         ylabel('Response, r(m)');
         
     case 'move_on_target_on_distribution'
+        move_t_all = [];
         for m = 1:length(monk)
             for sess = 1:length(monk(m).behavior)
                 correct = monk(m).behavior(sess).stats.trialtype.reward(strcmp({monk(m).behavior(sess).stats.trialtype.reward.val},'rewarded')).trlindx;
@@ -246,8 +262,18 @@ switch plot_type
                 bar(2,sum(move_before));
                 set(gca,'xTick', [],'TickDir', 'out', 'FontSize', 22); box off;
                 legend({'after' 'before'}, 'box', 'off');
+                
+                move_t_all = [move_t_all ; move_t'];
+                move_t_per_monk(m) = mean(move_t); 
             end
         end
+
+        % plot for all monkeys
+        figure; hold on
+        histogram(move_t_all,30, 'DisplayStyle', 'stairs');
+        set(gca,'xlim',[-2 2],'TickDir', 'out', 'FontSize', 22); box off;
+        vline(mean(move_t_all),'--r'); %vline(median(move_t_all), '--g')
+        xlabel('Time from target onset'); axis square;
         
     case 'erp_single_sess_all'
         type = 'all'
@@ -2730,7 +2756,7 @@ switch plot_type
         theta = [4 12];
         low_beta = [12 20];
         high_beta = [20 30];
-        for nmonk = 1 %1:length(monk)
+        for nmonk = 1:length(monk)
             for nsess = 1:length(monk(nmonk).sess)
                 for cond = 2
                     areas = fieldnames(monk(nmonk).sess(nsess).trialtype.(type)(1).area); % get areas
@@ -2935,7 +2961,7 @@ switch plot_type
         %Contains average per session
         type = 'reward'
         ev = 'stop'
-        brain_area = 'MSTPFC'  % 'PFCMST'  % 'PPCMST'
+        brain_area = 'PPCMST'  % 'PFCMST'  % 'PPCMST'
         time_win = [-0.5 0.5];   % [-0.25 0.25]; [-0.45 0.25];
         freq_win = [3 51];
         align_t = 1;  % 1.3 for target (so it's aligned to target offset
@@ -2947,7 +2973,8 @@ switch plot_type
                 for cond = 2 % 1:ncond
                     freq = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_freq;
                     ts = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_ts-align_t;
-                    p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher';
+                    % p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher';
+                    p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_phi';
                     ts_win = ts(ts>time_win(1) & ts<time_win(2));
                     p_cohero_win = p_cohero(freq>freq_win(1) & freq<freq_win(2),ts>time_win(1) & ts<time_win(2));
                     coher_all(nsess,:,:) = p_cohero_win;
@@ -2964,15 +2991,19 @@ switch plot_type
                     % xlabel('time (s)'); ylabel('frequency (Hz)');
                     
                     % plot win
-                    %                     figure('Name',['Normalized  Monk ' num2str(nmonk) ' sess ' num2str(nsess)  ' PPC--MST ' ev ' rew ' num2str(cond)]);
-                    figure(1); subplot(p(1),p(2),cnt)
-                    
-                    %colormap(parula); copper
-                    % imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),p_cohero_win/max_cohero, [0 1]); axis xy; %colorbar;
+                    % figure('Name',['Normalized  Monk ' num2str(nmonk) ' sess ' num2str(nsess)  ' PPC--MST ' ev ' rew ' num2str(cond)]);
+                    figure(2); subplot(p(1),p(2),cnt)
+                    %colormap(parula); 
                     imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),p_cohero_win, [0 max_cohero]); axis xy; colorbar;
                     set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; % vline(-0.3,'b');
                     title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
-                    % xlabel('time (s)'); ylabel('frequency (Hz)');
+                    
+                    %% plot circular color (when extracting phases)
+                    ph = phasewrap(p_cohero_win, 'rad');
+                    imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),ph, [0 max_cohero]); axis xy; colorbar;
+                    phasemap; 
+                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
+                    xlabel('time (s)'); ylabel('frequency (Hz)');
                     cnt = cnt+1;
                 end
             end
@@ -3003,16 +3034,38 @@ switch plot_type
             set(gca, 'ylim',[0.18 0.32], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
             title(['beta cond ' num2str(cond)])
             
-            % wideband mu
-            figure; coher_wideband = coher_mu(1,freq>5 & freq<40,:);
-            plot(ts_win, squeeze(mean(coher_wideband))); box off
-            set(gca, 'ylim',[0.13 0.19], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
-            title('wideband') % compute statistics
-            
             % save per monk
             save(['monk ' num2str(nmonk) ' cond' num2str(cond)], 'coher_mu', 'coher_theta','coher_beta', 'coher_wideband');
             
         end
+        
+    case 'coherogram_target_stop_PPC_MST_diff' %% under construction
+        area = 'PFC'
+        type = 'reward' % LOOK FOR TIME OF ALIGN target off is -1.3
+        ev = 'stop'
+        th = [4 12];
+        bet = [12 20];
+        align_t = 1;  % 1.3 for target (so it's aligned to target offset
+        for nmonk = 3  % 1:length(monk) %; [1 3]
+            freq = monk(nmonk).spec.area.(area).(type)(1).events.(ev).freq_sess;
+            ts = monk(nmonk).spec.area.(area).(type)(1).events.(ev).ts_sess;
+            p_spectro_err = monk(nmonk).spec.area.(area).(type)(1).events.(ev).mu_sess;
+            p_spectro_corr = monk(nmonk).spec.area.(area).(type)(2).events.(ev).mu_sess;
+            % plot average per band across time
+            theta_mu_err(nmonk,:) = nanmean(p_spectro_err(th(1):th(2),:)); theta_sem_err(nmonk,:) = nanstd(p_spectro_err(th(1):th(2),:))/sqrt(size(th(1):th(2),2));
+            theta_mu_corr(nmonk,:) = nanmean(p_spectro_corr(th(1):th(2),:)); theta_sem_corr(nmonk,:) = nanstd(p_spectro_corr(th(1):th(2),:))/sqrt(size(th(1):th(2),2));
+        end
+        
+        col_mag = [0.3 0 0.3;
+            0.45 0 0.139;
+            0.128,0,0.128];
+        
+        figure; hold on;
+        for nmonk = 1:length(monk)
+            plot(ts-align_t, theta_mu_err(nmonk,:)- theta_mu_corr(nmonk,:),'Color',[col_mag(nmonk,:)]);
+        end
+        set(gca,'xlim',[-0.25 0.25], 'FontSize', 22, 'TickDir', 'out'); axis square;
+        hline(0,'--k')
         
     case 'coherogram_target_stop_per_band'
         %Contains average per session
@@ -4171,15 +4224,15 @@ switch plot_type
             xlabel([ num2str(timepoints(i)) 's'])
         end
         
-    case 'mean_itpc'
-        ar = 'PFC'     % MST PPC PFC
+    case 'mean_plv'
+        ar = 'PPC'     % MST PPC PFC
         band = 'theta'
         win = [-1.5 1.5];
         ev = 'stop'
         
         itpc_corr_all = []; itpc_incorr_all = []; t_max_itpc_corr = []; t_max_itpc_incorr = []; itpc_corr_sem_all= []; itpc_incorr_sem_all = []; 
         
-        for m = 3  % [1 3] % 1:length(monk) 
+        for m = 1:length(monk)  % [1 3] % 1:length(monk) 
            
             clear itpc_corr itpc_incorr itpc_corr_sem itpc_incorr_sem
             for nsess = 1:length(monk(m).sess)
