@@ -911,7 +911,7 @@ if prs.analyse_phase
                                 for tmp_indx = 1:length(t_temp_theta)
                                     theta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * theta_angle(tmp_indx,1:ntrls) ) ) ) ; 
                                     % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
-                                    theta(ch).itpc_pval = exp(-ntrls * (theta(ch).itpc(tmp_indx,1:ntrls))^2);
+                                    theta(ch).itpc_pval = exp(-ntrls * (theta(ch).itpc(tmp_indx,:))^2);
                             end
                         end
                         %
@@ -920,7 +920,7 @@ if prs.analyse_phase
                             for tmp_indx = 1:length(t_temp_beta)
                                 beta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * beta_angle(tmp_indx,1:ntrls) ) ) ) ; 
                                 % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
-                                beta(ch).itpc_pval = exp(-ntrls * (beta(ch).itpc(tmp_indx,1:ntrls))^2);
+                                beta(ch).itpc_pval = exp(-ntrls * (beta(ch).itpc(tmp_indx,:))^2);
                             end
                         end
                         % plot sanity check

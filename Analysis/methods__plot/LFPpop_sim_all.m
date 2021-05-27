@@ -13,7 +13,7 @@ save_lfp_raw = false; % raw and per trial lfps
 do_PSD = false;  % extract power spectral densities
 save_spectro = false; % save spectrogram file?
 save_spectro_per_trial = false;
-save_spectro_per_trial_align_stop = false;
+save_spectro_per_trial_align_stop = true;
 avg_monks = false; % average for all monkeys?
 do_cohero = false; % extract coherograms
 do_cohero_band_passed = false; % extract coherograms per band
@@ -21,14 +21,15 @@ doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
 save_band_pass_analysis = false; % extract band passed lfp signal only (used only for plotting)
 do_band_passed_pop = false;  % needs pop
-do_phases = true; % needs pop
-name_output_exp_out_file = 'exp_out_lfp_phase_2021_03_29'; 
-name_output_file = 'lfp_phase_2021_05_12_test';
+do_phases = false; % needs popc
+
+name_output_exp_out_file = 'exp_out_lfp_spectro_stop_2021_05_18'; 
+name_output_file = 'lfp_spectro_stop_2021_05_18';
 
 %% Extract
 if extract_exp_out
-%     path = 'D:\output_data';
-%     cd(path)
+%      path = 'D:\Output';
+%      cd(path)
     fprintf(['Time:  ' num2str(clock) '\n']);
     fnames = dir('experiments*.mat');
     cnt=1;
