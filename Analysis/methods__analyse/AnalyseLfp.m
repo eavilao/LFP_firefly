@@ -16,6 +16,7 @@ analyse_theta = prs.analyse_theta;
 analyse_alpha = prs.analyse_alpha;
 analyse_beta = prs.analyse_beta;
 extract_band_pass = prs.extract_band_passed;
+analyse_phase = prs.analyse_phase; 
 ntrls = length(trials_lfps);
 fixateduration = prs.fixateduration;
 around_event = prs.around_event;
@@ -218,9 +219,9 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_lfp_align = ts(ts > -max([events_temp.t_stop])-0.5 & ts < 2);
                     [stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.freq_spectrogram] = ...
                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.lfp_align,prs.spectrogram_movingwin,spectralparams);
-                    %                     figure; imagesc(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_spectrogram-1,...
-                    %                         stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.p_spectrogram')); axis xy;
-                    %                     set(gca,'xlim',[-0.75 0.75])
+%                                         figure; imagesc(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_spectrogram-abs(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_lfp_align(1)),...
+%                                             stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.freq_spectrogram,real(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.p_spectrogram')); axis xy;
+%                                         set(gca,'xlim',[-1.5 1.5])
                     %
                     %% compute spectrogram lfp theta
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp_theta');

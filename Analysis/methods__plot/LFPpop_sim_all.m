@@ -409,23 +409,23 @@ end
 
 %% Gather spectrograms for each trial per electrode per monkey aligned to movement stop
 if save_spectro_per_trial_align_stop
-    monks = unique([exp.monk_id]); clear p_monk
-    for i = 1:length(monks)
-        m = [exp.monk_id] == monks(i); p_monk = exp(m);
-        for sess = 1:length(p_monk) % num of sessions
-            trialtype = fieldnames(p_monk(sess).pop.trialtype);
-            for type = 1:length(trialtype) % num of trial types
-                for cond = 2%1:length(p_monk(sess).pop.trialtype.(trialtype{type}));
-                    areas = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area);
-                    for a=1:length(areas)
-                        for ch = 1:length(p_monk(sess).pop.trialtype.reward(1).area.(areas{a}).ch)
-                            monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).ch(ch).trl = p_monk(sess).pop.trialtype.reward(cond).area.(areas{a}).ch(ch).trl;
-                        end
-                    end
-                end
-            end
-        end
-    end
+%     monks = unique([exp.monk_id]); clear p_monk
+%     for i = 1:length(monks)
+%         m = [exp.monk_id] == monks(i); p_monk = exp(m);
+%         for sess = 1:length(p_monk) % num of sessions
+%             trialtype = fieldnames(p_monk(sess).pop.trialtype);
+%             for type = 1:length(trialtype) % num of trial types
+%                 for cond = 2%1:length(p_monk(sess).pop.trialtype.(trialtype{type}));
+%                     areas = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area);
+%                     for a=1:length(areas)
+%                         for ch = 1:length(p_monk(sess).pop.trialtype.reward(1).area.(areas{a}).ch)
+%                             monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).ch(ch).trl = p_monk(sess).pop.trialtype.reward(cond).area.(areas{a}).ch(ch).trl;
+%                         end
+%                     end
+%                 end
+%             end
+%         end
+%     end
     
     %% Gather spectrograms for all electrodes each trial per monkey aligned to target onset
     monks = unique([exp.monk_id]); clear p_monk
