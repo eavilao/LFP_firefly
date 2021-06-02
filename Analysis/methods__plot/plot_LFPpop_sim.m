@@ -38,7 +38,11 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'spectrogram_reward_density_all_beta_diff'
 % 'spectrogram_reward_density_diff'
 % 'spectrogram_trl'
+<<<<<<< HEAD
 % 'spectrogram_trl_align_stop'  *** 
+=======
+% 'spectrogram_trl_align_stop'  <-----
+>>>>>>> 7bbed310f64762a8a9c8195008abcff77311dbfb
 % 'spectrogram_trl_session_align_target'
 % 'spectrogram_trl_session_align_stop'
 % 'coherogram_move'
@@ -2113,7 +2117,7 @@ switch plot_type
         
     case 'spectrogram_reward_density'
         type = 'reward'
-        ev = 'move'
+        ev = 'stop'
         align_t = 1;  % 1.3 for target (so it's aligned to target offset
         for nmonk = 1:length(monk)
             areas = fieldnames(monk(nmonk).spec.area);
@@ -2208,9 +2212,9 @@ switch plot_type
         hline(0,'--k')
         
     case 'spectrogram_reward_density_all_beta'
-        area = 'PFC'
+        area = 'PPC'
         type = 'reward' % LOOK FOR TIME OF ALIGN target off is -1.3 % reward (separate by rew or unrew) or densities
-        ev = 'move'
+        ev = 'stop'
         th = [4 12];
         bet = [12 20];
         align_t = 1;
@@ -2321,7 +2325,7 @@ switch plot_type
         theta = [4 12];
         low_beta = [12 20];
         high_beta = [20 30];
-        for nmonk = 1 %1:length(monk)
+        for nmonk = 3 %1:length(monk)
             for nsess = 1:length(monk(nmonk).sess)
                 areas = fieldnames(monk(nmonk).sess(nsess).trialtype.(type)(1).area);
                 for narea = 1:length(areas)
@@ -2372,7 +2376,7 @@ switch plot_type
                         max_bands = max([max(max_th) max(max_be_low) max(max_be_high)]);
                         
                         % plot
-                        figure('Position',[1838 295 1679 381],'Name',['Session ', num2str(nsess)]); hold on; colormap(winter);
+                        figure('Position',[1838 295 1679 381],'Name',['Session ', num2str(nsess)]); hold on; %colormap(winter);
                         %% plot delta
                         % figure; hold on; colormap(winter);
                         subplot(1,4,1); hold on;
@@ -2414,26 +2418,26 @@ switch plot_type
                         title(['High-B M' num2str(nmonk) ' area ' (areas{narea}) ' cond ' num2str(cond)])
                         %ylabel('trial number'); xlabel('Time (s)'); axis square
                         
-                        % plot by trial to inspect
-                        figure('Name',['Monk ' num2str(nmonk) ' area ' (areas{narea}) ' cond ' num2str(cond) ' sess ' num2str(nsess)]); hold on;
-                        %p = numSubplots(50);
-                        p = numSubplots(size(th_norm,2));
-                        % pick_trls = randperm(size(th_norm,2)); cnt=1;
-                        % for ntrl = pick_trls(1:50)
-                        for ntrl = 1:size(th_norm,2)
-                            freq = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).freq;
-                            ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).ts-1;
-                            spectro = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro';
-                            subplot(p(1),p(2),ntrl); %colormap(winter);
-                            imagesc(ts,freq, spectro); axis xy; %colorbar;
-                            set(gca,'xlim',[-0.25 ts(end)],'ylim',[0 50], 'FontSize', 22)
-                            %xlabel('time (s)'); ylabel('frequency (Hz)');
-                            %title(['Monkey ' num2str(nmonk) ' area ' (areas{narea}) ' trial ' num2str(ntrl) ' cond ' num2str(cond)])
-                            hline([4 12 20 30],'-w'); vline(0,'-w'); vline(0.3,'-w'); %vline(move_on(ntrl),'-r');
-                            %if cond == 2, vline(t_rew,'-r'), end
-                            axis off;
-                            % cnt=cnt+1;
-                        end
+                        %% plot by trial to inspect
+%                         figure('Name',['Monk ' num2str(nmonk) ' area ' (areas{narea}) ' cond ' num2str(cond) ' sess ' num2str(nsess)]); hold on;
+%                         %p = numSubplots(50);
+%                         p = numSubplots(size(th_norm,2));
+%                         % pick_trls = randperm(size(th_norm,2)); cnt=1;
+%                         % for ntrl = pick_trls(1:50)
+%                         for ntrl = 1:size(th_norm,2)
+%                             freq = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).freq;
+%                             ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).ts-1;
+%                             spectro = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro';
+%                             subplot(p(1),p(2),ntrl); %colormap(winter);
+%                             imagesc(ts,freq, spectro); axis xy; %colorbar;
+%                             set(gca,'xlim',[-0.25 ts(end)],'ylim',[0 50], 'FontSize', 22)
+%                             %xlabel('time (s)'); ylabel('frequency (Hz)');
+%                             %title(['Monkey ' num2str(nmonk) ' area ' (areas{narea}) ' trial ' num2str(ntrl) ' cond ' num2str(cond)])
+%                             hline([4 12 20 30],'-w'); vline(0,'-w'); vline(0.3,'-w'); %vline(move_on(ntrl),'-r');
+%                             %if cond == 2, vline(t_rew,'-r'), end
+%                             axis off;
+%                             % cnt=cnt+1;
+%                         end
                         
                     end
                 end
@@ -2448,8 +2452,13 @@ switch plot_type
         low_beta = [12 20];
         high_beta = [20 30];
         th_norm_monk_corr=[]; th_norm_monk_err=[]; be_low_norm_monk_corr=[]; be_low_norm_monk_err=[];
+<<<<<<< HEAD
         for nmonk = 3 % 1:length(monk)  % [1 3]
             areas = {'PFC'} %fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
+=======
+        for nmonk = 3 %1:length(monk)  % [1 3]
+            areas = {'PPC'} %fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
+>>>>>>> 7bbed310f64762a8a9c8195008abcff77311dbfb
             for narea = 1:length(areas)
                 th_norm_all_err = []; be_low_norm_all_err = []; th_norm_all_corr = []; be_low_norm_all_corr = [];
                 for nsess = 1:length(monk(nmonk).sess)
@@ -2473,14 +2482,14 @@ switch plot_type
                         % Pad with NaNs to compensate for different sized vectors
                         for ntrl = 1:length(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl)
                             % find location of t_rew
-                            %                             if cond >= 2
-                            %                                 this_ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).ts;
-                            %                                 indx_rew = this_ts(this_ts<=t_rew(ntrl)+0.250); indx_rew = length(indx_rew);
-                            %                                 monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro(indx_rew+1:pad_size,:) = NaN;
-                            %                             else
+%                             if cond >= 2
+%                                 this_ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).ts;
+%                                 indx_rew = this_ts(this_ts<=t_rew(ntrl)+0.250); indx_rew = length(indx_rew);
+%                                 monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro(indx_rew+1:pad_size,:) = NaN;
+%                             else
                             this_ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).ts;
-                            indx_end = this_ts(this_ts<=trl_end(ntrl)+0.250); indx_end = length(indx_end);
                             this_spectro = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro;
+                            indx_end = this_ts(this_ts<=trl_end(ntrl)+0.250); indx_end = length(indx_end);
                             this_spectro(indx_end+1:pad_size,:) = NaN;
                             %                             end
                             % padded_spectro(ntrl).spectro = this_spectro;
@@ -2515,7 +2524,6 @@ switch plot_type
                         %                         pcolor(ts,1:size(de_norm,2),de_norm'); colorbar;
                         %                         shading interp;
                         imagesc(ts,1:size(de_norm,2),de_norm'); colorbar;
-                        % if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
                         % imagesc(ts,1:size(th,2),(th./max_bands)'); colorbar;
                         % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(th,2)], 'FontSize', 22)
                         set(gca,'xlim',[-1.5 1.5],'ylim',[0 size(th,2)], 'FontSize', 22)
@@ -2528,9 +2536,13 @@ switch plot_type
                         %% plot theta
                         %figure; hold on; colormap(winter);
                         subplot(1,4,2);hold on;
+<<<<<<< HEAD
                         imagesc(ts,1:size(th_norm,2),th_norm',[0 1]); colorbar;
                         % scatter(th_max_after_stop,1:size(th_norm,2),1,'k','filled');
                         % if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
+=======
+                        imagesc(ts,1:size(th_norm,2),th_norm'); colorbar;
+>>>>>>> 7bbed310f64762a8a9c8195008abcff77311dbfb
                         % imagesc(ts,1:size(th,2),(th./max_bands)'); colorbar;
                         % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(th,2)], 'FontSize', 22)
                         set(gca,'xlim',[-1.5 1.5],'ylim',[0 size(th,2)], 'FontSize', 22)
@@ -2543,9 +2555,13 @@ switch plot_type
                         %% plot low beta
                         %figure; hold on; colormap(winter);
                         subplot(1,4,3);hold on;
+<<<<<<< HEAD
                         imagesc(ts,1:size(be_low_norm,2),be_low_norm', [0 1]); colorbar;
                         % scatter(be_low_max_after_stop,1:size(be_low_norm,2),1,'k','filled');
                         % if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
+=======
+                        imagesc(ts,1:size(be_low_norm,2),be_low_norm'); colorbar;
+>>>>>>> 7bbed310f64762a8a9c8195008abcff77311dbfb
                         % imagesc(ts,1:size(be_low,2),(be_low./max_bands)'); colorbar;
                         % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(be_low,2)], 'FontSize', 22)
                         set(gca,'xlim',[-1.5 1.5],'ylim',[0 size(th,2)], 'FontSize', 22)
@@ -2558,7 +2574,6 @@ switch plot_type
                         %figure; hold on; colormap(winter);
                         subplot(1,4,4);hold on;
                         imagesc(ts,1:size(be_high_norm,2),be_high_norm'); colorbar;
-                        % if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
                         % imagesc(ts,1:size(be_high,2),(be_high./max_bands)'); colorbar;
                         % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(be_high,2)], 'FontSize', 22)
                         set(gca,'xlim',[-1.5 1.5],'ylim',[0 size(th,2)], 'FontSize', 22)
