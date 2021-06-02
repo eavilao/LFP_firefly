@@ -718,6 +718,9 @@ if prs.compute_coherogram
                                 stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).([unique_brain_areas{area2} unique_brain_areas{area1}]).coher_ts, ...
                                 stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).([unique_brain_areas{area2} unique_brain_areas{area1}]).coher_freq] = cohgramc(a1_lfp',a2_lfp',prs.spectrogram_movingwin,spectralparams);
                             
+                            % correct timing
+                            -abs(lfps(a1(n)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.ts_lfp_align(1))
+                            
                             %                                                     figure; imagesc((stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).([unique_brain_areas{area2} unique_brain_areas{area1}]).coher_ts)-1,...
                             %                                                         stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).([unique_brain_areas{area2} unique_brain_areas{area1}]).coher_freq,...
                             %                                                         stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).([unique_brain_areas{area2} unique_brain_areas{area1}]).coher', [0 1]);
