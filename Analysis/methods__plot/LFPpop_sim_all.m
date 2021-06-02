@@ -6,14 +6,14 @@ function LFPpop_sim_all(exp)
 %% Choose what to analyze and save
 extract_exp_out = true; % load experiments.m file and extract
 save_exp_out = false; % save mat file without raw lfp signal
-save_pop = true; % if this is true it will only extract pop
+save_pop = false; % if this is true it will only extract pop
 
 extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
 do_PSD = false;  % extract power spectral densities
-save_spectro = false; % save spectrogram file?
+save_spectro = true;
 save_spectro_per_trial = false;
-save_spectro_per_trial_align_stop = true;
+save_spectro_per_trial_align_stop = false;
 avg_monks = false; % average for all monkeys?
 do_cohero = false; % extract coherograms
 do_cohero_band_passed = false; % extract coherograms per band
@@ -24,7 +24,7 @@ do_band_passed_pop = false;  % needs pop
 do_phases = false; % needs popc
 
 name_output_exp_out_file = 'exp_out_lfp_spectro_stop_2021_05_18'; 
-name_output_file = 'lfp_spectro_stop_2021_05_18';
+name_output_file = 'lfp_spectrogram_all_2021_05_31';
 
 %% Extract
 if extract_exp_out
@@ -279,21 +279,30 @@ if save_spectro
     for i = 1:length(exp) % num of sessions
         nareas = numel(fieldnames(exp(i).area)); areas = fieldnames(exp(i).area);
         for a = 1:length(areas) % num of areas
-            for type = 1:3 % length(trialtype) % num of trial types
+            for type = 2% 1:3 % length(trialtype) % num of trial types
                 if ~isempty(exp(i).area.(areas{a}).lfps.stats)
                     nconds = length(exp(i).area.(areas{a}).lfps.stats(1).trialtype.(trialtype{type})); clear cond
                     for cond = 1:nconds
                         for ev = 1:length(events)
                             clear spec
-                            for ch = 1:length(exp(i).area.(areas{a}).lfps.stats) % extract per channel
-                                spec(ch,:,:) = real(exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).p_spectrogram');
+                            if ev == 4 && cond == 1
+                                p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).pow_mu = NaN;
+                                p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).pow_mu_no_norm = NaN;
+                                p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).std = NaN;
+                                p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).freq = NaN;
+                                p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).ts = NaN;
+                            else
+                                for ch = 1:length(exp(i).area.(areas{a}).lfps.stats) % extract per channel
+                                    spec(ch,:,:) = real(exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).all_freq.p_spectrogram');
+                                end
+                                
+                                % store and normalize by max
+                                p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).pow_mu = squeeze(nanmean(spec,1))/max(max(squeeze(nanmean(spec,1))));
+                                p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).pow_mu_no_norm = squeeze(nanmean(spec,1));
+                                p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).std = squeeze(nanstd(spec,1)/sqrt(length(ch)));
+                                p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).freq = exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).all_freq.freq_spectrogram;
+                                p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).ts = exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).all_freq.ts_spectrogram;
                             end
-                            % store and normalize by max
-                            p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).pow_mu = squeeze(nanmean(spec,1))/max(max(squeeze(nanmean(spec,1))));
-                            p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).pow_mu_no_norm = squeeze(nanmean(spec,1));
-                            p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).std = squeeze(nanstd(spec,1)/sqrt(length(ch)));
-                            p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).freq = exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).freq_spectrogram;
-                            p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).ts = exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).ts_spectrogram;
                         end
                     end
                 end
@@ -320,7 +329,7 @@ if save_spectro
         nareas = numel(fieldnames(p_monk(1).area)); areas = fieldnames(p_monk(1).area);
         for a = 1:length(areas)
             trialtype = fieldnames(p_monk(1).area.(areas{a}));
-            for type = 1:length(trialtype)
+            for type = 2 %1:length(trialtype)
                 nconds = length(p_monk(1).area.(areas{a}).(trialtype{type})); clear cond
                 for cond = 1:nconds
                     for ev = 1:length(events)
@@ -349,7 +358,7 @@ if save_spectro
         for i=[1 3] %1:length(monk), area_m{i} = fieldnames(monk(i).spec.area); end  % if size(area_m{i},1) == 1,  end
             areas = intersect(string(area_m{1}), string(area_m{3})); % hardcoded for now, only look at Quigley(44) and Schro(51) % change to 2 if less than 3 monkeys.
             for a = 1:length(areas)
-                for type = 1:length(trialtype)
+                for type = 2 %1:length(trialtype)
                     nconds = length(monk(3).spec.area.(areas{a}).(trialtype{type})); clear cond
                     for cond = 1:nconds
                         for ev = 1:length(events)
