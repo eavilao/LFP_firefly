@@ -38,6 +38,7 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'spectrogram_reward_density_all_beta_diff'
 % 'spectrogram_reward_density_diff'
 % 'spectrogram_trl'
+% 'spectrogram_trl_align_stop'  *** 
 % 'spectrogram_trl_session_align_target'
 % 'spectrogram_trl_session_align_stop'
 % 'coherogram_move'
@@ -2447,7 +2448,7 @@ switch plot_type
         low_beta = [12 20];
         high_beta = [20 30];
         th_norm_monk_corr=[]; th_norm_monk_err=[]; be_low_norm_monk_corr=[]; be_low_norm_monk_err=[];
-        for nmonk = 1:length(monk)  % [1 3]
+        for nmonk = 3 % 1:length(monk)  % [1 3]
             areas = {'PFC'} %fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
             for narea = 1:length(areas)
                 th_norm_all_err = []; be_low_norm_all_err = []; th_norm_all_corr = []; be_low_norm_all_corr = [];
@@ -2482,7 +2483,8 @@ switch plot_type
                             this_spectro = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro;
                             this_spectro(indx_end+1:pad_size,:) = NaN;
                             %                             end
-                            padded_spectro(ntrl).spectro = this_spectro;
+                            % padded_spectro(ntrl).spectro = this_spectro;
+                            padded_spectro(ntrl).spectro = this_spectro(ts>-1.59 & ts<1.59,:); % uncomment to be able to avg (works for plotting
                         end
                         % sort spectrograms
                         
@@ -2577,7 +2579,8 @@ switch plot_type
 %                         
                         %% Mean per band
                         
-                        figure(6);
+                        ts = ts(ts>-1.59 & ts<1.59);
+                        figure(8);
                         subplot(1,4,1); hold on; title delta;
                         if cond==2, c = [0 1 0]; else c = [0 0 0]; end
                         % plot(ts,nanmean(de_norm'), 'LineWidth',1, 'Color', c);
@@ -2603,11 +2606,12 @@ switch plot_type
                         set(gca,'xlim',[-0.8 0.8],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k')
                         
                         if cond == 1
-                            th_norm_all_err = [th_norm' ; th_norm'];
-                            be_low_norm_all_err = [be_low_norm' ; be_low_norm'];
+                            th_norm_all_err = [th_norm_all_err ; th_norm(1:65,:)'];
+                            be_low_norm_all_err = [be_low_norm_all_err ; be_low_norm(1:65,:)'];
                         else
-                            th_norm_all_corr = [th_norm' ; th_norm'];
-                            be_low_norm_all_corr = [be_low_norm' ; be_low_norm'];
+                            
+                            th_norm_all_corr = [th_norm_all_corr ; th_norm(1:65,:)'];
+                            be_low_norm_all_corr = [be_low_norm_all_corr ; be_low_norm(1:65,:)'];
                         end
                         % plot by trial to inspect
                         %                         figure('Name',['Monk ' num2str(nmonk) ' area ' (areas{narea}) ' cond ' num2str(cond) ' sess ' num2str(nsess)]); hold on;
@@ -2633,18 +2637,18 @@ switch plot_type
                     end
                 end
                 % plot all power for all sessions per monkey
-                figure; hold on;
+                figure; hold on; ts = ts(1:65); 
                 subplot(1,2,1); hold on; title([(areas{narea}) ' theta']);
                 shadedErrorBar(ts,nanmean(th_norm_all_err), nanstd(th_norm_all_err)/sqrt(size(th_norm_all_err,1)), 'lineprops', 'k');
                 shadedErrorBar(ts,nanmean(th_norm_all_corr), nanstd(th_norm_all_corr)/sqrt(size(th_norm_all_corr,1)), 'lineprops', 'g');
-                set(gca,'xlim',[-0.8 0.8],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k');
+                set(gca,'xlim',[-1.5 1.5],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k'); % vline([-0.5 0.5], '--k');
                 
                 subplot(1,2,2); hold on; title([(areas{narea}) ' beta']);
                 shadedErrorBar(ts,nanmean(be_low_norm_all_err), nanstd(be_low_norm_all_err)/sqrt(size(be_low_norm_all_err,1)), 'lineprops', 'k');
                 shadedErrorBar(ts,nanmean(be_low_norm_all_corr), nanstd(be_low_norm_all_corr)/sqrt(size(be_low_norm_all_corr,1)), 'lineprops', 'g');
-                set(gca,'xlim',[-0.8 0.8],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k');
+                set(gca,'xlim',[-1.5 1.5],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k'); % vline([-0.5 0.5], '--k');
             end
-            close all
+            
             % gather for all monkeys
             th_norm_monk_corr = [th_norm_monk_corr ; th_norm_all_corr]; th_norm_monk_corr_std = [th_norm_monk_corr ; nanstd(th_norm_all_corr)];
             th_norm_monk_err = [th_norm_monk_err ; th_norm_all_err];  th_norm_monk_err_std = [th_norm_monk_err ; nanstd(th_norm_all_err)];
@@ -2658,12 +2662,12 @@ switch plot_type
         subplot(1,2,1); hold on; title([(areas{narea}) ' theta']);
         shadedErrorBar(ts,nanmean(th_norm_monk_err), nanstd(th_norm_monk_err)/sqrt(size(th_norm_monk_err,1)), 'lineprops', 'k');
         shadedErrorBar(ts,nanmean(th_norm_monk_corr), nanstd(th_norm_monk_corr)/sqrt(size(th_norm_monk_corr,1)), 'lineprops', 'g');
-        set(gca,'xlim',[-0.8 0.8],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k');
+        set(gca,'xlim',[-1.5 1.5],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k'); % vline([-0.5 0.5], '--k');
         
         subplot(1,2,2); hold on; title([(areas{narea}) ' beta']);
         shadedErrorBar(ts,nanmean(be_low_norm_monk_err), nanstd(be_low_norm_monk_err)/sqrt(size(be_low_norm_monk_err,1)), 'lineprops', 'k');
         shadedErrorBar(ts,nanmean(be_low_norm_monk_corr), nanstd(be_low_norm_monk_corr)/sqrt(size(be_low_norm_monk_corr,1)), 'lineprops', 'g');
-        set(gca,'xlim',[-0.8 0.8],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k');
+        set(gca,'xlim',[-1.5 1.5],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k'); %vline([-0.5 0.5], '--k');
         
         
         
@@ -2979,7 +2983,7 @@ switch plot_type
         type = 'reward'
         ev = 'stop'
         brain_area = 'PPCMST'  % 'PFCMST'  % 'PPCMST'
-        time_win = [-0.5 0.5];   % [-0.25 0.25]; [-0.45 0.25];
+        time_win = [-1.5 1.5];   % [-0.25 0.25]; [-0.45 0.25];
         freq_win = [3 51];
         align_t = 1;  % 1.3 for target (so it's aligned to target offset
         p = numSubplots(12);  % 9 for reward cond, 12 for rest
@@ -2987,16 +2991,16 @@ switch plot_type
         for nmonk = 2 %[1 3]
             for nsess = 1:length(monk(nmonk).coher.sess)
                 ncond = length(monk(nmonk).coher.sess(nsess).trialtype.(type));
-                for cond = 2 % 1:ncond
+                for cond = 1:ncond
                     freq = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_freq;
                     ts = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_ts-align_t;
-                    % p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher';
-                    p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_phi';
+                     p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher';
+                    % p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_phi'; %phase
                     ts_win = ts(ts>time_win(1) & ts<time_win(2));
                     p_cohero_win = p_cohero(freq>freq_win(1) & freq<freq_win(2),ts>time_win(1) & ts<time_win(2));
                     coher_all(nsess,:,:) = p_cohero_win;
                     max_cohero = max(max(p_cohero_win));
-                    % plot
+                    %% plot colormap
                     %figure('Name',['Monk ' num2str(nmonk) ' sess ' num2str(nsess)  ' PPC--MST ' ev ' rew ' num2str(cond)]);
                     %                     subplot(p(1),p(2),cnt)
                     %
@@ -3012,8 +3016,11 @@ switch plot_type
                     figure(2); subplot(p(1),p(2),cnt)
                     %colormap(parula); 
                     imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),p_cohero_win, [0 max_cohero]); axis xy; colorbar;
-                    set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; % vline(-0.3,'b');
+                    set(gca,'xlim',[-1.5 1.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; % vline(-0.3,'b');
                     title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
+                    %% plot coher vs freq
+                    figure(2); subplot(p(1),p(2),cnt)
+                    plot
                     
                     %% plot circular color (when extracting phases)
                     ph = phasewrap(p_cohero_win, 'rad');
