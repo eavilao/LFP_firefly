@@ -38,11 +38,8 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'spectrogram_reward_density_all_beta_diff'
 % 'spectrogram_reward_density_diff'
 % 'spectrogram_trl'
-<<<<<<< HEAD
 % 'spectrogram_trl_align_stop'  *** 
-=======
-% 'spectrogram_trl_align_stop'  <-----
->>>>>>> 7bbed310f64762a8a9c8195008abcff77311dbfb
+% 'spectrogram_trl_align_stop'  <----
 % 'spectrogram_trl_session_align_target'
 % 'spectrogram_trl_session_align_stop'
 % 'coherogram_move'
@@ -2452,13 +2449,8 @@ switch plot_type
         low_beta = [12 20];
         high_beta = [20 30];
         th_norm_monk_corr=[]; th_norm_monk_err=[]; be_low_norm_monk_corr=[]; be_low_norm_monk_err=[];
-<<<<<<< HEAD
-        for nmonk = 3 % 1:length(monk)  % [1 3]
-            areas = {'PFC'} %fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
-=======
         for nmonk = 3 %1:length(monk)  % [1 3]
             areas = {'PPC'} %fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
->>>>>>> 7bbed310f64762a8a9c8195008abcff77311dbfb
             for narea = 1:length(areas)
                 th_norm_all_err = []; be_low_norm_all_err = []; th_norm_all_corr = []; be_low_norm_all_corr = [];
                 for nsess = 1:length(monk(nmonk).sess)
@@ -2536,13 +2528,9 @@ switch plot_type
                         %% plot theta
                         %figure; hold on; colormap(winter);
                         subplot(1,4,2);hold on;
-<<<<<<< HEAD
                         imagesc(ts,1:size(th_norm,2),th_norm',[0 1]); colorbar;
                         % scatter(th_max_after_stop,1:size(th_norm,2),1,'k','filled');
                         % if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
-=======
-                        imagesc(ts,1:size(th_norm,2),th_norm'); colorbar;
->>>>>>> 7bbed310f64762a8a9c8195008abcff77311dbfb
                         % imagesc(ts,1:size(th,2),(th./max_bands)'); colorbar;
                         % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(th,2)], 'FontSize', 22)
                         set(gca,'xlim',[-1.5 1.5],'ylim',[0 size(th,2)], 'FontSize', 22)
@@ -2555,13 +2543,9 @@ switch plot_type
                         %% plot low beta
                         %figure; hold on; colormap(winter);
                         subplot(1,4,3);hold on;
-<<<<<<< HEAD
                         imagesc(ts,1:size(be_low_norm,2),be_low_norm', [0 1]); colorbar;
                         % scatter(be_low_max_after_stop,1:size(be_low_norm,2),1,'k','filled');
                         % if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
-=======
-                        imagesc(ts,1:size(be_low_norm,2),be_low_norm'); colorbar;
->>>>>>> 7bbed310f64762a8a9c8195008abcff77311dbfb
                         % imagesc(ts,1:size(be_low,2),(be_low./max_bands)'); colorbar;
                         % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(be_low,2)], 'FontSize', 22)
                         set(gca,'xlim',[-1.5 1.5],'ylim',[0 size(th,2)], 'FontSize', 22)
