@@ -2,7 +2,7 @@ function LFPpop_sim_all(exp)
 
 % Function to  load, extract, and save relevant variables from
 % experiments.m
-% If running for the first time, you don't need (exp)
+% If running for the first time, you don't need (exp) just hit run
 %% Choose what to analyze and save
 extract_exp_out = true; % load experiments.m file and extract
 save_exp_out = false; % save mat file without raw lfp signal
@@ -11,11 +11,11 @@ save_pop = false; % if this is true it will only extract pop
 extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
 do_PSD = false;  % extract power spectral densities
-save_spectro = true;
+save_spectro = false;
 save_spectro_per_trial = false;
 save_spectro_per_trial_align_stop = false;
 avg_monks = false; % average for all monkeys?
-do_cohero = false; % extract coherograms
+do_cohero = true; % extract coherograms
 do_cohero_band_passed = false; % extract coherograms per band
 doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
@@ -24,7 +24,7 @@ do_band_passed_pop = false;  % needs pop
 do_phases = false; % needs popc
 
 name_output_exp_out_file = 'exp_out_lfp_spectro_stop_2021_05_18'; 
-name_output_file = 'lfp_spectrogram_all_2021_05_31';
+name_output_file = 'coherogram_all_2021_06_15';
 
 %% Extract
 if extract_exp_out
