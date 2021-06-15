@@ -7,7 +7,9 @@ function plot_LFPpop_sim(monk, plot_type)
 %% Plot directory
 
 % 'trial_times'
-% 'behavior_steering'
+% 'behavior_steering_corr'
+% 'behavior_steering_incorr'
+% 'plot_behv_single_trial'
 % 'distance_vs_reward' need to load behv as behv.stats (needs update)
 % 'move_on_target_on_distribution'
 % 'erp_single_sess_all'
@@ -88,7 +90,7 @@ switch plot_type
         end
         
         
-    case 'behavior_steering'
+    case 'behavior_steering_corr'
         %% behavioural data
         t_v_targ_all = []; t_w_targ_all = [];
         for m = 1:length(monk)
@@ -101,6 +103,7 @@ switch plot_type
                 
                 % velocity
                 for j = 1:length(behv_correct)
+
                     this_ts = behv_correct(j).continuous.ts;
                     this_ts_move = behv_correct(j).continuous.ts-behv_correct(j).events.t_move;
                     this_ts_stop = behv_correct(j).continuous.ts-behv_correct(j).events.t_stop;
@@ -111,6 +114,8 @@ switch plot_type
                     targ_v = behv_correct(j).continuous.v(this_ts>-0.81 & this_ts<0.81); targ_w = behv_correct(j).continuous.w(this_ts>-0.81 & this_ts<0.81);
                     stop_v = behv_correct(j).continuous.v(this_ts_stop>-0.51 & this_ts_stop<0.51); stop_w = behv_correct(j).continuous.w(this_ts_stop>-0.51 & this_ts_stop<0.51);
                     rew_v = behv_correct(j).continuous.v(this_ts_reward>-0.51 & this_ts_reward<0.51); rew_w = behv_correct(j).continuous.w(this_ts_reward>-0.51 & this_ts_reward<0.51);
+                    
+                    
                     
                     % store
                     v_this_move(j,:) = move_v(1:169);
@@ -207,6 +212,163 @@ switch plot_type
         set(gca,'xlim',[-0.5 0.5],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off;
         vline(0,'k'); axis square;
         
+        case 'behavior_steering_incorr'
+        %% behavioural data
+        t_v_targ_all = []; t_w_targ_all = [];
+        for m = 1:length(monk)
+            for sess = 1:length(monk(m).behavior)
+                correct = monk(m).behavior(sess).stats.trialtype.reward(strcmp({monk(m).behavior(sess).stats.trialtype.reward.val},'rewarded')).trlindx;
+                incorrect = monk(m).behavior(sess).stats.trialtype.reward(strcmp({monk(m).behavior(sess).stats.trialtype.reward.val},'unrewarded')).trlindx;
+                crazy = ~(correct | incorrect); ntrls = sum(~crazy);
+                behv_correct = monk(m).behavior(sess).trials(correct); ntrls_correct = length(behv_correct);
+                behv_incorrect = monk(m).behavior(sess).trials(incorrect); ntrls_incorrect = length(behv_incorrect);
+                
+                % velocity
+                for j = 1:length(behv_incorrect)
+
+                    this_ts = behv_incorrect(j).continuous.ts;
+                    this_ts_move = behv_incorrect(j).continuous.ts-behv_incorrect(j).events.t_move;
+                    this_ts_stop = behv_incorrect(j).continuous.ts-behv_incorrect(j).events.t_stop;
+                    this_ts_reward = behv_incorrect(j).continuous.ts-behv_incorrect(j).events.t_rew;
+                    ts_win = this_ts(this_ts>-0.51 & this_ts<0.51); ts_win_targ = this_ts(this_ts>-0.81 & this_ts<0.81);
+                    
+                    move_v = behv_incorrect(j).continuous.v(this_ts_move>-0.51 & this_ts_move<0.51); move_w = behv_incorrect(j).continuous.w(this_ts_move>-0.51 & this_ts_move<0.51);
+                    targ_v = behv_incorrect(j).continuous.v(this_ts>-0.81 & this_ts<0.81); targ_w = behv_incorrect(j).continuous.w(this_ts>-0.81 & this_ts<0.81);
+                    stop_v = behv_incorrect(j).continuous.v(this_ts_stop>-0.51 & this_ts_stop<0.51); stop_w = behv_incorrect(j).continuous.w(this_ts_stop>-0.51 & this_ts_stop<0.51);
+                    
+                    % store
+                    v_this_move(j,:) = move_v(1:169);
+                    v_this_targ(j,:) = targ_v(1:268); % so dirrrty...yuuuk. Extra sample, somewhere.
+                    v_this_stop(j,:) = stop_v(1:169);
+                   
+                    
+                    w_this_move(j,:) = abs(move_w(1:169));
+                    w_this_targ(j,:) = abs(targ_w(1:268));
+                    w_this_stop(j,:) = abs(stop_w(1:169));
+                   
+                    
+                    %% velocity distribution per session
+                    t_v_targ(j) = behv_incorrect(j).continuous.v(this_ts>-0.001 & this_ts<0.005);
+                    t_w_targ(j) = behv_incorrect(j).continuous.w(this_ts>-0.001 & this_ts<0.005);
+                end
+                % mean for a session
+                ts = ts_win(1:169); % ts_win(1:169);
+                ts_win_targ = ts_win_targ(1:268);
+                
+                v_sess_move(m,sess,:) = nanmean(v_this_move);
+                v_sess_targ(m,sess,:) = nanmean(v_this_targ);
+                v_sess_stop(m,sess,:) = nanmean(v_this_stop);
+            
+                
+                w_sess_move(m,sess,:) = nanmean(w_this_move);
+                w_sess_targ(m,sess,:) = nanmean(w_this_targ);
+                w_sess_stop(m,sess,:) = nanmean(w_this_stop);
+                
+                % plot per distribution of velocties when target is on per
+                % session
+                figure; hold on
+                histogram(t_v_targ,35, 'DisplayStyle', 'bar');
+                set(gca,'TickDir', 'out', 'FontSize', 22); box off;
+                xlabel('Linear velocity cm/s');
+                
+                figure; hold on
+                histogram(t_w_targ,35, 'DisplayStyle', 'bar');
+                set(gca,'TickDir', 'out', 'FontSize', 22); box off;
+                xlabel('Angular velocity cm/s');
+                
+                t_v_targ_all = [t_v_targ_all ; t_v_targ'];
+                t_w_targ_all = [t_w_targ_all ; t_w_targ'];
+            end
+            
+        end
+        
+        %% plot move
+        figure; hold on;
+        % [ax,~,~] = plotyy(ts, mean(squeeze(v_sess_move(:,)),ts, mean(w_sess_move));
+        for m = 1:length(monk), v_sess_mu(m,:) = nanmean(squeeze(v_sess_move(m,:,:))); w_sess_mu(m,:) = nanmean(squeeze(w_sess_move(m,:,:))) ; end 
+        [ax,~,~] = plotyy(ts,mean(v_sess_mu),ts,mean(w_sess_mu));                 
+        set(ax(1),'YLim',[0 200]);
+        set(ax(2),'YLim',[0 45]);
+        set(gca,'xlim',[-0.5 0.5],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off;
+        vline(0,'k'); axis square;
+        
+        %% plot target
+        figure; hold on;
+        % [ax,~,~] = plotyy(ts_win_targ, mean(v_sess_targ),ts_win_targ, mean(w_sess_targ));
+        for m = 1:length(monk), v_sess_targ_mu(m,:) = nanmean(squeeze(v_sess_targ(m,:,:))); w_sess_targ_mu(m,:) = nanmean(squeeze(w_sess_targ(m,:,:))) ; end 
+        [ax,~,~] = plotyy(ts_win_targ,mean(v_sess_targ_mu),ts_win_targ,mean(w_sess_targ_mu));                 
+        set(ax(1),'YLim',[0 200]);
+        set(ax(2),'YLim',[0 45]);
+        set(gca,'xlim',[-0.2 0.8],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off;
+        vline(0.3,'k'); vline(0,'k'); axis square;
+        
+        %figure; plot(ts_win_targ, mean(v_sess_targ))
+        figure; plot(ts_win_targ, mean(v_sess_targ_mu))
+        set(gca,'xlim',[0.05 0.55],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off; axis square; ylim([0 200]); vline(0.3,'k'); vline(0,'k');
+        figure;plot(ts_win_targ, mean(w_sess_targ_mu))
+        set(gca,'xlim',[0.05 0.55],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off; axis square; ylim([0 45]); vline(0.3,'k'); vline(0,'k');
+        %% Velocity distribution at target onset per session
+        
+        
+        %% plot stop
+        figure; hold on;
+        % [ax,~,~] = plotyy(ts, mean(v_sess_stop),ts, mean(w_sess_stop))
+        for m = 1:length(monk), v_sess_stop_mu(m,:) = nanmean(squeeze(v_sess_stop(m,:,:))); w_sess_stop_mu(m,:) = nanmean(squeeze(w_sess_stop(m,:,:))) ; end 
+        [ax,~,~] = plotyy(ts,mean(v_sess_stop_mu),ts,mean(w_sess_stop_mu));                 
+        set(ax(1),'YLim',[0 200]);
+        set(ax(2),'YLim',[0 45]);
+        set(gca,'xlim',[-0.5 0.5],'xTick',[],'TickDir', 'out', 'FontSize', 22); box off;
+        vline(0,'k'); axis square;
+
+        
+    case 'plot_behv_single_trial'
+        prs = default_prs(53,113);
+        Fs = prs.fs_smr/prs.factor_downsample;
+        for m = 1:length(monk)
+            for sess = 1:length(monk(m).behavior)
+                figure; hold on;
+                % extract correct vs incorrect trials
+                corr_indx = monk(m).behavior(sess).stats.trialtype.reward(strcmp({monk(m).behavior(sess).stats.trialtype.reward.val},'rewarded')).trlindx;
+                % get monkey and target position only for correct trials
+                x_monk = monk(m).behavior(sess).stats.pos_abs.x_monk(corr_indx); ntrls = length(x_monk);
+                y_monk = monk(m).behavior(sess).stats.pos_abs.y_monk(corr_indx);
+                r_targ = monk(m).behavior(sess).stats.pos_final.r_targ(corr_indx);
+                theta_targ = monk(m).behavior(sess).stats.pos_final.theta_targ(corr_indx)*pi/180;
+                x_targ = r_targ.*sin(theta_targ); % convert to cartesian
+                y_targ = r_targ.*cos(theta_targ);
+                % get end position for monkey
+                for indx = 1:ntrls
+                    x_monk = x_monk{indx}(5:end-50); y_monk = y_monk{indx}(5:end-50) + 37.5;
+                    x_targ = x_targ(indx); y_targ = y_targ(indx);
+                    monk2targ(indx) = sqrt((x_monk(indx) - x_targ(indx))^2 + (y_monk(indx) - y_targ(indx))^2);
+                    % velocity
+                    v{indx,:} = monk(m).behavior(sess).trials(indx).continuous.v; w{indx,:} = monk(m).behavior(sess).trials(indx).continuous.w;
+                    %% plot
+                    nt = length(x_monk);
+                    t = linspace(0,nt/Fs,nt);
+                    z = zeros(size(t));
+                    col = t;  % This is the color, vary with time (t) in this case.
+                    set(gca,'Fontsize',14);
+                    % plot target location
+                    scatter(x_targ(indx),y_targ(indx),20,'or','filled');
+                    scatter(x_monk(indx),y_targ(indx),20,'og','filled'); 
+                    % draw circle to denote reward zone
+                    t2 = linspace(0,2*pi);plot(65*cos(t2)+x_targ(indx),65*sin(t2)+y_targ(indx));
+                    % plot trajectory
+                    surface([x_monk';x_monk'],[y_monk';y_monk'],[z;z],[col;col],...
+                        'edgecol','interp','linew',2);
+                    box off; axis equal; axis([-250 250 -50 450]); %removeaxes;
+                    nt = length(v);
+                    t = linspace(0,nt/Fs,nt);
+                    z = zeros(size(t));
+                    col = t;
+                end
+            end
+        end
+        
+        
+         incorr_indx = monk(m).behavior(sess).stats.trialtype.reward(strcmp({monk(m).behavior(sess).stats.trialtype.reward.val},'unrewarded')).trlindx;
+        
     case 'distance_vs_reward'
         figure; hold on;
         r_targ = behv.stats.pos_final.r_targ(incorrect);
@@ -235,6 +397,8 @@ switch plot_type
         xlabel('Target, r(m)');
         set(gca, 'YTick', [0 200 400], 'YTickLabel', [0 2 4]);
         ylabel('Response, r(m)');
+        
+        
         
     case 'move_on_target_on_distribution'
         move_t_all = [];
@@ -2913,7 +3077,7 @@ switch plot_type
         ev = 'stop'
         time_win = [-0.5 0.5];   % [-0.25 0.25]; [-0.45 0.25];
         freq_win = [3 51];
-        align_t = 1;  % 1.3 for target (so it's aligned to target offset
+        % align_t = 1;  % 1.3 for target (so it's aligned to target offset
         p = numSubplots(12);  % 9 for reward cond, 12 for rest
         cnt=1;
         for nmonk = 1 %[1 3]
@@ -2984,20 +3148,22 @@ switch plot_type
         brain_area = 'PPCMST'  % 'PFCMST'  % 'PPCMST'
         time_win = [-1.5 1.5];   % [-0.25 0.25]; [-0.45 0.25];
         freq_win = [3 51];
-        align_t = 1;  % 1.3 for target (so it's aligned to target offset
+        align_t = 1.3;  % 1.3 for target (so it's aligned to target offset)
         p = numSubplots(12);  % 9 for reward cond, 12 for rest
         cnt=1;
-        for nmonk = 2 %[1 3]
+        p_cohero_all_corr = []; p_cohero_all_incorr = []; 
+        for nmonk = [1 3]
             for nsess = 1:length(monk(nmonk).coher.sess)
                 ncond = length(monk(nmonk).coher.sess(nsess).trialtype.(type));
                 for cond = 1:ncond
                     freq = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_freq;
-                    ts = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_ts-align_t;
-                     p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher';
+                    ts = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_ts;  %% CHECK TIME ALIGNMENT
+                    p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher';
+                    if cond == 1, p_cohero_all_incorr = [p_cohero_all_incorr ; p_cohero(:,1:108)]; else p_cohero_all_corr = [p_cohero_all_corr ; p_cohero(:,1:97)]; end % gather for all monks
                     % p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_phi'; %phase
                     ts_win = ts(ts>time_win(1) & ts<time_win(2));
                     p_cohero_win = p_cohero(freq>freq_win(1) & freq<freq_win(2),ts>time_win(1) & ts<time_win(2));
-                    coher_all(nsess,:,:) = p_cohero_win;
+                    if cond == 1,coher_sess_incorr(nsess,:,:) = p_cohero_win; else coher_sess_corr(nsess,:,:) = p_cohero_win; end
                     max_cohero = max(max(p_cohero_win));
                     %% plot colormap
                     %figure('Name',['Monk ' num2str(nmonk) ' sess ' num2str(nsess)  ' PPC--MST ' ev ' rew ' num2str(cond)]);
@@ -3010,57 +3176,87 @@ switch plot_type
                     
                     % xlabel('time (s)'); ylabel('frequency (Hz)');
                     
-                    % plot win
+                    %% plot win
                     % figure('Name',['Normalized  Monk ' num2str(nmonk) ' sess ' num2str(nsess)  ' PPC--MST ' ev ' rew ' num2str(cond)]);
                     figure(2); subplot(p(1),p(2),cnt)
                     %colormap(parula); 
                     imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),p_cohero_win, [0 max_cohero]); axis xy; colorbar;
                     set(gca,'xlim',[-1.5 1.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; % vline(-0.3,'b');
-                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
-                    %% plot coher vs freq
-                    figure(2); subplot(p(1),p(2),cnt)
-                    plot
-                    
-                    %% plot circular color (when extracting phases)
-                    ph = phasewrap(p_cohero_win, 'rad');
-                    imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),ph, [0 max_cohero]); axis xy; colorbar;
-                    phasemap; 
-                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
-                    xlabel('time (s)'); ylabel('frequency (Hz)');
-                    cnt = cnt+1;
+                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end                    
+%% if extracting phases, plot with circular color
+                    %                     %% plot circular color (if extracting phases)
+%                     ph = phasewrap(p_cohero_win, 'rad');
+%                     imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),ph, [0 max_cohero]); axis xy; colorbar;
+%                     phasemap; 
+%                     title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
+%                     xlabel('time (s)'); ylabel('frequency (Hz)');
+
+                     cnt = cnt+1;
                 end
             end
-            % Mean for all sessions for one condition
-            coher_mu = mean(coher_all);
+            %% Mean for all sessions for one condition
+            
+            % correct
+            coher_mu_corr = mean(coher_sess_corr);
             % plot
             figure;
-            imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),squeeze(coher_mu),[0 0.6]); axis xy; colorbar;
+            imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),squeeze(coher_mu_corr),[0 0.6]); axis xy; colorbar;
             set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; if align_t == 1.3; vline(-0.3,'--w'); end
             title (['Cond ' num2str(cond)]); box off
             xlabel('time (s)'); ylabel('frequency (Hz)');
             
             % mu all
             figure;
-            plot(ts_win,smooth(mean(squeeze(coher_mu))))
+            plot(ts_win,smooth(mean(squeeze(coher_mu_corr))))
             set(gca, 'ylim',[0.14 0.31], 'xlim',[-0.5 0.5], 'FontSize', 22, 'TickDir', 'out'); vline(0,'k'); axis square;
             title (['cond ' num2str(cond)]); box off; %if align_t == 1.3; vline(-0.3,'--k'); end
             
             % theta mu
-            figure; coher_theta = coher_mu(1,freq>3 & freq<12,:);
+            figure; coher_theta = coher_mu_corr(1,freq>3 & freq<12,:);
             plot(ts_win, smooth(squeeze(mean(coher_theta)))); box off
             set(gca, 'ylim',[0.25 0.36], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
             title(['theta cond ' num2str(cond)])
             
             % beta mu
-            figure; coher_beta = coher_mu(1,freq>12 & freq<21,:);
+            figure; coher_beta = coher_mu_corr(1,freq>12 & freq<21,:);
             plot(ts_win, smooth(squeeze(mean(coher_beta)))); box off
             set(gca, 'ylim',[0.18 0.32], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
             title(['beta cond ' num2str(cond)])
             
-            % save per monk
-            save(['monk ' num2str(nmonk) ' cond' num2str(cond)], 'coher_mu', 'coher_theta','coher_beta', 'coher_wideband');
+            % incorrect
+            coher_mu_incorr = mean(coher_sess_incorr);
+            % plot
+            figure;
+            imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),squeeze(coher_sess_incorr),[0 0.6]); axis xy; colorbar;
+            set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; if align_t == 1.3; vline(-0.3,'--w'); end
+            title (['Cond ' num2str(cond)]); box off
+            xlabel('time (s)'); ylabel('frequency (Hz)');
             
+            % mu all
+            figure;
+            plot(ts_win,smooth(mean(squeeze(coher_sess_incorr))))
+            set(gca, 'ylim',[0.14 0.31], 'xlim',[-0.5 0.5], 'FontSize', 22, 'TickDir', 'out'); vline(0,'k'); axis square;
+            title (['cond ' num2str(cond)]); box off; %if align_t == 1.3; vline(-0.3,'--k'); end
+            
+            % theta mu
+            figure; coher_theta = coher_sess_incorr(1,freq>3 & freq<12,:);
+            plot(ts_win, smooth(squeeze(mean(coher_theta)))); box off
+            set(gca, 'ylim',[0.25 0.36], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
+            title(['theta cond ' num2str(cond)])
+            
+            % beta mu
+            figure; coher_beta = coher_sess_incorr(1,freq>12 & freq<21,:);
+            plot(ts_win, smooth(squeeze(mean(coher_beta)))); box off
+            set(gca, 'ylim',[0.18 0.32], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
+            title(['beta cond ' num2str(cond)])
+
         end
+        
+        %% plot for all monkeys
+        
+        % correct
+        
+        % incorrec
         
     case 'coherogram_target_stop_PPC_MST_diff' %% under construction
         area = 'PFC'
@@ -3068,7 +3264,7 @@ switch plot_type
         ev = 'stop'
         th = [4 12];
         bet = [12 20];
-        align_t = 1;  % 1.3 for target (so it's aligned to target offset
+        % align_t = 1;  % 1.3 for target (so it's aligned to target offset
         for nmonk = 3  % 1:length(monk) %; [1 3]
             freq = monk(nmonk).spec.area.(area).(type)(1).events.(ev).freq_sess;
             ts = monk(nmonk).spec.area.(area).(type)(1).events.(ev).ts_sess;
@@ -3098,7 +3294,7 @@ switch plot_type
         band = 'beta';
         time_win = [-0.5 0.5];   % [-0.25 0.25]; [-0.45 0.25];
         freq_win = [3 51];
-        align_t = 1;  % 1.3 for target (so it's aligned to target offset
+        % align_t = 1;  % 1.3 for target (so it's aligned to target offset
         p = numSubplots(12);  % 9 for reward cond, 12 for rest
         cnt=1;
         for nmonk = 2 %[1 3]
@@ -4121,7 +4317,7 @@ switch plot_type
             figure; hold on
             shadedErrorBar(ts,smooth(mean(r_corr),8),mean(r_corr_sem), 'lineprops', 'r')
             shadedErrorBar(ts,smooth(mean(r_incorr),8),mean(r_incorr_sem), 'lineprops', 'b')
-            set(gca, 'xlim', [-1.5 1.5], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 20], 'yTick', [0 10 20]); axis square; box off
+            set(gca, 'xlim', [-1.5 1.5], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 22], 'yTick', [0 10 20]); axis square; box off
             xlabel('Time(s)'); vline(0,'-k')
             
             % ratio
@@ -4151,13 +4347,13 @@ switch plot_type
         figure; hold on
         shadedErrorBar(ts,smooth(mean(r_corr_all),8),smooth(std(r_corr_all)/sqrt(size(r_corr_all,1))), 'lineprops', 'r')
         shadedErrorBar(ts,smooth(mean(r_incorr_all),8),smooth(std(r_incorr_all)/sqrt(size(r_incorr_all,1))), 'lineprops', 'b')
-        set(gca, 'xlim', [-1.2 1.2], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 22], 'yTick', [0 20]); axis square; box off
+        set(gca, 'xlim', [-1.5 1.5], 'TickDir', 'out', 'FontSize', 24, 'yLim', [0 23], 'yTick', [0 20]); axis square; box off
         xlabel([(ev) ' time (s)']); vline(0,'-k');
         
         %% plot ratio all monks
         figure; hold on;
         plot(ts,smooth(mean(r_corr_all)./mean(r_incorr_all)), '-k', 'LineWidth',2)
-        set(gca, 'xlim', [-1.5 1.5],'ylim',[0 4.5],'yTick',[0 1 4.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+        set(gca, 'xlim', [-1.5 1.5],'ylim',[0 2],'yTick',[0 1 2], 'TickDir', 'out', 'FontSize', 22); axis square; box off
         ylabel('Correct / Incorrect'); xlabel('Time(s)')
         hline(1,'--k')
         
@@ -4248,14 +4444,14 @@ switch plot_type
         end
         
     case 'mean_plv'
-        ar = 'PPC'     % MST PPC PFC
-        band = 'theta'
-        win = [-1.5 1.5];
-        ev = 'stop'
+        ar = 'PFC'     % MST PPC PFC
+        band = 'beta'
+        win = [-0.5 1.5];
+        ev = 'target'
         
         itpc_corr_all = []; itpc_incorr_all = []; t_max_itpc_corr = []; t_max_itpc_incorr = []; itpc_corr_sem_all= []; itpc_incorr_sem_all = []; 
         
-        for m = 1:length(monk)  % [1 3] % 1:length(monk) 
+        for m = 3   % 1:length(monk)  % [1 3] 
            
             clear itpc_corr itpc_incorr itpc_corr_sem itpc_incorr_sem
             for nsess = 1:length(monk(m).sess)
@@ -4269,26 +4465,28 @@ switch plot_type
 %                 end
                 %
                 phase_clust_corr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_mu(1,ts_corr>win(1) & ts_corr<win(2));
-                itpc_corr(nsess,:) = phase_clust_corr(1:500); % making sure all vectors are the same length because of extra sample here and there
+                if ev == 'target', itpc_corr(nsess,:) = phase_clust_corr(1:333);  else itpc_corr(nsess,:) = phase_clust_corr(1:500); end % making sure all vectors are the same length because of extra sample here and there
                 phase_clust_corr_sem = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_sem(1,ts_corr>win(1) & ts_corr<win(2));
-                itpc_corr_sem(nsess,:) = phase_clust_corr_sem(1:500); 
+                if ev == 'target', itpc_corr_sem(nsess,:) = phase_clust_corr_sem(1:333); else itpc_corr_sem(nsess,:) = phase_clust_corr_sem(1:500); end 
                 % itpc_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_mu']); itpc_corr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_sem']);
                 % store
-                ts_corr_win = ts_corr(ts_corr>win(1) & ts_corr<win(2)); ts_corr_win = ts_corr_win(1:500); 
-                itpc_corr_all = [itpc_corr_all ; itpc_corr]; 
+                if ev == 'target', ts_corr_win = ts_corr(ts_corr>win(1) & ts_corr<win(2))-0.3; ts_corr_win = ts_corr_win(1:333); else ts_corr_win = ts_corr_win(1:500); end
+                %itpc_corr_all = [itpc_corr_all ; itpc_corr(nsess,:)./max(itpc_corr(nsess,:))];  %store normalized to max in correct trials
                 itpc_corr_sem_all = [itpc_corr_sem_all ; itpc_corr_sem]; 
                 % extract max val time
                 [~,indx_t_corr] = max(itpc_corr(nsess,:)); 
                 
                 %% incorrect
                 phase_clust_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ang_itpc_mu(1,ts_incorr>win(1) & ts_incorr<win(2));
-                itpc_incorr(nsess,:) = phase_clust_incorr(1:500); % making sure all vectors are the same length because of extra sample here and there
+                if ev == 'target', itpc_incorr(nsess,:) = phase_clust_incorr(1:333); else itpc_incorr(nsess,:) = phase_clust_incorr(1:500); end % making sure all vectors are the same length because of extra sample here and there
                 phase_clust_incorr_sem = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ang_itpc_sem(1,ts_incorr>win(1) & ts_incorr<win(2));
-                itpc_incorr_sem(nsess,:) = phase_clust_incorr_sem(1:500); 
+                if ev == 'target', itpc_incorr_sem(nsess,:) = phase_clust_incorr_sem(1:333); else itpc_incorr_sem(nsess,:) = phase_clust_incorr_sem(1:500); end 
                 % itpc_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).([(band) '_ang_itpc_mu']); itpc_incorr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).([(band) '_ang_itpc_sem']);
                 % store
-                ts_incorr_win = ts_incorr(ts_incorr>win(1) & ts_incorr<win(2)); ts_incorr_win = ts_incorr_win(1:500); 
-                itpc_incorr_all = [itpc_incorr_all ; itpc_incorr];
+               
+                if ev == 'target',  ts_incorr_win = ts_incorr(ts_incorr>win(1) & ts_incorr<win(2))-0.3; ts_incorr_win = ts_incorr_win(1:333); else ts_incorr_win = ts_incorr_win(1:500); end 
+                itpc_incorr_all = [itpc_incorr_all ; itpc_incorr(nsess,:)./max(itpc_incorr(nsess,:))]; %store normalized to max in correct trials
+                itpc_corr_all = [itpc_corr_all ; itpc_corr(nsess,:)./max(itpc_incorr(nsess,:))];  %store normalized to max in correct trials
                 itpc_incorr_sem_all = [itpc_incorr_sem_all ; itpc_corr_sem]; 
                  % extract max val time
                 [~,indx_t_incorr] =  max(itpc_incorr(nsess,:)); 
@@ -4296,31 +4494,77 @@ switch plot_type
                 t_max_itpc_corr = [t_max_itpc_corr ; ts_corr_win(indx_t_corr)];
                 t_max_itpc_incorr = [t_max_itpc_incorr ; ts_incorr_win(indx_t_incorr)];
             end 
-            % plot for each monkey
+            %% plot for each monkey
+            % plot each session
             figure; hold on
             for nsess = 1:length(monk)
             shadedErrorBar(ts_corr_win, itpc_corr(nsess,:),itpc_corr_sem(nsess,:),'lineprops', 'g');
             shadedErrorBar(ts_incorr_win, itpc_incorr(nsess,:),itpc_incorr_sem(nsess,:), 'lineprops', 'k')
             end 
-            set(gca,'ylim',[0 0.2], 'yTick',[0 0.1 0.2], 'FontSize', 22); axis square
+            set(gca,'ylim',[0 0.41], 'yTick',[0 0.2 0.4], 'FontSize', 22); axis square
+            ylabel('phase clustering'); xlabel('time (s)')
+            title(['monkey ' num2str(m)])
+           
+            % plot mean for each monkey
+            figure; hold on;
+            shadedErrorBar(ts_corr_win, mean(itpc_corr),mean(itpc_corr_sem),'lineprops', 'g');
+            shadedErrorBar(ts_incorr_win, mean(itpc_incorr),mean(itpc_incorr_sem), 'lineprops', 'k')
+            set(gca,'ylim',[0 0.41], 'yTick',[0 0.2 0.4], 'FontSize', 22); axis square
             ylabel('phase clustering'); xlabel('time (s)')
             title(['monkey ' num2str(m)])
         end
 
-        
         % plot mean for all monkeys
         figure; hold on
-        shadedErrorBar(ts_corr_win, mean(itpc_corr_all)/max(mean(itpc_corr_all)), mean(itpc_corr_sem_all), 'lineprops', 'g'); [~,indx_max_corr]=max(mean(itpc_corr_all)); 
-        shadedErrorBar(ts_incorr_win,  mean(itpc_incorr_all)/max(mean(itpc_incorr_all)), mean(itpc_incorr_sem_all),'lineprops', 'k'); [~,indx_max_incorr]=max(mean(itpc_incorr_all)); 
-        set(gca,'xlim',[win(1) win(2)],'ylim',[0 1], 'yTick',[0 0.5 1], 'FontSize', 22); axis square; vline(ts_corr_win(indx_max_corr),'g'); vline(ts_incorr_win(indx_max_incorr),'k');
+        shadedErrorBar(ts_corr_win, mean(itpc_corr_all), mean(itpc_corr_sem_all), 'lineprops', 'g'); [~,indx_max_corr]=max(mean(itpc_corr_all)); 
+        shadedErrorBar(ts_incorr_win, mean(itpc_incorr_all), mean(itpc_incorr_sem_all),'lineprops', 'k'); [~,indx_max_incorr]=max(mean(itpc_incorr_all)); 
+        set(gca,'xlim',[win(1) win(2)],'ylim',[0 1], 'yTick',[0 0.5 1], 'FontSize', 22, 'TickDir', 'out'); axis square; vline(0,'--k'); %vline(ts_corr_win(indx_max_corr),'g'); vline(ts_incorr_win(indx_max_incorr),'k');
         ylabel('phase clustering'); xlabel([ev ' time (s)']); title('all monks')
         
+        figure; hold on;
+        area(ts_incorr_win, mean(itpc_incorr_all),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+        area(ts_corr_win, mean(itpc_corr_all),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        % set(gca,'xlim',[win(1) win(2)],'ylim',[0 1.5], 'yTick',[0 0.5 1], 'FontSize', 22, 'TickDir', 'out'); axis square; vline(0,'--k');%vline(ts_corr_win(indx_max_corr),'g'); vline(ts_incorr_win(indx_max_incorr),'k');
+        set(gca,'xlim',[-0.5 0.5],'ylim',[0 1.3], 'yTick',[0 0.5 1], 'FontSize', 22, 'TickDir', 'out'); axis square; vline(0,'--k'); vline(-0.3,'--k'); % for target 
+        ylabel('phase clustering'); xlabel([ev ' time (s)']); title('all monks')
+
         % plot mean max itpc +/- sem
         figure; hold on; 
         errorbar(1,mean(t_max_itpc_corr),std(t_max_itpc_corr), '.g', 'MarkerSize', 20, 'CapSize',0)
         errorbar(2,mean(t_max_itpc_incorr),std(t_max_itpc_incorr), '.k', 'MarkerSize', 20, 'CapSize',0)
-        set(gca,'xlim',[0.5 2.5],'ylim',[-1.5 1.5], 'yTick',[-1 0 1],'xTick', [], 'FontSize', 22); axis square; 
-        ylabel ([ev ' time (s)'])
-
+        set(gca,'xlim',[0.5 2.5],'ylim',[-1.5 1.5], 'yTick',[-1 0 1],'xTick', [], 'FontSize', 22,'TickDir', 'out'); axis square;
+        ylabel ([ev ' time (s)']); hline(0, '--k');
         
+        % plot same thing as above as colormaps
+        J = customcolormap_preset('red-yellow-blue');
+        figure; hold on
+        %         imagesc(ts_corr_win, 1,mean(itpc_corr_all), [0 1])
+        %         colormap(B'); set(gca,'Fontsize',20, 'TickDir', 'out'); axis square
+        %         colorbar;
+        
+        % pcolor(ts_corr_win,1:size(itpc_corr_all,1),itpc_corr_all);
+        pcolor(ts_corr_win,1:2,repmat(mean(itpc_corr_all),2,1)); shading interp;
+        colormap(J); set(gca, 'clim', [0 1],'Fontsize',20, 'TickDir', 'out'); axis square; colorbar;
+        print('-painters', '-dtiffn', [ev '_correct_' band '_' ar])
+        
+        figure; hold on
+        %         imagesc(ts_incorr_win, 1,mean(itpc_incorr_all), [0 1])
+        %         colormap(B'); set(gca,'Fontsize',20, 'TickDir', 'out'); axis square
+        %         colorbar;
+        
+        % pcolor(ts_incorr_win,1:size(itpc_incorr_all,1),itpc_incorr_all);
+        pcolor(ts_incorr_win,1:2,repmat(mean(itpc_incorr_all),2,1)); shading interp;
+        colormap(J); set(gca, 'clim', [0 1],'Fontsize',20, 'TickDir', 'out'); axis square; colorbar;
+        print('-painters', '-dtiffn', [ev '_incorrect_' band '_' ar])
+        
+        % plot difference
+%         figure; hold on;
+%         B = goodcolormap_ext('wr');
+%         imagesc(ts_incorr_win, 1,abs(mean(itpc_corr_all)-mean(itpc_incorr_all)),[0 max(abs(mean(itpc_corr_all)-mean(itpc_incorr_all)))])
+%         colormap(B');
+        figure; hold on
+        plot(ts_corr_win,smooth(mean(itpc_corr_all)./mean(itpc_incorr_all)))
+        set(gca,'Fontsize',20, 'TickDir', 'out'); axis square; hline(1, '--k')
+        title('diff'); box off; axis square; ylim([0.28 1.8]); xlim([-1.5 1.5])
+
 end

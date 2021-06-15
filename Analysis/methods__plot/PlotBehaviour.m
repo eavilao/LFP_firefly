@@ -8,14 +8,18 @@ Fs = prs.fs_smr/prs.factor_downsample;
 ncorrbins = prs.ncorrbins;
 
 %% combine behaviour from all sessions
-if length(behv) > 1, behv = CombineBehv(behv); end
+if length(behv) > 1, behv = CombineBehv(behv); 
+correct = behv.stats.trlindx.correct;
+incorrect = behv.stats.trlindx.incorrect;
+else
+correct = behv.stats.trialtype.reward(strcmp({behv.stats.trialtype.reward.val},'rewarded')).trlindx;
+incorrect = behv.stats.trialtype.reward(strcmp({behv.stats.trialtype.reward.val},'unrewarded')).trlindx;      
+end
 
 %% behavioural data
-correct = behv.stats.trialtype.reward(strcmp({behv.stats.trialtype.reward.val},'rewarded')).trlindx;
-incorrect = behv.stats.trialtype.reward(strcmp({behv.stats.trialtype.reward.val},'unrewarded')).trlindx;
 crazy = ~(correct | incorrect); ntrls = sum(~crazy);
-behv_correct = behv.trials(correct); ntrls_correct = length(behv_correct);
-behv_incorrect = behv.trials(incorrect); ntrls_incorrect = length(behv_incorrect);
+behv_correct = behv.trials(logical(correct)); ntrls_correct = length(behv_correct);
+behv_incorrect = behv.trials(logical(incorrect)); ntrls_incorrect = length(behv_incorrect);
 
 %% plot
 switch plot_type
@@ -23,7 +27,7 @@ switch plot_type
         figure; hold on;
         r_targ = behv.stats.pos_final.r_targ(~crazy);
         r_monk = behv.stats.pos_final.r_monk(~crazy);
-        slope = behv.stats.trialtype.all.pos_regress.beta_r;
+        slope = behv.stats.trialtype.all.pos_regress.beta_r
         if ntrls > maxtrls
             trl_indx = randperm(ntrls);
             trl_indx = trl_indx(1:maxtrls);
@@ -118,7 +122,7 @@ switch plot_type
         figure; hold on;
         theta_targ = behv.stats.pos_final.theta_targ(~crazy);
         theta_monk = behv.stats.pos_final.theta_monk(~crazy);
-        slope = behv.stats.trialtype.all.pos_regress.beta_theta;
+        slope = behv.stats.trialtype.all.pos_regress.beta_theta
         if ntrls > maxtrls
             trl_indx = randperm(ntrls);
             trl_indx = trl_indx(1:maxtrls);
@@ -198,7 +202,7 @@ switch plot_type
             for i=1:maxtrls, plot(x_monk{i}(1:end-50), y_monk{i}(1:end-50), ...
                     'Color', [.5 .5 .5],'Linewidth',0.1); end
         else
-            for i=1:ntrls_correct, plot(x_monk{i}(1:end-50), y_monk{i}(1:end-50), ...
+            for i=1:ntrls_correct, plot(x_monk{i}(1:end-150), y_monk{i}(1:end-150), ...
                     'Color', [.5 .5 .5],'Linewidth',0.1); end
         end
         box off; axis([-250 250 -50 450]);
@@ -257,19 +261,24 @@ switch plot_type
         figure; hold on; plot(t,trials(indx).continuous.yle(5:end-50)); plot(t,trials(indx).continuous.yre(5:end-50)); axis tight; ylim([-30 30]);
         xlabel('time'); ylabel('Eye horizontal position (deg)');
     case 'ROC'
-        rewardwin = behv.stats.trialtype.all.accuracy.rewardwin;
-        pCorrect = behv.stats.trialtype.all.accuracy.pCorrect;
-        pCorrect_shuffled_mu = behv.stats.trialtype.all.accuracy.pcorrect_shuffled_mu;
+        rewardwin = behv.stats.accuracy.rewardwin;
+        pCorrect = behv.stats.accuracy.pCorrect;
+        pCorrect_shuffled_mu = behv.stats.accuracy.pCorrect_shuffled_mu;
         figure; hold on;
         plot(rewardwin,pCorrect,'k','linewidth',2);
         plot(rewardwin,pCorrect_shuffled_mu,'Color',[.5 .5 .5],'linewidth',2);
         xlabel('Hypothetical reward window (m)'); ylabel('Fraction of rewarded trials');
-        lessticks('x'); lessticks('y'); legend({'true','shuffled'});
+        vline(65,'--k')
+        lessticks('x'); lessticks('y'); legend({'true','shuffled'}); axis square
+        set(gca, 'ytick', [0 0.5 1], 'TickDir', 'out', 'FontSize', 20);
+        title('Monkey B')
         % ROC curve
         figure; hold on;
         plot(pCorrect_shuffled_mu,pCorrect,'k','linewidth',2); plot(0:1,0:1,'--k');
         xlabel('Shuffled accuracy'); ylabel('Actual accuracy');
-        lessticks('x'); lessticks('y');
+        lessticks('x'); lessticks('y'); axis square
+        set(gca, 'ytick', [0 0.5 1],'xtick', [0 0.5 1], 'TickDir', 'out', 'FontSize', 20);
+        title('Monkey B')
     case 'saccade'
         trials = behv.trials(~crazy);        
         for i=1:length(trials)
@@ -952,5 +961,20 @@ switch plot_type
                 stim.stimtriggered.eye_movement.eyepos.true.hor_mean.val{i}(round(1*nt/3)),'k');
         end
         axis([0 1 -20 20]);
+        
+    case 'reg_pos'
+        figure; hold on
+        plot(mean(s_angle), '.k', 'MarkerSize', 20)
+        set(gca, 'ylim', [0 1.5], 'yTick', [0 1], 'Fontsize',14, 'TickDir', 'out'); 
+        hline(1,'--k'); box off; axis square
+        title('Angle Monkey S')
+        
+        figure; hold on
+        plot(mean(s_dist), '.k', 'MarkerSize', 20)
+        set(gca, 'ylim', [0 1.5], 'yTick', [0 1], 'Fontsize',14, 'TickDir', 'out'); 
+        hline(1,'--k'); box off; axis square
+        title('Dist Monkey S')
+        
+        
         
 end
