@@ -892,7 +892,6 @@ end
 if prs.analyse_phase
     fprintf('********** Analyses on LFP phases ********** \n');
     fprintf(['Time:  ' num2str(clock) '\n']);
-    %% all of these are aligned to stop
     unique_brain_areas = unique({units.brain_area}); num_brain_areas = numel(unique_brain_areas);
     gettuning = prs.tuning_events;
     for area = 1:num_brain_areas
@@ -908,7 +907,10 @@ if prs.analyse_phase
                         ntrls = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(1).events.(gettuning{ev}).beta.lfp_align,2); % % match trial number. PLV is sensitive to trial num
                         t_temp_theta = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ts_lfp_align;
                         t_temp_beta = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ts_lfp_align;
-                        f = lfps(1).stats.trialtype.reward(2).spectrum.freq; 
+                        f = lfps(1).stats.trialtype.reward(2).events.move.all_freq.freq_spectrogram; 
+                        
+                        % gather phase for each freq for all channels
+                        plv_all(ch,:,:) = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.plv;
                   
                         %% gather angles at each time point for each electrode for band passed signal
                         % theta
@@ -972,6 +974,9 @@ if prs.analyse_phase
                         %                     end
                     end
                     % average itpc for all channels -1.5 to 1.5s store
+                     stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.plv_all = squeeze(nanmean(plv_all)); 
+                    
+                    % for theta and beta only
                     if ~isempty(theta_angle)
                         for ch = 1:length(ar)
                             stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc(ch,:) = theta(ch).itpc;
@@ -1006,7 +1011,7 @@ if prs.analyse_phase
                 end
             end
         end
-    end
+    end    
     %% compute phase locking value across areas (plv, Lachaux 1999)
     for area1 = 1:num_brain_areas
         for area2 = find(1:num_brain_areas ~= area1)
