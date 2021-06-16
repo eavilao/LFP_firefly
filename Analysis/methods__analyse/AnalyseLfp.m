@@ -119,6 +119,25 @@ if event_potential
                             end
                         end
                      end
+                     
+                     if analyse_phase && strcmp(trialtypes{i},'reward')
+                         freq = [prs.lfp_freqmin:prs.lfp_freqmax];
+                         this_lfp = fillmissing(stats.trialtype.(trialtypes{i})(j).events.move.all_freq.lfp_align,'constant',0);
+                         for f_indx = 1:length(freq)
+                             if f_indx ~= length(freq)
+                                 % extract analytic form for each freq
+                                 [b,a] = butter(prs.lfp_filtorder,[freq(f_indx) freq(f_indx+1)]/(prs.fs_lfp/2));
+                                 lfp_filt = filtfilt(b,a,this_lfp);
+                                 lfp_angle = angle(hilbert(lfp_filt)); % extract phase for that freq
+                                 % Compute phase clustering for all trials
+                                 % in one timepoint: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))-->(Lachaux et al 1999)
+                                 for tmp = 1:size(lfp_angle,1)
+                                     stats.trialtype.(trialtypes{i})(j).events.move.all_freq.plv(f_indx,tmp) = abs( mean( exp( 1i * lfp_angle(tmp,:) )));
+                                 end
+                             end
+                         end
+                     end
+                     
                 end
                 %% aligned to target onset
                 if any(strcmp(gettuning,'target'))
@@ -196,6 +215,24 @@ if event_potential
                             end
                         end
                     end
+                    
+                    if analyse_phase && strcmp(trialtypes{i},'reward')
+                        freq = [prs.lfp_freqmin:prs.lfp_freqmax];
+                        this_lfp = fillmissing(stats.trialtype.(trialtypes{i})(j).events.target.all_freq.lfp_align,'constant',0);
+                        for f_indx = 1:length(freq)
+                            if f_indx ~= length(freq)
+                                % extract analytic form for each freq
+                                [b,a] = butter(prs.lfp_filtorder,[freq(f_indx) freq(f_indx+1)]/(prs.fs_lfp/2));
+                                lfp_filt = filtfilt(b,a,this_lfp);
+                                lfp_angle = angle(hilbert(lfp_filt)); % extract phase for that freq
+                                % Compute phase clustering for all trials
+                                % in one timepoint: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))-->(Lachaux et al 1999)
+                                for tmp = 1:size(lfp_angle,1)
+                                    stats.trialtype.(trialtypes{i})(j).events.target.all_freq.plv(f_indx,tmp) = abs( mean( exp( 1i * lfp_angle(tmp,:) )));
+                                end
+                            end
+                        end
+                    end
                 end
                     
                 end
@@ -250,7 +287,7 @@ if event_potential
                     
                     %%
                     if extract_band_pass && strcmp(trialtypes{i},'reward')
-                        if j ==1   % incorrect
+                        if j == 1   % incorrect
                             % for every trial take 95th percentile value
                             for ntrl = 1:sum(trlindx)
                                 stats.band_passed.stop.err.ts = stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_lfp_align;
@@ -285,33 +322,23 @@ if event_potential
                     end
                 end
                 
-                if analyse_phase
-                    if j ==1   % incorrect
-                        for ntrl = 1:sum(trlindx)
-                            stats.band_passed.stop.err.ts = stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_lfp_align;
-                            % theta
-                            this_theta = real(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align(:,ntrl));
-                            theta_phase = angle(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align(:,ntrl));
-                            
-                            figure; hold on
-                            plot(stats.band_passed.stop.err.ts,this_theta)
-                            plot(stats.band_passed.stop.err.ts,theta_phase)
-                            
-                            % beta
-                            this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.stop.beta.lfp_align(:,ntrl));
-                        end
-                    else
-                        for ntrl = 1:sum(trlindx)
-                            stats.band_passed.stop.err.ts = stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_lfp_align;
-                            % theta
-                            this_theta = abs(stats.trialtype.(trialtypes{i})(j).events.stop.theta.lfp_align(:,ntrl));
-                            
-                            % beta
-                            this_beta = abs(stats.trialtype.(trialtypes{i})(j).events.stop.beta.lfp_align(:,ntrl));
+                if analyse_phase && strcmp(trialtypes{i},'reward')
+                    freq = [prs.lfp_freqmin:prs.lfp_freqmax];
+                    this_lfp = fillmissing(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.lfp_align,'constant',0);
+                    for f_indx = 1:length(freq)
+                        if f_indx ~= length(freq)
+                            % extract analytic form for each freq
+                            [b,a] = butter(prs.lfp_filtorder,[freq(f_indx) freq(f_indx+1)]/(prs.fs_lfp/2));
+                            lfp_filt = filtfilt(b,a,this_lfp);
+                            lfp_angle = angle(hilbert(lfp_filt)); % extract phase for that freq
+                            % Compute phase clustering for all trials
+                            % in one timepoint: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))-->(Lachaux et al 1999)
+                            for tmp = 1:size(lfp_angle,1)
+                                stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.plv(f_indx,tmp) = abs( mean( exp( 1i * lfp_angle(tmp,:) )));
+                            end
                         end
                     end
                 end
-                
                 %% aligned to reward
                 if any(strcmp(gettuning,'reward'))
                    [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_rew], 'lfp');
@@ -397,6 +424,25 @@ if event_potential
                             end
                         end
                     end
+                    
+                    if analyse_phase && strcmp(trialtypes{i},'reward')
+                        freq = [prs.lfp_freqmin:prs.lfp_freqmax];
+                        this_lfp = fillmissing(stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.lfp_align,'constant',0);
+                        for f_indx = 1:length(freq)
+                            if f_indx ~= length(freq)
+                                % extract analytic form for each freq
+                                [b,a] = butter(prs.lfp_filtorder,[freq(f_indx) freq(f_indx+1)]/(prs.fs_lfp/2));
+                                lfp_filt = filtfilt(b,a,this_lfp);
+                                lfp_angle = angle(hilbert(lfp_filt)); % extract phase for that freq
+                                % Compute phase clustering for all trials
+                                % in one timepoint: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))-->(Lachaux et al 1999)
+                                for tmp = 1:size(lfp_angle,1)
+                                    stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.plv(f_indx,tmp) = abs( mean( exp( 1i * lfp_angle(tmp,:) )));
+                                end
+                            end
+                        end
+                    end
+                    
                 end
                 
         end
