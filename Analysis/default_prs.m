@@ -8,8 +8,8 @@ prs.monk_Ody = 0; % This will run AddLOGData_Ody instead.
 %% session specific parameters
 monkeyInfoFile_joysticktask;
 monkeyInfo = monkeyInfo([monkeyInfo.session_id]==session_id & [monkeyInfo.monk_id]==monk_id);
-prs.filepath_behv = ['D:\' monkeyInfo.folder '\behavioural data\']; % ['Z:\Data\Monkey2_newzdrive\' monkeyInfo.folder '\behavioural data\'];  % ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\behavioural data\'];
-prs.filepath_neur = ['D:\' monkeyInfo.folder '\neural data\']; % ['Z:\Data\Monkey2_newzdrive\' monkeyInfo.folder '\neural data\Sorted']; % ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\neural data\'];
+prs.filepath_behv = ['E:\' monkeyInfo.folder '\behavioural data\']; % ['Z:\Data\Monkey2_newzdrive\' monkeyInfo.folder '\behavioural data\'];  % ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\behavioural data\'];
+prs.filepath_neur = ['E:\' monkeyInfo.folder '\neural data\']; % ['Z:\Data\Monkey2_newzdrive\' monkeyInfo.folder '\neural data\Sorted']; % ['C:\Users\eao5\Documents\temp_data\' monkeyInfo.folder '\neural data\'];
 prs.filepath_neuralnet = 'C:\Users\eao5\Documents\\GitHub\spykesML\MLencoding\';
 prs.sess_date = datestr(datenum(getnthcell(split(monkeyInfo.folder,'\'),3)));
 prs.coord = monkeyInfo.coord;
@@ -304,10 +304,10 @@ prs.analyse_theta = false; % compute tunings
 prs.analyse_alpha = false; % compute tunings
 prs.analyse_beta = false; % compute tunings
 prs.analyse_wideband = false; % compute tunings
-prs.compute_coherencyLFP = false;
-prs.compute_coherogram = false;
+prs.compute_coherencyLFP = true;
+prs.compute_coherogram = true;
 prs.compute_coherogram_band_passed = false;
-prs.analyse_phase = true;
+prs.analyse_phase = false;
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;

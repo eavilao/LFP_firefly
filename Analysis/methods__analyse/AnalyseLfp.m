@@ -426,23 +426,26 @@ if event_potential
                     end
                     
                     if analyse_phase && strcmp(trialtypes{i},'reward')
-                        freq = [prs.lfp_freqmin:prs.lfp_freqmax];
-                        this_lfp = fillmissing(stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.lfp_align,'constant',0);
-                        for f_indx = 1:length(freq)
-                            if f_indx ~= length(freq)
-                                % extract analytic form for each freq
-                                [b,a] = butter(prs.lfp_filtorder,[freq(f_indx) freq(f_indx+1)]/(prs.fs_lfp/2));
-                                lfp_filt = filtfilt(b,a,this_lfp);
-                                lfp_angle = angle(hilbert(lfp_filt)); % extract phase for that freq
-                                % Compute phase clustering for all trials
-                                % in one timepoint: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))-->(Lachaux et al 1999)
-                                for tmp = 1:size(lfp_angle,1)
-                                    stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.plv(f_indx,tmp) = abs( mean( exp( 1i * lfp_angle(tmp,:) )));
+                        if j == 2
+                            freq = [prs.lfp_freqmin:prs.lfp_freqmax];
+                            this_lfp = fillmissing(stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.lfp_align,'constant',0);
+                            for f_indx = 1:length(freq)
+                                if f_indx ~= length(freq)
+                                    % extract analytic form for each freq
+                                    [b,a] = butter(prs.lfp_filtorder,[freq(f_indx) freq(f_indx+1)]/(prs.fs_lfp/2));
+                                    lfp_filt = filtfilt(b,a,this_lfp);
+                                    lfp_angle = angle(hilbert(lfp_filt)); % extract phase for that freq
+                                    % Compute phase clustering for all trials
+                                    % in one timepoint: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))-->(Lachaux et al 1999)
+                                    for tmp = 1:size(lfp_angle,1)
+                                        stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.plv(f_indx,tmp) = abs( mean( exp( 1i * lfp_angle(tmp,:) )));
+                                    end
                                 end
                             end
+                        else
+                           stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.plv = NaN;  
                         end
                     end
-                    
                 end
                 
         end
