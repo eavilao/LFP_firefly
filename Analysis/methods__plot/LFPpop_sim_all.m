@@ -6,16 +6,16 @@ function LFPpop_sim_all(exp)
 %% Choose what to analyze and save
 extract_exp_out = true; % load experiments.m file and extract
 save_exp_out = false; % save mat file without raw lfp signal
-save_pop = true; % if this is true it will only extract pop
+save_pop = false; % if this is true it will only extract pop
 
 extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
 do_PSD = false;  % extract power spectral densities
-save_spectro = false;
+save_spectro = true;
 save_spectro_per_trial = false;
 save_spectro_per_trial_align_stop = false;
 avg_monks = false; % average for all monkeys?
-do_cohero = true; % extract coherograms
+do_cohero = false; % extract coherograms
 do_cohero_band_passed = false; % extract coherograms per band
 doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
@@ -24,7 +24,7 @@ do_band_passed_pop = false;  % needs pop
 do_phases = false; % needs pop
 
 name_output_exp_out_file = 'exp_out_lfp_spectro_stop_2021_05_18'; 
-name_output_file = 'coherogram_all_2021_06_16';
+name_output_file = 'spectro_Schro_allfreq_2021_06_19';
 
 %% Extract
 if extract_exp_out
@@ -293,7 +293,7 @@ if save_spectro
                                 p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).ts = NaN;
                             else
                                 for ch = 1:length(exp(i).area.(areas{a}).lfps.stats) % extract per channel
-                                    spec(ch,:,:) = real(exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).all_freq.p_spectrogram');
+                                        spec(ch,:,:) = real(exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).all_freq.p_spectrogram');
                                 end
                                 
                                 % store and normalize by max
@@ -330,15 +330,15 @@ if save_spectro
         for a = 1:length(areas)
             trialtype = fieldnames(p_monk(1).area.(areas{a}));
             for type = 2 %1:length(trialtype)
-                nconds = length(p_monk(1).area.(areas{a}).(trialtype{type})); clear cond
+                nconds = 2 %length(p_monk(1).area.(areas{a}).(trialtype{type})); clear cond
                 for cond = 1:nconds
                     for ev = 1:length(events)
                         clear spec spec_no_norm spec_f spec_ts
                         for k = 1:length(p_monk)
-                            spec(k,:,:) = p_monk(k).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).pow_mu;
-                            spec_no_norm(k,:,:) = p_monk(k).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).pow_mu_no_norm;
-                            spec_f(k,:,:) = p_monk(k).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).freq;
-                            spec_ts(k,:,:) = p_monk(k).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).ts;
+                            spec(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).pow_mu;
+                            spec_no_norm(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).pow_mu_no_norm;
+                            spec_f(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).freq;
+                            spec_ts(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).ts;
                         end
                         monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).mu_sess = squeeze(nanmean(spec,1));  % average per trial type
                         monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).mu_sess_no_norm = squeeze(nanmean(spec_no_norm,1));  % average per trial type
@@ -347,7 +347,6 @@ if save_spectro
                         monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).ts_sess = squeeze(spec_ts(1,:));
                     end
                 end
-                
             end
         end
     end
@@ -464,20 +463,20 @@ if do_cohero
     monks = unique([exp.monk_id]);
     for i = 1:length(monks) % [1 3]
         m = [exp.monk_id] == monks(i); p_monk = exp(m);
-        coh_areas = fieldnames(p_monk(i).pop.trialtype.reward(1).events.stop);
+        coh_areas = fieldnames(p_monk(i).pop.trialtype.reward(2).events.stop.coherogram);
         trialtype = fieldnames(p_monk(i).pop.trialtype);
         for sess = 1:length(p_monk)
-            for type = 1:length(trialtype)
+            for type = 2 %1:length(trialtype)
                 nconds = length(p_monk(sess).pop.trialtype.(trialtype{type})); clear cond
                 for cond = 1:nconds
                     events = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).events);
                     for ev = 1:length(events)
                         clear coh_ar coh_ev coh_phi coh_ts coh_freq
                         for coh_ar = 1:length(coh_areas)
-                            coh_ev(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).(bands(b)).coher;
-                            coh_phi(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coherPhi;
-                            coh_ts(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_ts;
-                            coh_freq(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).(coh_areas{coh_ar}).coher_freq;
+                            coh_ev(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).coherogram.(coh_areas{coh_ar}).coher;
+                            coh_phi(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).coherogram.(coh_areas{coh_ar}).coherPhi;
+                            coh_ts(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).coherogram.(coh_areas{coh_ar}).coher_ts;
+                            coh_freq(coh_ar,:,:) = p_monk(sess).pop.trialtype.(trialtype{type})(cond).events.(events{ev}).coherogram.(coh_areas{coh_ar}).coher_freq;
                         end
                         % plot -- sanity
                         %             figure('Name', 'PPC-->MST');
