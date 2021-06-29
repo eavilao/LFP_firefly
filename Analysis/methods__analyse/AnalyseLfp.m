@@ -51,7 +51,7 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.move.potential_mu = nanmean(lfps_temp2);
                     stats.trialtype.(trialtypes{i})(j).events.move.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.move.time = prs.ts.move;
-                    
+
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp_theta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.move)';
                     stats.trialtype.(trialtypes{i})(j).events.move.theta.potential_mu = nanmean(lfps_temp2);
@@ -63,7 +63,7 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.move.beta.potential_mu = nanmean(lfps_temp2);
                     stats.trialtype.(trialtypes{i})(j).events.move.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.move.beta.time = prs.ts.move;
-
+                   
                     %% compute spectrogram
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_move], 'lfp');
                     stats.trialtype.(trialtypes{i})(j).events.move.all_freq.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_move])-0.5 & ts < 2,:);
@@ -243,7 +243,7 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.stop.potential_mu = nanmean(lfps_temp2);
                     stats.trialtype.(trialtypes{i})(j).events.stop.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.stop.time = prs.ts.stop;
-                    
+
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop],'lfp_theta');
                     lfps_temp2 = interp1(ts,(trials_lfps_temp2),prs.ts.stop)';
                     stats.trialtype.(trialtypes{i})(j).events.stop.theta.potential_mu = nanmean(lfps_temp2);
@@ -255,7 +255,7 @@ if event_potential
                     stats.trialtype.(trialtypes{i})(j).events.stop.beta.potential_mu = nanmean(lfps_temp2);
                     stats.trialtype.(trialtypes{i})(j).events.stop.beta.potential_sem = nanstd(lfps_temp2)/sqrt(size(lfps_temp2,1));
                     stats.trialtype.(trialtypes{i})(j).events.stop.beta.time = prs.ts.stop;
-                    
+
                     %% compute spectrogram lfp not band passed
                     [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_stop], 'lfp');
                     stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.lfp_align = trials_lfps_temp2(ts > -max([events_temp.t_stop])-0.5 & ts < 2,:);
@@ -451,9 +451,6 @@ if event_potential
         end
     end
 end
-
-
-
 
 %% power spectral density
 if compute_psd

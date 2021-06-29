@@ -4,15 +4,15 @@ function LFPpop_sim_all(exp)
 % experiments.m
 % If running for the first time, you don't need (exp) just hit run
 %% Choose what to analyze and save
-extract_exp_out = true; % load experiments.m file and extract
+extract_exp_out = false; % load experiments.m file and extract. If saved 'exp_out', make it false.
 save_exp_out = false; % save mat file without raw lfp signal
 save_pop = false; % if this is true it will only extract pop
 
 extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
 do_PSD = false;  % extract power spectral densities
-save_spectro = true;
-save_spectro_per_trial = false;
+save_spectro = false;
+save_spectro_per_trial = true;
 save_spectro_per_trial_align_stop = false;
 avg_monks = false; % average for all monkeys?
 do_cohero = false; % extract coherograms
@@ -23,13 +23,13 @@ save_band_pass_analysis = false; % extract band passed lfp signal only (used onl
 do_band_passed_pop = false;  % needs pop
 do_phases = false; % needs pop
 
-name_output_exp_out_file = 'exp_out_lfp_spectro_stop_2021_05_18'; 
-name_output_file = 'spectro_Schro_allfreq_2021_06_19';
+name_output_exp_out_file = 'exp_out_lfp_spectro_2021_06_28';
+name_output_file = 'lfp_spectro_allfreq_2021_06_28';
 
 %% Extract
 if extract_exp_out
-%      path = 'D:\Output';
-%      cd(path)
+    %      path = 'D:\Output';
+    %      cd(path)
     fprintf(['Time:  ' num2str(clock) '\n']);
     fnames = dir('experiments*.mat');
     cnt=1;
@@ -293,7 +293,7 @@ if save_spectro
                                 p_spec(i).area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).ts = NaN;
                             else
                                 for ch = 1:length(exp(i).area.(areas{a}).lfps.stats) % extract per channel
-                                        spec(ch,:,:) = real(exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).all_freq.p_spectrogram');
+                                    spec(ch,:,:) = real(exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).events.(events{ev}).all_freq.p_spectrogram');
                                 end
                                 
                                 % store and normalize by max
@@ -329,22 +329,25 @@ if save_spectro
         nareas = numel(fieldnames(p_monk(1).area)); areas = fieldnames(p_monk(1).area);
         for a = 1:length(areas)
             trialtype = fieldnames(p_monk(1).area.(areas{a}));
-            for type = 2 %1:length(trialtype)
+            for type = 1 %1:length(trialtype)
                 nconds = 2 %length(p_monk(1).area.(areas{a}).(trialtype{type})); clear cond
                 for cond = 1:nconds
-                    for ev = 1:length(events)
+                    for ev = [2 3 4] %1:length(events)
                         clear spec spec_no_norm spec_f spec_ts
                         for k = 1:length(p_monk)
-                            spec(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).pow_mu;
-                            spec_no_norm(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).pow_mu_no_norm;
-                            spec_f(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).freq;
-                            spec_ts(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).ts;
+                            ts = round(p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).ts);
+                            spec(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).pow_mu(:,ts>=-1.56 & ts<=1.56);
+                            spec_no_norm(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).pow_mu_no_norm(:,ts>-1.51 & ts<1.51);
+                            %spec_f(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).freq;
+                            %spec_ts(k,:,:) = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).ts(ts>-1.51 & ts<1.51);
                         end
                         monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).mu_sess = squeeze(nanmean(spec,1));  % average per trial type
                         monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).mu_sess_no_norm = squeeze(nanmean(spec_no_norm,1));  % average per trial type
                         monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).std_sess = squeeze(nanstd(spec,1));
-                        monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).freq_sess = squeeze(spec_f(1,:));
-                        monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).ts_sess = squeeze(spec_ts(1,:));
+                        % monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).freq_sess = squeeze(spec_f(1,:));
+                        monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).freq_sess = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).freq;
+                        % monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).ts_sess = squeeze(spec_ts(1,:));
+                        monk(i).spec.area.(areas{a}).(trialtype{type})(cond).events.(events{ev}).ts_sess = p_monk(k).area.(areas{a}).reward(cond).events.(events{ev}).ts(ts>-1.51 & ts<1.51)
                     end
                 end
             end
@@ -375,6 +378,133 @@ if save_spectro
 end
 %% Gather spectrograms for each trial per electrode per monkey aligned to target onset
 if save_spectro_per_trial
+    %     monks = unique([exp.monk_id]); clear p_monk
+    %     for i = 1:length(monks)
+    %         m = [exp.monk_id] == monks(i); p_monk = exp(m);
+    %         for sess = 1:length(p_monk) % num of sessions
+    %             trialtype = fieldnames(p_monk(sess).pop.trialtype);
+    %             for type = 1:length(trialtype) % num of trial types
+    %                 for cond = 2%1:length(p_monk(sess).pop.trialtype.(trialtype{type}));
+    %                     areas = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area);
+    %                     for a=1:length(areas)
+    %                         events = fieldnames(exp(1).pop.trialtype.reward(2).area.PPC.events);
+    %                         for ev = 1:length(events)
+    %                             for chn = 1:length(p_monk(sess).pop.trialtype.reward(cond).area.(areas{a}).events.(events{ev}).ch)
+    %                                 monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).ch(chn).trl = p_monk(sess).pop.trialtype.reward(cond).area.(areas{a}).events.(events{ev}).ch(chn).trl;
+    %                             end
+    %                         end
+    %                     end
+    %                 end
+    %             end
+    %         end
+    %     end
+    
+    %% Gather spectrograms for all electrodes each trial per monkey aligned to event onset
+    monks = unique([exp.monk_id]); clear p_monk
+    for i = 1:length(monks)
+        m = [exp.monk_id] == monks(i); p_monk = exp(m);
+        for sess = 1:length(p_monk) % num of sessions
+            trialtype = fieldnames(p_monk(sess).pop.trialtype);
+            for type = 1:length(trialtype) % num of trial types
+                for cond = 1:length(p_monk(sess).pop.trialtype.(trialtype{type}))
+                    areas = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area);
+                    for a=1:length(areas)
+                        events = fieldnames(exp(1).pop.trialtype.reward(2).area.PPC.events);
+                        for ev = 1:length(events)
+                            if strcmp((events{ev}),'reward') && cond==1
+                                monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl.ts = NaN;
+                                monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl.freq = NaN;
+                                monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl.spectro = NaN;
+                            else
+                                for trl = 1:length(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pop_trl)
+                                    monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).ts = p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pop_trl(trl).ts_spectrogram;
+                                    monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq = p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pop_trl(trl).freq_spectrogram;
+                                    monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(trl).spectro = p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pop_trl(trl).spectrogram;
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    %% average across monkeys
+    for a = 1:length(areas)
+        for type = 1:length(trialtype)
+            clear cond
+            for cond = 1:length(monk(i).sess(sess).trialtype.(trialtype{type}))
+                for ev = 2:4 %1:length(events)
+                    clear spectro_trl_freq monk_sess_mu
+                    if strcmp((areas{a}),'PFC')
+                        for i = 3 % change if adding one more monkey
+                            for nsess = 1:length(monk(i).sess)
+                                ts = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).ts;
+                                for trl = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl)
+                                    for freq = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq)
+                                        pw_trl =  monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(trl).spectro(ts>-1.51 & ts<1.514,freq)';
+                                        %if ev == 3; spectro_trl_freq(trl,freq,:) = pw_trl(1:62);end
+                                        spectro_trl_freq(trl,freq,:) = pw_trl;
+                                    end
+                                end
+                            end
+                            
+                            % average session per monkey
+                            monk_sess_mu(i,:,:) = squeeze(nanmean(spectro_trl_freq));
+                        end
+                        % average for all monkeys
+                        monk_sess_mu(2,:,:) = []; % hardcoded because the second monk has no MST rec
+                        monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).all_monks_mu = squeeze(nanmean(monk_sess_mu));
+                        monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).all_monks_ts = ts(ts>-1.51 & ts<1.514);
+                    elseif strcmp((areas{a}),'MST')
+                        for i = [1 3] % change if adding one more monkey
+                            for nsess = 1:length(monk(i).sess)
+                                ts = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).ts;
+                                for trl = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl)
+                                    for freq = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq)
+                                        pw_trl =  monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(trl).spectro(ts>-1.51 & ts<1.514,freq)'; %extract 1.5s around event
+                                        %if ev == 3; spectro_trl_freq(trl,freq,:) = pw_trl(1:62);end
+                                        spectro_trl_freq(trl,freq,:) = pw_trl;
+                                    end
+                                end
+                            end
+                            
+                            % average session per monkey
+                            monk_sess_mu(i,:,:) = squeeze(nanmean(spectro_trl_freq));
+                        end
+                        % average for all monkeys
+                        monk_sess_mu(2,:,:) = []; % hardcoded because the second monk has no MST rec
+                        monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).all_monks_mu = squeeze(nanmean(monk_sess_mu));
+                        monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).all_monks_ts = ts(ts>-1.51 & ts<1.514);
+                    else
+                        for i = 1:length(monk)
+                            for nsess = 1:length(monk(i).sess)
+                                ts = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).ts;
+                                for trl = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl)
+                                    for freq = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq)
+                                        pw_trl =  monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(trl).spectro(ts>-1.51 & ts<1.514,freq)';
+                                        %if ev == 3; spectro_trl_freq(trl,freq,:) = pw_trl(1:62);end
+                                        spectro_trl_freq(trl,freq,:) = pw_trl;
+                                    end
+                                end
+                            end
+                            
+                            % average session per monkey
+                            monk_sess_mu(i,:,:) = squeeze(nanmean(spectro_trl_freq));
+                        end
+                        % average for all monkeys
+                        monk_sess_mu(2,:,:) = []; % hardcoded because the second monk has no MST rec
+                        monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).all_monks_mu = squeeze(nanmean(monk_sess_mu));
+                        monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).all_monks_ts = ts(ts>-1.51 & ts<1.514);
+                    end
+                end
+            end
+        end
+    end
+end
+
+%% Gather spectrograms for each trial per electrode per monkey aligned to movement stop
+if save_spectro_per_trial_align_stop
     monks = unique([exp.monk_id]); clear p_monk
     for i = 1:length(monks)
         m = [exp.monk_id] == monks(i); p_monk = exp(m);
@@ -392,48 +522,6 @@ if save_spectro_per_trial
             end
         end
     end
-    
-    %% Gather spectrograms for all electrodes each trial per monkey aligned to target onset
-    monks = unique([exp.monk_id]); clear p_monk
-    for i = 1:length(monks)
-        m = [exp.monk_id] == monks(i); p_monk = exp(m);
-        for sess = 1:length(p_monk) % num of sessions
-            trialtype = fieldnames(p_monk(sess).pop.trialtype);
-            for type = 1:length(trialtype) % num of trial types
-                for cond = 1:length(p_monk(sess).pop.trialtype.(trialtype{type}))
-                    areas = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area);
-                    for a=1:length(areas)
-                        for trl = 1:length(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).pop_trl)
-                            monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).pw_trl(trl).ts = p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).pop_trl(trl).ts_spectrogram;
-                            monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).pw_trl(trl).freq = p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).pop_trl(trl).freq_spectrogram;
-                            monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).pw_trl(trl).spectro = p_monk(sess).pop.trialtype.(trialtype{type})(cond).area.(areas{a}).pop_trl(trl).spectrogram;
-                        end
-                    end
-                end
-            end
-        end
-    end
-end
-
-%% Gather spectrograms for each trial per electrode per monkey aligned to movement stop
-if save_spectro_per_trial_align_stop
-%     monks = unique([exp.monk_id]); clear p_monk
-%     for i = 1:length(monks)
-%         m = [exp.monk_id] == monks(i); p_monk = exp(m);
-%         for sess = 1:length(p_monk) % num of sessions
-%             trialtype = fieldnames(p_monk(sess).pop.trialtype);
-%             for type = 1:length(trialtype) % num of trial types
-%                 for cond = 2%1:length(p_monk(sess).pop.trialtype.(trialtype{type}));
-%                     areas = fieldnames(p_monk(sess).pop.trialtype.(trialtype{type})(cond).area);
-%                     for a=1:length(areas)
-%                         for ch = 1:length(p_monk(sess).pop.trialtype.reward(1).area.(areas{a}).ch)
-%                             monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).ch(ch).trl = p_monk(sess).pop.trialtype.reward(cond).area.(areas{a}).ch(ch).trl;
-%                         end
-%                     end
-%                 end
-%             end
-%         end
-%     end
     
     %% Gather spectrograms for all electrodes each trial per monkey aligned to target onset
     monks = unique([exp.monk_id]); clear p_monk
@@ -700,7 +788,7 @@ if save_band_pass_analysis
     end
 end
 
-%% only extract data for raster 
+%% only extract data for raster
 if do_band_passed_pop
     monks = unique([exp.monk_id]); clear p_monk
     for ii = 1:length(monks)
@@ -729,7 +817,7 @@ end
 %% Save
 % This file is needed to plot in plotLFPpop_sim.m
 
-%% 
+%%
 disp('                 Done, saving . . .     ')
 fprintf(['Time:  ' num2str(clock) '\n']);
 save(name_output_file, 'monk', '-v7.3')
