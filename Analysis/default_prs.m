@@ -297,7 +297,7 @@ prs.band_pass_acc_thresh_low_third = 21.6666; % distance in cm -- threshold for 
 prs.band_pass_acc_thresh_upper_third = 43.3332; % distance in cm -- threshold for band pass vs accuracy
 prs.compute_psd = false;
 prs.lfp_eye = false; 
-prs.compute_spectrum_whole_trial = true;
+prs.compute_spectrum_whole_trial = false;
 prs.compute_spectrum_whole_trial_align_stop = false; 
 prs.compute_spectrum_whole_trial_align_stop_per_band = false;
 prs.analyse_theta = false; % compute tunings
@@ -307,7 +307,7 @@ prs.analyse_wideband = false; % compute tunings
 prs.compute_coherencyLFP = false;
 prs.compute_coherogram = false;
 prs.compute_coherogram_band_passed = false;
-prs.analyse_phase = false;
+prs.analyse_phase = true;
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;

@@ -73,6 +73,7 @@ psi = zeros(nchan,nchan,size(freqbins,1));
 
 datafft = fft(bsxfun(@times,data,hanning(npnts)'),[],2);
 
+
 % trial-average cross-spectral density
 for triali=1:ntrials
     for freqi=1:nhz
@@ -115,7 +116,7 @@ for freqbini=1:size(freqbins,1)
             nulldist(:,:,permi) = sum(imag(conj(pp(:,:,randperm(nfidx))).*pp(:,:,randperm(nfidx))),3);
         end
         
-        psi(:,:,freqbini) = ( psi(:,:,freqbini)-mean(nulldist,3) ) ./ std(nulldist,[],3);
+        psi(:,:,freqbini) = ( psi(:,:,freqbini)-nanmean(nulldist,3) ) ./ std(nulldist,[],3);
     end
     
     % zero-out diagonals
