@@ -1,4 +1,4 @@
-function plot_LFPpop_sim(monk, plot_type)
+function plot_LFPpop_sim(monk,all_monks,plot_type)
 
 % plot from LFPpop_sim
 % names of variables
@@ -39,8 +39,8 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'spectrogram_reward_density_all_beta'
 % 'spectrogram_reward_density_all_beta_diff'
 % 'spectrogram_reward_density_diff'
+% 'spectro_all_monks' <----
 % 'spectrogram_trl'
-% 'spectrogram_trl_align_stop'  *** 
 % 'spectrogram_trl_align_stop'  <----
 % 'spectrogram_trl_session_align_target'
 % 'spectrogram_trl_session_align_stop'
@@ -49,7 +49,6 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'coherogram_stop'
 % 'coherogram_reward_PPC_MST'
 % 'coherogram_target_stop_PPC_MST'
-% 'coherogram_target_stop_PPC_MST_diff'
 % 'coherence_dist'
 % 'coherence_dist_all'
 % 'coherence_dist_reward_density'
@@ -64,8 +63,10 @@ function plot_LFPpop_sim(monk, plot_type)
 % 'band_passed_phase_trial' <-- this one uses experiments.m directly. load experiments.m and then monk = experiments;
 % 'phase_colormap_trial'
 % 'phase_polar_hist'
-% 'mean_plv'
+% 'plv_all_freq'
+% 'mean_plv'  <-- This is per band
 % 'plv_stats'
+% 'plv_across_area'
 
 
 % print('-painters', '-depsc2', 'raster')
@@ -2480,6 +2481,44 @@ switch plot_type
             end
         end
         
+    case 'spectro_all_monks'
+        ev = 'target'
+        areas = 'PFC'
+        % extract
+        freq = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_freq;
+        ts = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_ts;
+        p_spectro_corr = all_monks.trialtype.reward(1).area.(areas).events.(ev).all_monks_mu;
+        p_spectro_incorr = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_mu;
+        max_p = max( [ max(max(all_monks.trialtype.reward(1).area.(areas).events.(ev).all_monks_mu(4:50,:))) max(max(all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_mu(4:50,:))) ]);
+        
+        % plot correct
+        figure; hold on
+        % imagesc(ts-0.3,freq,p_spectro_corr/6e-05, [0 1]); axis xy; colorbar; % MST
+         imagesc(ts-0.3,freq,p_spectro_corr/12, [0 1]); axis xy; colorbar; % PFC
+        % imagesc(ts-0.3,freq,p_spectro_corr/150, [0 1]); axis xy; colorbar; % PPC
+        % imagesc(ts,freq,p_spectro_corr/max_p, [0 1]); axis xy; colorbar;
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
+        title([(areas) ' Corr']); vline([-0.3 0], 'w'); 
+        
+        % plot incorrect
+        figure; hold on
+        % imagesc(ts-0.3,freq,p_spectro_incorr/6e-05, [0 1]); axis xy; colorbar; % MST
+        imagesc(ts-0.3,freq,p_spectro_incorr/9, [0 1]); axis xy; colorbar; % PFC
+        % imagesc(ts-0.3,freq,p_spectro_incorr/150, [0 1]); axis xy; colorbar; % PPC
+        % imagesc(ts,freq,p_spectro/max_p, [0 1]); axis xy; colorbar;
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
+        title([(areas) ' Err']); vline([-0.3 0], 'w'); 
+        
+        % diff
+        figure; hold on
+         imagesc(ts-0.3,freq,p_spectro_incorr./p_spectro_corr,[1 1.5]); axis xy; colorbar;
+        % imagesc(ts,freq,p_spectro/max_p, [0 1]); axis xy; colorbar;
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
+        title([(areas) ' Ratio']); vline([-0.3 0], 'w'); 
+
     case 'spectrogram_trl'
         % aligned to target onset
         type = 'reward'
@@ -2614,8 +2653,8 @@ switch plot_type
         low_beta = [12 20];
         high_beta = [20 30];
         th_norm_monk_corr=[]; th_norm_monk_err=[]; be_low_norm_monk_corr=[]; be_low_norm_monk_err=[];
-        for nmonk = 3 %1:length(monk)  % [1 3]
-            areas = {'PPC'} %fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
+        for nmonk = [1 3] % 1:length(monk)  % [1 3]
+            areas = {'MST'} %fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
             for narea = 1:length(areas)
                 th_norm_all_err = []; be_low_norm_all_err = []; th_norm_all_corr = []; be_low_norm_all_corr = [];
                 for nsess = 1:length(monk(nmonk).sess)
@@ -2833,6 +2872,22 @@ switch plot_type
         shadedErrorBar(ts,nanmean(be_low_norm_monk_corr), nanstd(be_low_norm_monk_corr)/sqrt(size(be_low_norm_monk_corr,1)), 'lineprops', 'g');
         set(gca,'xlim',[-1.5 1.5],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k'); %vline([-0.5 0.5], '--k');
         
+        % plot max ts
+        [~,indx_max_th_corr] = max(nanmean(th_norm_monk_corr)); [~,indx_max_th_err] = max(nanmean(th_norm_monk_err));
+        [~,indx_max_be_corr] = max(nanmean(be_low_norm_monk_corr)); [~,indx_max_be_err] = max(nanmean(be_low_norm_monk_err));
+        
+         
+        figure; hold on; 
+        errorbar(1,nanmean(th_norm_monk_corr(:,indx_max_th_corr)),nanstd(th_norm_monk_corr(:,indx_max_th_corr)), '.g', 'MarkerSize', 20, 'CapSize',0)
+        errorbar(2,nanmean(th_norm_monk_err(:,indx_max_th_err)),nanstd(th_norm_monk_err(:,indx_max_th_err)), '.k', 'MarkerSize', 20, 'CapSize',0)
+        set(gca,'xlim',[0.5 2.5],'ylim',[-1.5 1.5], 'yTick',[-1 0 1],'xTick', [], 'FontSize', 22,'TickDir', 'out'); axis square;
+        ylabel (['stop time (s)']); title('theta'); hline(0, '--k');
+        
+        figure; hold on; 
+        errorbar(1,nanmean(be_low_norm_monk_corr(:,indx_max_be_corr)),nanstd(be_low_norm_monk_corr(:,indx_max_th_corr)), '.g', 'MarkerSize', 20, 'CapSize',0)
+        errorbar(2,nanmean(be_low_norm_monk_err(:,indx_max_be_err)),nanstd(be_low_norm_monk_err(:,indx_max_th_err)), '.k', 'MarkerSize', 20, 'CapSize',0)
+        set(gca,'xlim',[0.5 2.5],'ylim',[-1.5 1.5], 'yTick',[-1 0 1],'xTick', [], 'FontSize', 22,'TickDir', 'out'); axis square;
+        ylabel (['stop time (s)']); title('beta'); hline(0, '--k');
         
         
     case 'spectrogram_trl_session_align_target'
@@ -3146,14 +3201,13 @@ switch plot_type
         %Contains average per session
         type = 'reward'
         ev = 'stop'
-        brain_area = 'PPCMST'  % 'PFCMST'  % 'PPCMST'
-        time_win = [-1.5 1.5];   % [-0.25 0.25]; [-0.45 0.25];
+        brain_area = 'MSTPFC'  % 'PFCMST'  % 'PPCMST'
+        time_win = [-1.51 1.51];   % [-0.25 0.25]; [-0.45 0.25];
         freq_win = [3 51];
-        align_t = 1.3;  % 1.3 for target (so it's aligned to target offset)
         p = numSubplots(12);  % 9 for reward cond, 12 for rest
-        cnt=1;
+        cnt=1; cnt_incorr = 1; cnt_corr = 1; 
         p_cohero_all_corr = []; p_cohero_all_incorr = []; phase_cohero_all_corr = [] ; phase_cohero_all_incorr = []; 
-        for nmonk = [1 3]
+        for nmonk = 2 % 1:length(monk)
             for nsess = 1:length(monk(nmonk).coher.sess)
                 ncond = length(monk(nmonk).coher.sess(nsess).trialtype.(type));
                 for cond = 1:ncond
@@ -3161,11 +3215,22 @@ switch plot_type
                     ts = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_ts;
                     cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher';
                     phase_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_phi;
-                    if cond == 1, p_cohero_all_incorr = [p_cohero_all_incorr ; cohero(:,1:108)]; else p_cohero_all_corr = [p_cohero_all_corr ; cohero(:,1:97)]; end % gather for all monks
                     % p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_phi'; %phase
-                    ts_win = ts(ts>time_win(1) & ts<time_win(2));
+                    ts_win = ts(ts>=time_win(1) & ts<=time_win(2));
                     cohero_win = cohero(freq>freq_win(1) & freq<freq_win(2),ts>time_win(1) & ts<time_win(2));
-                    if cond == 1,coher_sess_incorr(nsess,:,:) = cohero_win; else coher_sess_corr(nsess,:,:) = cohero_win; end
+                    if cond == 1
+                        if strcmp((ev),'target')
+                            coher_sess_incorr(nsess,:,:) = cohero_win(:,1:37); p_cohero_all_incorr(cnt_incorr,:,:) = cohero_win(:,1:37); cnt_incorr = cnt_incorr+1;
+                        else
+                            coher_sess_incorr(nsess,:,:) = cohero_win(:,1:63); p_cohero_all_incorr(cnt_incorr,:,:) = cohero_win(:,1:63); cnt_incorr = cnt_incorr+1;
+                        end
+                    else
+                        if strcmp((ev),'target')
+                             coher_sess_corr(nsess,:,:) = cohero_win(:,1:37); p_cohero_all_corr(cnt_corr,:,:) = cohero_win(:,1:37); cnt_corr = cnt_corr+1;
+                        else
+                            coher_sess_corr(nsess,:,:) = cohero_win(:,1:62); p_cohero_all_corr(cnt_corr,:,:) = cohero_win(:,1:62); cnt_corr = cnt_corr+1;
+                        end
+                    end
                     max_cohero = max(max(cohero_win));
                     %% plot colormap
                     %figure('Name',['Monk ' num2str(nmonk) ' sess ' num2str(nsess)  ' PPC--MST ' ev ' rew ' num2str(cond)]);
@@ -3185,154 +3250,72 @@ switch plot_type
                     colormap(J);
                     imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),cohero_win, [0 max_cohero]); axis xy; colorbar;
                     set(gca,'xlim',[-1.5 1.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; % vline(-0.3,'b');
-                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end                    
+                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)]);                 
                     
                     %% if extracting phases, plot with circular color           
-                    ph = phasewrap(p_cohero_win, 'rad');
-                    imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),ph, [0 max_cohero]); axis xy; colorbar;
-                    phasemap; 
-                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
-                    xlabel('time (s)'); ylabel('frequency (Hz)');
+%                     ph = phasewrap(phase_cohero, 'rad');
+%                     imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),ph, [0 pi]); axis xy; colorbar;
+%                     phasemap; 
+%                     title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
+%                     xlabel('time (s)'); ylabel('frequency (Hz)');
 
                      cnt = cnt+1;
                 end
             end
             %% Mean for all sessions for one condition
-            
-            % correct
-            coher_mu_corr = mean(coher_sess_corr);
+        end 
+            %% correct
+            % coher_mu_corr = squeeze(mean(coher_sess_corr)); mean session
+            coher_mu_corr = squeeze(nanmean(p_cohero_all_corr)); coher_sem_corr = squeeze(nanstd(p_cohero_all_corr))/sqrt(size(p_cohero_all_corr,1)); 
             % plot
             figure; colormap(J);
-            imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),squeeze(coher_mu_corr),[0 0.6]); axis xy; colorbar;
-            set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; if align_t == 1.3; vline(-0.3,'--w'); end
-            title (['Cond ' num2str(cond)]); box off
-            xlabel('time (s)'); ylabel('frequency (Hz)');
+            imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),coher_mu_corr,[0 0.5]); axis xy; colorbar;
+            set(gca,'xlim',[-1.5 1.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square;
+            title ('Corr'); box off
+            xlabel([(ev) ' time (s)']); ylabel('frequency (Hz)'); %vline(-0.3,'--k')
             
-            % mu all
-            figure;
-            plot(ts_win,smooth(mean(squeeze(coher_mu_corr))))
-            set(gca, 'ylim',[0.14 0.31], 'xlim',[-0.5 0.5], 'FontSize', 22, 'TickDir', 'out'); vline(0,'k'); axis square;
-            title (['cond ' num2str(cond)]); box off; %if align_t == 1.3; vline(-0.3,'--k'); end
-            
-            % theta mu
-            figure; coher_theta = coher_mu_corr(1,freq>3 & freq<12,:);
-            plot(ts_win, smooth(squeeze(mean(coher_theta)))); box off
-            set(gca, 'ylim',[0.25 0.36], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
-            title(['theta cond ' num2str(cond)])
-            
-            % beta mu
-            figure; coher_beta = coher_mu_corr(1,freq>12 & freq<21,:);
-            plot(ts_win, smooth(squeeze(mean(coher_beta)))); box off
-            set(gca, 'ylim',[0.18 0.32], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
-            title(['beta cond ' num2str(cond)])
-            
-            % incorrect
-            coher_mu_incorr = mean(coher_sess_incorr);
+            %% incorrect
+            % coher_mu_incorr = squeeze(mean(coher_sess_incorr)); mean session
+            coher_mu_incorr = squeeze(mean(p_cohero_all_incorr)); coher_sem_incorr = squeeze(nanstd(p_cohero_all_incorr))/sqrt(size(p_cohero_all_incorr,1)); 
             % plot
             figure; hold on; 
             J = customcolormap_preset('red-yellow-blue'); colormap(J);
-            imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),squeeze(coher_mu_incorr),[0 0.6]); axis xy; colorbar;
-            set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square; if align_t == 1.3; vline(-0.3,'--w'); end
-            title (['Cond ' num2str(cond)]); box off
-            xlabel('time (s)'); ylabel('frequency (Hz)');
+            imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),coher_mu_incorr,[0 0.5]); axis xy; colorbar;
+            set(gca,'xlim',[-1.5 1.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square;
+            title ('Err'); box off
+            xlabel('time (s)'); ylabel('frequency (Hz)'); %vline(-0.3,'--k')
             
-            % mu all
-%             figure;
-%             plot(ts_win,smooth(squeeze(coher_mu_incorr)))
-%             set(gca, 'ylim',[0.14 0.31], 'xlim',[-0.5 0.5], 'FontSize', 22, 'TickDir', 'out'); vline(0,'k'); axis square;
-%             title (['cond ' num2str(cond)]); box off; %if align_t == 1.3; vline(-0.3,'--k'); end
-%             
+            %% diff
+            figure; hold on; colormap(J);
+            % imagesc(ts_win-0.3,freq(freq>freq_win(1) & freq<freq_win(2)),coher_mu_corr./coher_mu_incorr(:,1:37),[0 2]); axis xy; colorbar;
+            imagesc(ts_win,freq(freq>freq_win(1) & freq<freq_win(2)),coher_mu_corr-coher_mu_incorr(:,1:37),[0 0.1]); axis xy; colorbar;
+            set(gca,'xlim',[-1.5 1.5], 'ylim',[4 50], 'FontSize', 22); vline(0,'w'); axis square;
+            title ('Diff'); box off
+            xlabel('time (s)'); ylabel('frequency (Hz)'); vline(-0.3,'--k')
+            
+            
+            %% plot per band correct vs incorrect
+
             % theta mu
-            figure; coher_theta = squeeze(coher_mu_incorr(1,freq>3 & freq<12,:));
-            plot(ts_win, smooth(mean(coher_theta))); box off
-            set(gca, 'ylim',[0.25 0.36], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
-            title(['theta cond ' num2str(cond)])
+            figure; hold on 
+            coher_theta_corr = nanmean(coher_mu_corr(freq>3 & freq<12,:)); coher_theta_corr_sem = nanmean(coher_sem_corr(freq>3 & freq<12,:)); 
+            coher_theta_incorr = nanmean(coher_mu_incorr(freq>3 & freq<12,:)); coher_theta_incorr_sem = nanmean(coher_sem_incorr(freq>3 & freq<12,:)); 
+            % shadedErrorBar(ts_win(1:62)-0.3,coher_theta_corr,coher_theta_corr_sem,'lineprops','g')
+            shadedErrorBar(ts_win,coher_theta_corr,coher_theta_corr_sem,'lineprops','g')
+            shadedErrorBar(ts_win,coher_theta_incorr,coher_theta_incorr_sem,'lineprops','k')
+            set(gca, 'ylim',[0.3 0.65], 'xlim',[-0.5 1], 'FontSize', 22,'TickDir', 'out'); vline([0 -0.3],'k'); axis square;
+            title('theta')
             
             % beta mu
-            figure; coher_beta = squeeze(coher_mu_incorr(1,freq>12 & freq<21,:));
-            plot(ts_win, smooth(mean(coher_beta))); box off
-            set(gca, 'ylim',[0.18 0.32], 'xlim',[-0.5 0.5], 'FontSize', 22,'TickDir', 'out'); vline(0,'k'); axis square;
-            title(['beta cond ' num2str(cond)])
+            figure; hold on 
+            coher_beta_corr = nanmean(coher_mu_corr(freq>12 & freq<21,:)); coher_beta_corr_sem = nanmean(coher_sem_corr(freq>12 & freq<21,:)); 
+            coher_beta_incorr = nanmean(coher_mu_incorr(freq>12 & freq<21,:)); coher_beta_incorr_sem = nanmean(coher_sem_incorr(freq>12 & freq<21,:)); 
+            shadedErrorBar(ts_win,coher_beta_corr,coher_beta_corr_sem,'lineprops','g')
+            shadedErrorBar(ts_win,coher_beta_incorr,coher_beta_incorr_sem,'lineprops','k')
+            set(gca, 'ylim',[0.3 0.65], 'xlim',[-0.5 1], 'FontSize', 22,'TickDir', 'out'); vline([0 -0.3],'k'); axis square;
+            title('beta')
+                           
 
-        end
-        
-        %% plot for all monkeys
-        
-        % correct
-        
-        % incorrec
-        
-    case 'coherogram_target_stop_PPC_MST_diff' %% under construction
-        area = 'PFC'
-        type = 'reward' % LOOK FOR TIME OF ALIGN target off is -1.3
-        ev = 'stop'
-        th = [4 12];
-        bet = [12 20];
-        % align_t = 1;  % 1.3 for target (so it's aligned to target offset
-        for nmonk = 3  % 1:length(monk) %; [1 3]
-            freq = monk(nmonk).spec.area.(area).(type)(1).events.(ev).freq_sess;
-            ts = monk(nmonk).spec.area.(area).(type)(1).events.(ev).ts_sess;
-            p_spectro_err = monk(nmonk).spec.area.(area).(type)(1).events.(ev).mu_sess;
-            p_spectro_corr = monk(nmonk).spec.area.(area).(type)(2).events.(ev).mu_sess;
-            % plot average per band across time
-            theta_mu_err(nmonk,:) = nanmean(p_spectro_err(th(1):th(2),:)); theta_sem_err(nmonk,:) = nanstd(p_spectro_err(th(1):th(2),:))/sqrt(size(th(1):th(2),2));
-            theta_mu_corr(nmonk,:) = nanmean(p_spectro_corr(th(1):th(2),:)); theta_sem_corr(nmonk,:) = nanstd(p_spectro_corr(th(1):th(2),:))/sqrt(size(th(1):th(2),2));
-        end
-        
-        col_mag = [0.3 0 0.3;
-            0.45 0 0.139;
-            0.128,0,0.128];
-        
-        figure; hold on;
-        for nmonk = 1:length(monk)
-            plot(ts-align_t, theta_mu_err(nmonk,:)- theta_mu_corr(nmonk,:),'Color',[col_mag(nmonk,:)]);
-        end
-        set(gca,'xlim',[-0.25 0.25], 'FontSize', 22, 'TickDir', 'out'); axis square;
-        hline(0,'--k')
-        
-    case 'coherogram_target_stop_per_band'
-        %Contains average per session
-        type = 'reward'
-        ev = 'stop'
-        brain_area = 'MSTPFC'  % 'PFCMST'  % 'PPCMST' $ PFCPPC
-        band = 'beta';
-        time_win = [-0.5 0.5];   % [-0.25 0.25]; [-0.45 0.25];
-        freq_win = [3 51];
-        % align_t = 1;  % 1.3 for target (so it's aligned to target offset
-        p = numSubplots(12);  % 9 for reward cond, 12 for rest
-        cnt=1;
-        for nmonk = 2 %[1 3]
-            for nsess = 1:length(monk(nmonk).coher.sess)
-                ncond = length(monk(nmonk).coher.sess(nsess).trialtype.(type));
-                for cond = 1 % 1:ncond
-                    % freq = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).coher_freq;
-                    ts = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).(band).coher_ts-align_t;
-                    p_cohero = monk(nmonk).coher.sess(nsess).trialtype.(type)(cond).events.(ev).(brain_area).(band).coher';
-                    ts_win = ts(ts>time_win(1) & ts<time_win(2));
-                    p_cohero_win = p_cohero(:,ts>time_win(1) & ts<time_win(2));
-                    coher_all(nsess,:,:) = p_cohero_win;
-                    max_cohero = max(max(p_cohero_win));
-                    
-                    figure(1); subplot(p(1),p(2),cnt)
-                    plot(ts_win,mean(p_cohero_win)); box off;
-                    set(gca,'xlim',[-0.5 0.5], 'FontSize', 22); vline(0,'w'); axis square; % vline(-0.3,'b');
-                    title (['sess ' num2str(nsess) ' cond ' num2str(cond)]); if align_t == 1.3; vline(-0.3,'--w'); end
-                    % xlabel('time (s)'); ylabel('frequency (Hz)');
-                    cnt = cnt+1;
-                end
-            end
-            % Mean for all sessions for one condition
-            coher_mu = mean(coher_all);
-            % plot
-            figure;
-            plot(ts_win,smooth(squeeze(mean(coher_mu)))); ylim([0.24 0.33])
-            set(gca,'xlim',[-0.5 0.5], 'FontSize', 22); vline(0,'k'); axis square; if align_t == 1.3; vline(-0.3,'--w'); end
-            title ([ band ' Cond ' num2str(cond)]); box off
-            xlabel('time (s)'); ylabel('Coherence');
-            
-        end
-        
-        
     case 'coherence_dist'
         
         for m = 1:length(monk)
@@ -4447,15 +4430,52 @@ switch plot_type
             xlabel([ num2str(timepoints(i)) 's'])
         end
         
-    case 'mean_plv'
+    case 'plv_all_freq'
         ar = 'PPC'     % MST PPC PFC
-        band = 'theta'
+        win = [-1.51 1.51];
+        ev = 'stop'
+        
+        for m = 2 % 1:length(monk)
+            ts = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).theta.ts; ts_win = ts(ts>win(1) & ts<win(2));
+            freq = 1:74;
+            for f = 1:length(freq)
+                for nsess = 1:length(monk(m).sess)
+                    one_freq_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).all_freq.plv_all(f,ts>win(1) & ts<win(2)); 
+                    one_freq_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).all_freq.plv_all(f,ts>win(1) & ts<win(2)); 
+                end
+                % mean for freq
+                plv_per_monk_corr(m,f,:) = nanmean(one_freq_corr); 
+                plv_per_monk_incorr(m,f,:) = nanmean(one_freq_incorr); 
+            end
+        end 
+        
+        plv_all_corr = squeeze(nanmean(plv_per_monk_corr)); 
+        plv_all_incorr = squeeze(nanmean(plv_per_monk_incorr)); 
+        
+        % plot correct
+        figure; hold on;
+        J = customcolormap_preset('pasteljet'); colormap(J);
+        imagesc(ts_win,freq,plv_all_corr./max(max(plv_all_corr)), [0 0.9]); axis xy;
+        set(gca,'xlim',[-1.5 1.5], 'ylim',[2 50], 'FontSize', 22)
+        xlabel('time (s)'); ylabel('frequency (Hz)')
+        colorbar;  axis square; title('Corr')
+        
+        % plot incorrect
+        figure; hold on; colormap(J);
+        imagesc(ts_win,freq,plv_all_incorr./max(max(plv_all_incorr)), [0 0.9]); axis xy;
+        set(gca,'xlim',[-1.5 1.5], 'ylim',[2 50], 'FontSize', 22)
+        xlabel('time (s)'); ylabel('frequency (Hz)')
+        colorbar;  axis square; title('Incorr')
+        
+    case 'mean_plv'
+        ar = 'PFC'     % MST PPC PFC
+        band = 'beta'
         win = [-0.5 1.5];
         ev = 'target'
         
         itpc_corr_all = []; itpc_incorr_all = []; t_max_itpc_corr = []; t_max_itpc_incorr = []; itpc_corr_sem_all= []; itpc_incorr_sem_all = []; 
         
-        for m = 1:length(monk)   % 1:length(monk)  % [1 3] 
+        for m = 3  % 1:length(monk)  % [1 3] 
            
             clear itpc_corr itpc_incorr itpc_corr_sem itpc_incorr_sem
             for nsess = 1:length(monk(m).sess)
@@ -4489,8 +4509,8 @@ switch plot_type
                 % store
                
                 if ev == 'target',  ts_incorr_win = ts_incorr(ts_incorr>win(1) & ts_incorr<win(2))-0.3; ts_incorr_win = ts_incorr_win(1:333); else ts_incorr_win = ts_incorr_win(1:500); end 
-                itpc_incorr_all = [itpc_incorr_all ; itpc_incorr(nsess,:)./max(itpc_incorr(nsess,:))]; %store normalized to max in correct trials
-                itpc_corr_all = [itpc_corr_all ; itpc_corr(nsess,:)./max(itpc_incorr(nsess,:))];  %store normalized to max in correct trials
+                itpc_incorr_all = [itpc_incorr_all ; itpc_incorr(nsess,:)./max(itpc_corr(nsess,:))]; %store normalized to max in correct trials
+                itpc_corr_all = [itpc_corr_all ; itpc_corr(nsess,:)./max(itpc_corr(nsess,:))];  %store normalized to max in correct trials
                 itpc_incorr_sem_all = [itpc_incorr_sem_all ; itpc_corr_sem]; 
                  % extract max val time
                 [~,indx_t_incorr] =  max(itpc_incorr(nsess,:)); 
@@ -4500,14 +4520,14 @@ switch plot_type
             end 
             %% plot for each monkey
             % plot each session
-            figure; hold on
-            for nsess = 1:length(monk)
-            shadedErrorBar(ts_corr_win, itpc_corr(nsess,:),itpc_corr_sem(nsess,:),'lineprops', 'g');
-            shadedErrorBar(ts_incorr_win, itpc_incorr(nsess,:),itpc_incorr_sem(nsess,:), 'lineprops', 'k')
-            end 
-            set(gca,'ylim',[0 0.41], 'yTick',[0 0.2 0.4], 'FontSize', 22); axis square
-            ylabel('phase clustering'); xlabel('time (s)')
-            title(['monkey ' num2str(m)])
+%             figure; hold on
+%             for nsess = 1:length(monk)
+%             shadedErrorBar(ts_corr_win, itpc_corr(nsess,:),itpc_corr_sem(nsess,:),'lineprops', 'g');
+%             shadedErrorBar(ts_incorr_win, itpc_incorr(nsess,:),itpc_incorr_sem(nsess,:), 'lineprops', 'k')
+%             end 
+%             set(gca,'ylim',[0 0.41], 'yTick',[0 0.2 0.4], 'FontSize', 22); axis square
+%             ylabel('phase clustering'); xlabel('time (s)')
+%             title(['monkey ' num2str(m)])
            
             % plot mean for each monkey
             figure; hold on;
@@ -4529,7 +4549,7 @@ switch plot_type
         area(ts_incorr_win, mean(itpc_incorr_all),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
         area(ts_corr_win, mean(itpc_corr_all),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
         % set(gca,'xlim',[win(1) win(2)],'ylim',[0 1.5], 'yTick',[0 0.5 1], 'FontSize', 22, 'TickDir', 'out'); axis square; vline(0,'--k');%vline(ts_corr_win(indx_max_corr),'g'); vline(ts_incorr_win(indx_max_incorr),'k');
-        set(gca,'xlim',[-0.5 0.5],'ylim',[0 1.3], 'yTick',[0 0.5 1], 'FontSize', 22, 'TickDir', 'out'); axis square; vline(0,'--k'); vline(-0.3,'--k'); % for target 
+        set(gca,'xlim',[-0.5 0.5],'ylim',[0 1], 'yTick',[0 0.5 1], 'FontSize', 22, 'TickDir', 'out'); axis square; vline(0,'--k'); vline(-0.3,'--k'); % for target 
         ylabel('phase clustering'); xlabel([ev ' time (s)']); title('all monks')
 
         % plot mean max itpc +/- sem
