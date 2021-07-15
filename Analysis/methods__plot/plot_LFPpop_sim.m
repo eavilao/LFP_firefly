@@ -4438,6 +4438,7 @@ switch plot_type
         for m = 2 % 1:length(monk)
             ts = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).theta.ts; ts_win = ts(ts>win(1) & ts<win(2));
             freq = 1:74;
+            clear one_freq_corr one_freq_incorr
             for f = 1:length(freq)
                 for nsess = 1:length(monk(m).sess)
                     one_freq_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).all_freq.plv_all(f,ts>win(1) & ts<win(2)); 
@@ -4629,6 +4630,41 @@ switch plot_type
         area(ts_corr_win-0.3,sum(pval_incorr_all),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
         set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('count'); vline(-0.3,'--k')
-
+        
+    case 'plv_across_area' 
+        ar = 'PPC'     % MST PPC PFC
+        win = [-1.51 1.51];
+        ev = 'stop'
+        band = 'beta'
+        
+        plv_all_corr = []; plv_all_corr_sem = []; plv_all_incorr = []; plv_all_incorr_sem = []; 
+        ts_corr = monk(m).sess(nsess).pop.area.PPC.trialtype.reward(2).events.(ev).(band).ts; ts_win_corr = ts_corr(ts_corr > win(1) & ts_corr < win(2));
+        ts_incorr = monk(m).sess(nsess).pop.area.PPC.trialtype.reward(1).events.(ev).(band).ts; ts_win_incorr = ts_corr(ts_incorr > win(1) & ts_incorr < win(2));
+        
+        for m = 2 %1:length(monk)
+            clear plv_sess_corr plv_sess_incorr
+            for nsess = 1:length(monk(m).sess)
+                plv_sess_corr(nsess,:) = monk(m).sess(nsess).pop.area.MST_PPC_PLV.trialtype.reward(2).events.(ev).(band).PLV_mu(ts_corr > win(1) & ts_corr < win(2));
+                plv_sess_corr_sem(nsess,:) = monk(m).sess(nsess).pop.area.MST_PPC_PLV.trialtype.reward(2).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
+                
+                plv_sess_incorr(nsess,:) = monk(m).sess(nsess).pop.area.MST_PPC_PLV.trialtype.reward(1).events.(ev).(band).PLV_mu(ts_corr > win(1) & ts_corr < win(2)); 
+                plv_sess_incorr_sem(nsess,:) = monk(m).sess(nsess).pop.area.MST_PPC_PLV.trialtype.reward(1).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
+            end 
+            % average per monkey
+            plv_monk_corr = nanmean(plv_sess_corr); plv_monk_corr_sem = nanmean(plv_sess_corr_sem);
+            plv_monk_incorr = nanmean(plv_sess_incorr); plv_monk_incorr_sem = nanmean(plv_sess_incorr_sem);
+            
+            plv_all_corr = [plv_all_corr ; plv_monk_corr]; plv_all_corr_sem = [plv_all_corr_sem ; plv_monk_corr_sem]; 
+            plv_all_incorr = [plv_all_incorr ; plv_monk_incorr]; plv_all_incorr_sem = [plv_all_incorr_sem ; plv_monk_incorr_sem];
+            
+        end 
+        
+        % plot 
+        figure; hold on
+        shadedErrorBar(ts_win_corr,nanmean(plv_all_corr),nanmean(plv_all_corr_sem), 'lineprops','g');
+        shadedErrorBar(ts_win_corr,nanmean(plv_all_incorr),nanmean(plv_all_incorr_sem), 'lineprops','k');
+        set(gca,'xlim',[-1.5 1.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+        xlabel ([ev ' time (s)']); ylabel('PLV'); axis square
+        
         
 end
