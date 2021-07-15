@@ -1018,6 +1018,7 @@ if prs.analyse_phase
             end
         end
     end    
+    
     % compute phase locking value across areas (plv, Lachaux 1999)
     theta_all_corr = []; theta_all_incorr = []; beta_all_corr = []; beta_all_incorr = []; 
     for area1 = 1:num_brain_areas
