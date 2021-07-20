@@ -4632,10 +4632,10 @@ switch plot_type
         xlabel ([ev ' time (s)']); ylabel('count'); vline(-0.3,'--k')
         
     case 'plv_across_area'
-        ar = 'PPCPFC'     % MST PPC PFC
-        win = [-1.51 1.51];
+        ar = 'MSTPFC'     % MST PPC PFC
+        win = [-1.5 1.5];
         ev = 'stop'
-        band = 'beta'
+        band = 'theta'
         
         plv_all_corr = []; plv_all_corr_sem = []; plv_all_incorr = []; plv_all_incorr_sem = [];
         for m = 3 % [1 3]
@@ -4662,8 +4662,29 @@ switch plot_type
         figure; hold on
         shadedErrorBar(ts_win_corr,nanmean(plv_all_corr),nanmean(plv_all_corr_sem), 'lineprops','g');
         shadedErrorBar(ts_win_corr,nanmean(plv_all_incorr),nanmean(plv_all_incorr_sem), 'lineprops','k');
-        set(gca,'xlim',[-1.5 1.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar);
+        
+        figure; hold on
+        area(ts_win_corr, nanmean(plv_all_incorr),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+        area(ts_win_corr, nanmean(plv_all_corr),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+        xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); %vline([-0.3 0],'k')
+        
+        
+        % temp plot PFC
+        figure; hold on
+        shadedErrorBar(ts_win_corr-0.3,plv_all_corr,plv_all_corr_sem, 'lineprops','g');
+        shadedErrorBar(ts_win_corr-0.3,plv_all_incorr,plv_all_incorr_sem, 'lineprops','k');
+        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+        xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); vline([-0.3 0],'k')
+        
+        % 
+        figure; hold on
+        area(ts_win_corr, plv_all_incorr,'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+        area(ts_win_corr, plv_all_corr,'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+        xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); %vline([-0.3 0],'k')
         
         
 end
