@@ -308,6 +308,7 @@ prs.compute_coherencyLFP = false;
 prs.compute_coherogram = false;
 prs.compute_coherogram_band_passed = false;
 prs.analyse_phase = true;
+prs.analyse_phase_within_area = false;
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;
