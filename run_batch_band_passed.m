@@ -1,6 +1,6 @@
 
 %%
-rerun_analyseLFP = true; 
+rerun_analyseLFP = false; 
 rerun_AddPop = true; 
 disp('Loading file 1... . . ')
 load('experiments_lfp_Schro_113_phase')
@@ -14,7 +14,7 @@ disp('Saving... . .' )
 save('experiments_lfp_Schro_113_phase', 'experiments', '-v7.3')
 clear
 %%
-rerun_analyseLFP = true; 
+rerun_analyseLFP = false; 
 rerun_AddPop = true;
 disp('Loading file 2... . . ')
 load('experiments_lfp_Schro_107_phase')
@@ -28,7 +28,7 @@ disp('Saving... . .' )
 save('experiments_lfp_Schro_107_phase', 'experiments', '-v7.3')
 clear experiments
 %%
-rerun_analyseLFP = true; 
+rerun_analyseLFP = false; 
 rerun_AddPop = true;  
 disp('Loading file 3... . . ')
 load('experiments_lfp_Schro_86_phase')
@@ -42,7 +42,7 @@ disp('Saving... . .' )
 save('experiments_lfp_Schro_86_phase', 'experiments', '-v7.3')
 clear experiments
 %%
-rerun_analyseLFP = true; 
+rerun_analyseLFP = false; 
 rerun_AddPop = true;  
 disp('Loading file 4... . . ')
 load('experiments_lfp_Quigley_207_phase')
@@ -56,7 +56,7 @@ disp('Saving... . .' )
 save('experiments_lfp_Quigley_207_phase', 'experiments', '-v7.3')
 clear experiments
 %%
-rerun_analyseLFP = true; 
+rerun_analyseLFP = false; 
 rerun_AddPop = true; 
 disp('Loading file 5... . . ')
 load('experiments_lfp_Quigley_188_phase')
@@ -70,7 +70,7 @@ disp('Saving... . .' )
 save('experiments_lfp_Quigley_188_phase', 'experiments', '-v7.3')
 clear experiments
 %%
-rerun_analyseLFP = true; 
+rerun_analyseLFP = false; 
 rerun_AddPop = true; 
 disp('Loading file 6... . . ')
 load('experiments_lfp_Quigley_185_phase')
@@ -84,7 +84,7 @@ disp('Saving... . .' )
 save('experiments_lfp_Quigley_185_phase', 'experiments', '-v7.3')
 clear experiments
 %%
-rerun_analyseLFP = true; 
+rerun_analyseLFP = false; 
 rerun_AddPop = true;  
 disp('Loading file 7... . . ')
 load('experiments_lfp_Bruno_43_phase')
@@ -98,7 +98,7 @@ disp('Saving... . .' )
 save('experiments_lfp_Bruno_43_phase', 'experiments', '-v7.3')
 clear experiments
 %%
-rerun_analyseLFP = true; 
+rerun_analyseLFP = false; 
 rerun_AddPop = true;
 disp('Loading file 8... . . ')
 load('experiments_lfp_Bruno_42_phase')
@@ -112,7 +112,7 @@ disp('Saving... . .' )
 save('experiments_lfp_Bruno_42_phase', 'experiments', '-v7.3')
 clear experiments
 %%
-rerun_analyseLFP = true; 
+rerun_analyseLFP = false; 
 rerun_AddPop = true;  
 disp('Loading file 9... . . ')
 load('experiments_lfp_Bruno_41_phase')
@@ -126,7 +126,7 @@ disp('Saving... . .' )
 save('experiments_lfp_Bruno_41_phase', 'experiments', '-v7.3')
 clear experiments
 %%
-rerun_analyseLFP = true; 
+rerun_analyseLFP = false; 
 rerun_AddPop = true;  
 disp('Loading file 10... . . ')
 load('experiments_lfp_Bruno_38_phase')

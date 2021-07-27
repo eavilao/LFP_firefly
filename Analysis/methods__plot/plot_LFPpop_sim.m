@@ -4632,8 +4632,8 @@ switch plot_type
         xlabel ([ev ' time (s)']); ylabel('count'); vline(-0.3,'--k')
         
     case 'plv_across_area'
-        ar = 'MSTPFC'     % MST PPC PFC
-        win = [-1.5 1.5];
+        ar = 'PFC_PPC_PLV'     % MST_PPC_PLV // MST_PFC_PLV // PFC_PPC_PLV
+        win = [-1.501 1.501];
         ev = 'stop'
         band = 'theta'
         
@@ -4643,11 +4643,11 @@ switch plot_type
             ts_incorr = monk(m).sess(1).pop.area.PPC.trialtype.reward(1).events.(ev).(band).ts; ts_win_incorr = ts_incorr(ts_incorr > win(1) & ts_incorr < win(2));
             clear plv_sess_corr plv_sess_incorr
             for nsess = 1:length(monk(m).sess)
-                plv_sess_corr(nsess,:) = monk(m).sess(nsess).pop.area.MST_PPC_PLV.trialtype.reward(2).events.(ev).(band).PLV_mu(ts_corr > win(1) & ts_corr < win(2));
-                plv_sess_corr_sem(nsess,:) = monk(m).sess(nsess).pop.area.MST_PPC_PLV.trialtype.reward(2).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
+                plv_sess_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLV_mu(ts_corr > win(1) & ts_corr < win(2));
+                plv_sess_corr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
                 
-                plv_sess_incorr(nsess,:) = monk(m).sess(nsess).pop.area.MST_PPC_PLV.trialtype.reward(1).events.(ev).(band).PLV_mu(ts_corr > win(1) & ts_corr < win(2));
-                plv_sess_incorr_sem(nsess,:) = monk(m).sess(nsess).pop.area.MST_PPC_PLV.trialtype.reward(1).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
+                plv_sess_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_mu(ts_corr > win(1) & ts_corr < win(2));
+                plv_sess_incorr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
             end
             % average per monkey
             plv_monk_corr = nanmean(plv_sess_corr); plv_monk_corr_sem = nanmean(plv_sess_corr_sem);
@@ -4658,7 +4658,7 @@ switch plot_type
             
         end
         
-        % plot
+        %% plot two monks
         figure; hold on
         shadedErrorBar(ts_win_corr,nanmean(plv_all_corr),nanmean(plv_all_corr_sem), 'lineprops','g');
         shadedErrorBar(ts_win_corr,nanmean(plv_all_incorr),nanmean(plv_all_incorr_sem), 'lineprops','k');
@@ -4671,20 +4671,27 @@ switch plot_type
         set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); %vline([-0.3 0],'k')
         
-        
-        % temp plot PFC
+        % target
         figure; hold on
-        shadedErrorBar(ts_win_corr-0.3,plv_all_corr,plv_all_corr_sem, 'lineprops','g');
-        shadedErrorBar(ts_win_corr-0.3,plv_all_incorr,plv_all_incorr_sem, 'lineprops','k');
-        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+        area(ts_win_corr-0.3, nanmean(plv_all_incorr),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+        area(ts_win_corr-0.3, nanmean(plv_all_corr),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); vline([-0.3 0],'k')
         
-        % 
+        %% plot PFC
+        % temp plot PFC
         figure; hold on
-        area(ts_win_corr, plv_all_incorr,'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+        area(ts_win_corr, nanmean(plv_sess_incorr),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
         area(ts_win_corr, plv_all_corr,'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
         set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); %vline([-0.3 0],'k')
+
+        % target
+        figure; hold on
+        area(ts_win_corr-0.3, plv_all_incorr,'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+        area(ts_win_corr-0.3, plv_all_corr,'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+        xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); vline([-0.3 0],'k')
         
         
 end

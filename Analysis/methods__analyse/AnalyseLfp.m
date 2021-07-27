@@ -20,7 +20,7 @@ analyse_alpha = prs.analyse_alpha;
 analyse_beta = prs.analyse_beta;
 extract_band_pass = prs.extract_band_passed;
 analyse_phase = prs.analyse_phase;
-analyse_phase_within_area;
+analyse_phase_within_area = prs.analyse_phase;
 
 
 %% load cases
