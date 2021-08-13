@@ -24,7 +24,7 @@ do_band_passed_pop = false;  % needs pop
 do_phases = true; % needs pop
 
 name_output_exp_out_file = 'exp_out_lfp_spectro_2021_06_28';
-name_output_file = 'lfp_spectro_phase_2021_07_24';
+name_output_file = 'lfp_spectro_phase_2021_08_02';
 
 %% Extract
 if extract_exp_out

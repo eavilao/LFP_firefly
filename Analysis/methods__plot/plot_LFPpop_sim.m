@@ -4433,41 +4433,97 @@ switch plot_type
         
     case 'plv_all_freq'
         ar = 'PPC'     % MST PPC PFC
-        win = [-1.51 1.51];
-        ev = 'stop'
+        win = [-0.5 0.5]; % [-1.513 1.513];  % [-0.513 1]; for target
+        ev = 'target'
         
-        for m = 2 % 1:length(monk)
-            ts = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).theta.ts; ts_win = ts(ts>win(1) & ts<win(2));
+        for m =  1:length(monk) % [1 3]  % 1:length(monk)
             freq = 1:74;
-            clear one_freq_corr one_freq_incorr
             for f = 1:length(freq)
+                clear one_freq_corr one_freq_incorr
                 for nsess = 1:length(monk(m).sess)
-                    one_freq_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).all_freq.plv_all(f,ts>win(1) & ts<win(2)); 
-                    one_freq_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).all_freq.plv_all(f,ts>win(1) & ts<win(2)); 
+                    ts = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).theta.ts; ts_win = ts(ts>win(1) & ts<win(2));
+                    one_f_corr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).all_freq.plv_all(f,ts>win(1) & ts<win(2)); 
+                    one_f_corr = one_f_corr(1:166); % try
+%                   one_f_corr = one_f_corr(1:249); % target 
+%                   one_f_corr = one_f_corr(1:504); % stop
+                    one_freq_corr(nsess,:) = one_f_corr; 
+                    
+                    one_f_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).all_freq.plv_all(f,ts>win(1) & ts<win(2));
+                    one_f_incorr = one_f_incorr(1:166); % try
+%                   one_f_incorr = one_f_incorr(1:249); % target
+%                   one_f_incorr = one_f_incorr(1:504); % stop
+                    one_freq_incorr(nsess,:) =one_f_incorr; 
                 end
                 % mean for freq
-                plv_per_monk_corr(m,f,:) = nanmean(one_freq_corr); 
-                plv_per_monk_incorr(m,f,:) = nanmean(one_freq_incorr); 
+                plv_per_monk_corr(m,f,:) = nanmean(one_freq_corr);
+                plv_per_monk_incorr(m,f,:) = nanmean(one_freq_incorr);
             end
-        end 
+        end
         
         plv_all_corr = squeeze(nanmean(plv_per_monk_corr)); 
         plv_all_incorr = squeeze(nanmean(plv_per_monk_incorr)); 
         
-        % plot correct
-        figure; hold on;
-        J = customcolormap_preset('pasteljet'); colormap(J);
-        imagesc(ts_win,freq,plv_all_corr./max(max(plv_all_corr)), [0 0.9]); axis xy;
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[2 50], 'FontSize', 22)
-        xlabel('time (s)'); ylabel('frequency (Hz)')
-        colorbar;  axis square; title('Corr')
+        if strcmp('stop',ev)
+            % plot correct
+            figure; hold on;
+            J = customcolormap_preset('pasteljet'); colormap(J);
+%             imagesc(ts_win,freq,plv_all_corr(3:end,:)./0.035, [0 1]); axis xy;
+            imagesc(ts_win,freq,plv_all_corr(3:end,:)./max(max(plv_all_corr(3:end,:))), [0 1]); axis xy;
+%             imagesc(ts_win,freq,plv_all_corr, [0 0.04]); axis xy;
+            set(gca,'xlim',[-1.5 1.5], 'ylim',[3 50], 'FontSize', 22)
+            xlabel([(ev) ' time (s)']); ylabel('frequency (Hz)')
+            colorbar;  axis square; title('Corr')
+            
+            figure(4); hold on;
+            plot(smooth(mean(plv_all_corr(3:end,:)./max(max(plv_all_corr(3:end,:))),2)), 'g');
+            set(gca,'xlim',[1 75], 'ylim',[0 1], 'FontSize', 22, 'TickDir', 'out')
+            xlabel('Freq (Hz)'); ylabel('PLV'); title(ev); axis square
+        else
+            %target corr
+            figure; hold on;
+            J = customcolormap_preset('pasteljet'); colormap(J);
+%             imagesc(ts_win-0.3,freq,plv_all_corr(3:end,:)./0.1, [0 1]); axis xy;
+            imagesc(ts_win-0.3,freq,plv_all_corr(3:end,:)./max(max(plv_all_corr(3:end,:))), [0 1]); axis xy;
+            % imagesc(ts_win,freq,plv_all_corr, [0 0.4]); axis xy;
+            set(gca,'xlim',[-0.5 0.5], 'ylim',[3 50], 'FontSize', 22)
+            xlabel([(ev) ' time (s)']); ylabel('frequency (Hz)')
+            colorbar;  axis square; title('Corr'); vline([-0.3 0], 'k');
+            
+            figure(4); hold on;
+            plot(smooth(mean(plv_all_corr(3:end,:)./max(max(plv_all_corr(3:end,:))),2)), 'g');
+            set(gca,'xlim',[1 75], 'ylim',[0 1], 'FontSize', 22, 'TickDir', 'out')
+            xlabel('Freq (Hz)'); ylabel('PLV');title(ev);axis square
+        end
         
-        % plot incorrect
-        figure; hold on; colormap(J);
-        imagesc(ts_win,freq,plv_all_incorr./max(max(plv_all_incorr)), [0 0.9]); axis xy;
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[2 50], 'FontSize', 22)
-        xlabel('time (s)'); ylabel('frequency (Hz)')
-        colorbar;  axis square; title('Incorr')
+        if strcmp('stop',ev)
+            % plot incorrect
+            figure; hold on; colormap(J);
+%             imagesc(ts_win,freq,plv_all_incorr(3:end,:)./0.035, [0 1]); axis xy;
+             imagesc(ts_win,freq,plv_all_incorr(3:end,:)./max(max(plv_all_corr(3:end,:))), [0 1]); axis xy;
+            % imagesc(ts_win,freq,plv_all_incorr, [0 0.04]); axis xy;
+            set(gca,'xlim',[-1.5 1.5], 'ylim',[3 50], 'FontSize', 22)
+            xlabel([(ev) ' time (s)']); ylabel('frequency (Hz)')
+            colorbar;  axis square; title('Incorr')
+            
+           figure(4); hold on;
+            plot(smooth(mean(plv_all_incorr(3:end,:)./max(max(plv_all_incorr(3:end,:))),2)), 'k');
+            set(gca,'xlim',[1 75], 'ylim',[0 1], 'FontSize', 22, 'TickDir', 'out')
+            xlabel('Freq (Hz)'); ylabel('PLV'); title(ev); axis square
+        else
+            % plot incorrect
+            figure; hold on; colormap(J);
+%             imagesc(ts_win,freq,plv_all_incorr(3:end,:)./0.1, [0 1]); axis xy;
+            imagesc(ts_win-0.3,freq,plv_all_incorr(3:end,:)./max(max(plv_all_corr(3:end,:))), [0 1]); axis xy;
+            % imagesc(ts_win-0.3,freq,plv_all_incorr, [0 0.4]); axis xy;
+            set(gca,'xlim',[-0.5 0.5], 'ylim',[3 50], 'FontSize', 22)
+            xlabel([(ev) ' time (s)']); ylabel('frequency (Hz)')
+            colorbar;  axis square; title('Incorr'); vline([-0.3 0], 'k');
+            
+            figure(4); hold on;
+            plot(smooth(mean(plv_all_incorr(3:end,:)./max(max(plv_all_incorr(3:end,:))),2)), 'k');
+            set(gca,'xlim',[1 75], 'ylim',[0 1], 'FontSize', 22, 'TickDir', 'out')
+            xlabel('Freq (Hz)'); ylabel('PLV'); title(ev); axis square
+        end
         
     case 'mean_plv'
         ar = 'PFC'     % MST PPC PFC
@@ -4633,29 +4689,29 @@ switch plot_type
         xlabel ([ev ' time (s)']); ylabel('count'); vline(-0.3,'--k')
         
     case 'plv_across_area'
-        ar = 'PFC_PPC_PLV'     % MST_PPC_PLV // MST_PFC_PLV // PFC_PPC_PLV
+        ar = 'MST_PPC_PLV'     % MST_PPC_PLV // MST_PFC_PLV // PFC_PPC_PLV
         win = [-1.501 1.501];
-        ev = 'stop'
-        band = 'theta'
+        ev = 'reward'
+        band = 'beta'
         
         plv_all_corr = []; plv_all_corr_sem = []; plv_all_incorr = []; plv_all_incorr_sem = [];
-        for m = 3 % [1 3]
+        for m = [1 3] % [1 3]
             ts_corr = monk(m).sess(1).pop.area.PPC.trialtype.reward(2).events.(ev).(band).ts; ts_win_corr = ts_corr(ts_corr > win(1) & ts_corr < win(2));
-            ts_incorr = monk(m).sess(1).pop.area.PPC.trialtype.reward(1).events.(ev).(band).ts; ts_win_incorr = ts_incorr(ts_incorr > win(1) & ts_incorr < win(2));
+%              ts_incorr = monk(m).sess(1).pop.area.PPC.trialtype.reward(1).events.(ev).(band).ts; ts_win_incorr = ts_incorr(ts_incorr > win(1) & ts_incorr < win(2));
             clear plv_sess_corr plv_sess_incorr
             for nsess = 1:length(monk(m).sess)
-                plv_sess_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLV_mu(ts_corr > win(1) & ts_corr < win(2));
+                plv_sess_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLV_mu_Z(ts_corr > win(1) & ts_corr < win(2));
                 plv_sess_corr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
                 
-                plv_sess_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_mu(ts_corr > win(1) & ts_corr < win(2));
-                plv_sess_incorr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
+%                  plv_sess_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_mu_Z(ts_corr > win(1) & ts_corr < win(2));
+%                  plv_sess_incorr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
             end
             % average per monkey
             plv_monk_corr = nanmean(plv_sess_corr); plv_monk_corr_sem = nanmean(plv_sess_corr_sem);
-            plv_monk_incorr = nanmean(plv_sess_incorr); plv_monk_incorr_sem = nanmean(plv_sess_incorr_sem);
+%              plv_monk_incorr = nanmean(plv_sess_incorr); plv_monk_incorr_sem = nanmean(plv_sess_incorr_sem);
             
             plv_all_corr = [plv_all_corr ; plv_monk_corr]; plv_all_corr_sem = [plv_all_corr_sem ; plv_monk_corr_sem];
-            plv_all_incorr = [plv_all_incorr ; plv_monk_incorr]; plv_all_incorr_sem = [plv_all_incorr_sem ; plv_monk_incorr_sem];
+%              plv_all_incorr = [plv_all_incorr ; plv_monk_incorr]; plv_all_incorr_sem = [plv_all_incorr_sem ; plv_monk_incorr_sem];
             
         end
         
@@ -4667,10 +4723,11 @@ switch plot_type
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar);
         
         figure; hold on
-        area(ts_win_corr, nanmean(plv_all_incorr),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
-        area(ts_win_corr, nanmean(plv_all_corr),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        area(ts_win_corr, smooth(nanmean(plv_all_incorr),5),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+        area(ts_win_corr, smooth(nanmean(plv_all_corr),5),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
         set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); %vline([-0.3 0],'k')
+        ylim([-45 45]);
         
         % target
         figure; hold on
@@ -4678,6 +4735,7 @@ switch plot_type
         area(ts_win_corr-0.3, nanmean(plv_all_corr),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
         set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); vline([-0.3 0],'k')
+        ylim([-100 100]);
         
         %% plot PFC
         % temp plot PFC
@@ -4686,6 +4744,7 @@ switch plot_type
         area(ts_win_corr, plv_all_corr,'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
         set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); %vline([-0.3 0],'k')
+        ylim([-100 100]);
 
         % target
         figure; hold on
@@ -4693,23 +4752,24 @@ switch plot_type
         area(ts_win_corr-0.3, plv_all_corr,'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
         set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); vline([-0.3 0],'k')
+        ylim([-100 100]);
         
      case 'pli_across_area'
-        ar = 'MST_PPC_PLV'     % MST_PPC_PLV // MST_PFC_PLV // PFC_PPC_PLV
+        ar = 'MST_PFC_PLI'     % MST_PPC_PLI // MST_PFC_PLI // PFC_PPC_PLI
         win = [-1.501 1.501];
-        ev = 'stop'
-        band = 'theta'
+        ev = 'target'
+        band = 'beta'
         
-        plv_all_corr = []; plv_all_corr_sem = []; plv_all_incorr = []; plv_all_incorr_sem = [];
+        pli_all_corr = []; pli_all_corr_sem = []; pli_all_incorr = []; pli_all_incorr_sem = [];
         for m = 3 % [1 3]
             ts_corr = monk(m).sess(1).pop.area.PPC.trialtype.reward(2).events.(ev).(band).ts; ts_win_corr = ts_corr(ts_corr > win(1) & ts_corr < win(2));
             ts_incorr = monk(m).sess(1).pop.area.PPC.trialtype.reward(1).events.(ev).(band).ts; ts_win_incorr = ts_incorr(ts_incorr > win(1) & ts_incorr < win(2));
             clear plv_sess_corr plv_sess_incorr
             for nsess = 1:length(monk(m).sess)
-                pli_sess_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLI_mu(ts_corr > win(1) & ts_corr < win(2));
+                pli_sess_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLI_dir_mu(ts_corr > win(1) & ts_corr < win(2));
                 pli_sess_corr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLI_sem(ts_corr > win(1) & ts_corr < win(2));
                 
-                pli_sess_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLI_mu(ts_corr > win(1) & ts_corr < win(2));
+                pli_sess_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLI_dir_mu(ts_corr > win(1) & ts_corr < win(2));
                 pli_sess_incorr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLI_sem(ts_corr > win(1) & ts_corr < win(2));
             end
             % average per monkey
@@ -4725,34 +4785,58 @@ switch plot_type
         figure; hold on
         shadedErrorBar(ts_win_corr,nanmean(pli_all_corr),nanmean(pli_all_corr_sem), 'lineprops','g');
         shadedErrorBar(ts_win_corr,nanmean(pli_all_incorr),nanmean(pli_all_incorr_sem), 'lineprops','k');
-        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
-        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar);
+        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); box off
+        ylim([0 0.3])
+        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar); axis square;
         
         figure; hold on
-        area(ts_win_corr, nanmean(pli_all_incorr),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
-        area(ts_win_corr, nanmean(pli_all_corr),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        plot(ts_win_corr, nanmean(pli_all_incorr),'k'); 
+        plot(ts_win_corr, nanmean(pli_all_corr),'g');
         set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
-        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar); %vline([-0.3 0],'k')
+        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar);
+
         
         % target
         figure; hold on
-        area(ts_win_corr-0.3, nanmean(pli_all_incorr),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
-        area(ts_win_corr-0.3, nanmean(pli_all_corr),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        shadedErrorBar(ts_win_corr-0.3,nanmean(pli_all_corr),nanmean(pli_all_corr_sem), 'lineprops','g');
+        shadedErrorBar(ts_win_corr-0.3,nanmean(pli_all_incorr),nanmean(pli_all_incorr_sem), 'lineprops','k');
+        set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); box off
+        ylim([0 0.3])
+        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar); axis square; vline([-0.3 0],'k')
+        
+        figure; hold on
+        plot(ts_win_corr-0.3, nanmean(pli_all_incorr),'k'); 
+        plot(ts_win_corr-0.3, nanmean(pli_all_corr),'g');
         set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
-        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar); vline([-0.3 0],'k')
+        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar);vline([-0.3 0],'k')
         
         %% plot PFC
         % temp plot PFC
         figure; hold on
-        area(ts_win_corr, nanmean(pli_sess_incorr),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
-        area(ts_win_corr, plv_all_corr,'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        shadedErrorBar(ts_win_corr,nanmean(pli_sess_incorr),nanmean(pli_sess_incorr_sem), 'lineprops','g');
+        shadedErrorBar(ts_win_corr,nanmean(pli_sess_corr),nanmean(pli_sess_corr_sem), 'lineprops','k');
+        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); box off
+        ylim([0 0.3])
+        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar); axis square;
+        
+        figure; hold on
+        plot(ts_win_corr, nanmean(pli_sess_incorr),'k'); 
+        plot(ts_win_corr, nanmean(pli_sess_corr),'g');
         set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
-        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar); %vline([-0.3 0],'k')
+        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar);
+
 
         % target
         figure; hold on
-        area(ts_win_corr-0.3, pli_all_incorr,'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
-        area(ts_win_corr-0.3, pli_all_corr,'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        shadedErrorBar(ts_win_corr-0.3,nanmean(pli_sess_incorr),nanmean(pli_sess_corr_sem), 'lineprops','g');
+        shadedErrorBar(ts_win_corr-0.3,nanmean(pli_sess_corr),nanmean(pli_sess_incorr_sem), 'lineprops','k');
+        set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); box off
+        ylim([0 0.3])
+        xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar); axis square;vline([-0.3 0],'k')
+        
+        figure; hold on
+        plot(ts_win_corr-0.3, nanmean(pli_sess_incorr),'k'); 
+        plot(ts_win_corr-0.3, nanmean(pli_sess_corr),'g');
         set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('wPLI'); title(ar); vline([-0.3 0],'k')
         
