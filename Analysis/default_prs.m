@@ -4,7 +4,7 @@ if nargin<2, session_id = 1; end
 getnthcell = @(x,n) x{n};
 
 prs.monk_Ody = 0; % This will run AddLOGData_Ody instead.  
-
+prs.isRipple = 1; % To run AddLOGData_NYU instead.
 %% session specific parameters
 monkeyInfoFile_joysticktask;
 monkeyInfo = monkeyInfo([monkeyInfo.session_id]==session_id & [monkeyInfo.monk_id]==monk_id);
@@ -58,11 +58,12 @@ prs.mintrialduration = 0.5; % to detect bad trials (s)
 prs.electrodespacing = 0.4; %distance (mm) between electrode sites on the array
 
 %% electrode parameters
-prs.linearprobe.types = {'linearprobe16','linearprobe24','linearprobe32'};
-prs.linearprobe.channelcount = [16 24 32];
-prs.utaharray.types = {'utah96','utah2x48'};
-prs.utaharray.channelcount = [96 96];
+prs.linearprobe.types = {'linearprobe16','linearprobe24','linearprobe32', 'linearprobe64'};
+prs.linearprobe.channelcount = [16 24 32 64];
+prs.utaharray.types = {'utah96','utah2x48', 'utah2x128'};
+prs.utaharray.channelcount = [96 96 256];
 prs.MapDualArray2BrainArea = @(x,y) char((y<=48)*x{1} + (y>48)*x{2});
+prs.MapDualArray2BrainArea_128 = @(x,y) char((y<=256)*x{1} + (y>256)*x{2}); % 256 because Ripple's rec begin at ch 128.
 
 %% static stimulus parameters
 prs.monk_startpos = [0 -30];
@@ -291,24 +292,24 @@ prs.corr_neuronbehverr = false;
 %% LFP
 prs.event_potential = true;
 prs.compute_spectrum = true;
-prs.extract_band_passed = false; % AnalyseLFP.m
-prs.analyse_band_passed = false; % AnalysePopulation.m
+prs.extract_band_passed = true; % AnalyseLFP.m
+prs.analyse_band_passed = true; % AnalysePopulation.m
 prs.band_pass_acc_thresh_low_third = 21.6666; % distance in cm -- threshold for band pass vs accuracy
 prs.band_pass_acc_thresh_upper_third = 43.3332; % distance in cm -- threshold for band pass vs accuracy
-prs.compute_psd = false;
+prs.compute_psd = true;
 prs.lfp_eye = false; 
-prs.compute_spectrum_whole_trial = false;
+prs.compute_spectrum_whole_trial = true;
 prs.compute_spectrum_whole_trial_align_stop = false; 
 prs.compute_spectrum_whole_trial_align_stop_per_band = false;
-prs.analyse_theta = false; % compute tunings
+prs.analyse_theta = true; % compute tunings
 prs.analyse_alpha = false; % compute tunings
-prs.analyse_beta = false; % compute tunings
+prs.analyse_beta = true; % compute tunings
 prs.analyse_wideband = false; % compute tunings
 prs.compute_coherencyLFP = false;
 prs.compute_coherogram = false;
 prs.compute_coherogram_band_passed = false;
-prs.analyse_phase = true;
-prs.analyse_phase_within_area = true;
+prs.analyse_phase = false;
+prs.analyse_phase_within_area = false;
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;

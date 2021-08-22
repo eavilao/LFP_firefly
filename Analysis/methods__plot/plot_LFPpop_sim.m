@@ -2655,7 +2655,7 @@ switch plot_type
         high_beta = [20 30];
         th_norm_monk_corr=[]; th_norm_monk_err=[]; be_low_norm_monk_corr=[]; be_low_norm_monk_err=[];
         for nmonk = [1 3] % 1:length(monk)  % [1 3]
-            areas = {'MST'} %fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
+            areas = fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
             for narea = 1:length(areas)
                 th_norm_all_err = []; be_low_norm_all_err = []; th_norm_all_corr = []; be_low_norm_all_corr = [];
                 for nsess = 1:length(monk(nmonk).sess)

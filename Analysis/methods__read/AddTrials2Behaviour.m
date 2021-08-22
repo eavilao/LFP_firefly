@@ -17,7 +17,9 @@ for i=1:nfiles
     % read .log file
     if prs.monk_Ody
          trials_log = AddLOGData_Ody(flist_log(i).name,prs);
-    else
+    elseif prs.isRipple
+        trials_log = AddLOGData_NYU(flist_log(i).name,prs);
+    else    
         trials_log = AddLOGData(flist_log(i).name);
     end
     % read all .smr files associated with this log file
@@ -26,7 +28,12 @@ for i=1:nfiles
     trials_smr = [];
     for j = indx_smr
         data_smr = ImportSMR(flist_smr(j).name);
-        trials_smr = [trials_smr AddSMRData(data_smr,prs)];
+        if prs.isRipple
+            trials_smr = [trials_smr AddSMRData_NYU(data_smr,prs)];
+        else
+            trials_smr = [trials_smr AddSMRData(data_smr,prs)];
+        end
+        
     end
     % merge contents of .log and .smr files
     ntrls_log = length(trials_log); ntrls_smr = length(trials_smr);

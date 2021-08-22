@@ -7911,5 +7911,72 @@ monkeyInfo (end).FFparams_ypos = 5;
 monkeyInfo (end).FFparams_rewardDur = 7;
 monkeyInfo (end).FFparams_flyDuration = 8;
 
+%% Viktor
 
+%% session 1
+monkeyInfo (end+1).monk_id = 71;
+monkeyInfo (end).session_id = 1;
+monkeyInfo (end).coord.row = nan;
+monkeyInfo (end).coord.column = nan;
+monkeyInfo (end).coord.depth = nan;
+monkeyInfo (end).units = 0;
+monkeyInfo (end).folder = 'Viktor\Utah Array\May 4 2021';
+monkeyInfo (end).comments = {'density, no landmarks, no ptb, random DCI, random ITI'};
+monkeyInfo (end).electrode_type = {'utah2x128'};
+monkeyInfo (end).area = {{'PFC', 'PPC'}}; 
+monkeyInfo (end).eyechannels = [2 2];
+monkeyInfo (end).FFparams_xpos = 7; 
+monkeyInfo (end).FFparams_ypos = 8; 
+monkeyInfo (end).FFparams_flyDuration = 4;
+monkeyInfo (end).isRipple = 1; 
 
+%% session 2
+monkeyInfo (end+1).monk_id = 71;
+monkeyInfo (end).session_id = 2;
+monkeyInfo (end).coord.row = nan;
+monkeyInfo (end).coord.column = nan;
+monkeyInfo (end).coord.depth = nan;
+monkeyInfo (end).units = 0;
+monkeyInfo (end).folder = 'Viktor\Utah Array\June 25 2021';
+monkeyInfo (end).comments = {'density, no landmarks, no ptb, random DCI, random ITI'};
+monkeyInfo (end).electrode_type = {'utah2x128'};
+monkeyInfo (end).area = {{'PFC', 'PPC'}}; 
+monkeyInfo (end).eyechannels = [2 2];
+monkeyInfo (end).FFparams_xpos = 7; 
+monkeyInfo (end).FFparams_ypos = 8; 
+monkeyInfo (end).FFparams_flyDuration = 4;
+monkeyInfo (end).isRipple = 1; 
+
+%% session 3 
+monkeyInfo (end+1).monk_id = 71;
+monkeyInfo (end).session_id = 3;
+monkeyInfo (end).coord.row = nan;
+monkeyInfo (end).coord.column = nan;
+monkeyInfo (end).coord.depth = nan;
+monkeyInfo (end).units = 0;
+monkeyInfo (end).folder = 'Viktor\Utah Array\July 8 2021';
+monkeyInfo (end).comments = {'density, no landmarks, no ptb, random DCI, random ITI'};
+monkeyInfo (end).electrode_type = {'utah2x128'};
+monkeyInfo (end).area = {{'PFC', 'PPC'}}; 
+monkeyInfo (end).eyechannels = [2 2];
+monkeyInfo (end).FFparams_xpos = 7; 
+monkeyInfo (end).FFparams_ypos = 8; 
+monkeyInfo (end).FFparams_flyDuration = 4;
+monkeyInfo (end).isRipple = 1; 
+
+%% session 4
+monkeyInfo (end+1).monk_id = 71;
+monkeyInfo (end).session_id = 3;
+monkeyInfo (end).coord.row = nan;
+monkeyInfo (end).coord.column = nan;
+monkeyInfo (end).coord.depth = nan;
+monkeyInfo (end).units = 0;
+monkeyInfo (end).folder = 'Viktor\Utah Array\June 24 2021';
+monkeyInfo (end).comments = {'density, no landmarks, no ptb, random DCI, random ITI'};
+monkeyInfo (end).electrode_type = {'utah2x128'};
+monkeyInfo (end).area = {{'PFC', 'PPC'}}; 
+monkeyInfo (end).eyechannels = [2 2];
+monkeyInfo (end).FFparams_xpos = 7; 
+monkeyInfo (end).FFparams_ypos = 8; 
+monkeyInfo (end).FFparams_flyDuration = 4;
+monkeyInfo (end).isRipple = 1; 
