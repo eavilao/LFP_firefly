@@ -37,7 +37,7 @@ if event_potential
     for i=1:length(trialtypes)
         nconds = length(behv_stats.trialtype.(trialtypes{i}));
         if ~strcmp((trialtypes{i}),'all') && nconds==1, copystats = true; else, copystats = false; end % only one condition means variable was not manipulated
-        for j=1:nconds
+        for j=1:nconds  
             if copystats % if only one condition present, no need to recompute stats --- simply copy them from 'all' trials
                 stats.trialtype.(trialtypes{i})(j).events = stats.trialtype.all.events;
             else

@@ -552,7 +552,7 @@ if prs.compute_spectrum_whole_trial
     gettuning = prs.tuning_events; unique_brain_areas = unique({units.brain_area}); num_brain_areas = numel(unique_brain_areas);
     for type = 2 %1:length(trialtypes)
         nconds = length(behv_stats.trialtype.(trialtypes{type}));
-        for cond = 1:2 %nconds
+        for cond = 1:nconds
             for ev = 1:length(gettuning)
                 for area = 1:num_brain_areas
                     unitindx = strcmp({units.brain_area}, unique_brain_areas{area});
@@ -597,7 +597,7 @@ if prs.compute_spectrum_whole_trial_align_stop
     gettuning = prs.tuning_events; unique_brain_areas = unique({units.brain_area}); num_brain_areas = numel(unique_brain_areas);
     for type = 2 %1:length(trialtypes)
         nconds = length(behv_stats.trialtype.(trialtypes{type}));
-        for cond = 1:2 %nconds
+        for cond = 1:nconds %1:2 %nconds
             %             for ev = 3 % ('stop') %1:length(gettuning)
             for area = 1:num_brain_areas
                 unitindx = strcmp({units.brain_area}, unique_brain_areas{area});
@@ -646,7 +646,7 @@ if prs.compute_spectrum_whole_trial_align_stop_per_band
     gettuning = prs.tuning_events; unique_brain_areas = unique({units.brain_area}); num_brain_areas = numel(unique_brain_areas);
     for type = 2 %1:length(trialtypes)
         nconds = length(behv_stats.trialtype.(trialtypes{type}));
-        for cond = 1:2 %nconds
+        for cond = 1:nconds %2 %nconds
             %             for ev = 3 % ('stop') %1:length(gettuning)
             for area = 1:num_brain_areas
                 unitindx = strcmp({units.brain_area}, unique_brain_areas{area});

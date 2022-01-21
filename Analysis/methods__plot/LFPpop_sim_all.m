@@ -23,8 +23,8 @@ save_band_pass_analysis = false; % extract band passed lfp signal only (used onl
 do_band_passed_pop = false;  % needs pop
 do_phases = false; % needs pop
 
-name_output_exp_out_file = 'exp_out_lfp_spectro_2021_06_28';
-name_output_file = 'lfp_spectro_Vik_test_2021_08_16';
+name_output_exp_out_file = 'exp_out_lfp_spectro_2022_01_20';
+name_output_file = 'lfp_spectro_test_2022_01_20';
 
 %% Extract
 if extract_exp_out
@@ -437,7 +437,7 @@ if save_spectro_per_trial
                     for a=1:length(areas)
                         events = fieldnames(exp(1).pop.trialtype.reward(2).area.PPC.events);
                         for ev = 1:length(events)
-                            if strcmp((events{ev}),'reward') && cond==1
+                            if strcmp((events{ev}),'reward') && cond==1 || strcmp((events{ev}),'reward') && cond==3 || strcmp((events{ev}),'reward') && cond==4 
                                 monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl.ts = NaN;
                                 monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl.freq = NaN;
                                 monk(i).sess(sess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl.spectro = NaN;
@@ -850,7 +850,7 @@ end
 %%
 disp('                 Done, saving . . .     ')
 fprintf(['Time:  ' num2str(clock) '\n']);
-save(name_output_file, 'monk', '-v7.3')
+save(name_output_file, 'monk','all_monks', '-v7.3')
 % load train
 % sound(y,Fs)
 disp('                     Saved!')

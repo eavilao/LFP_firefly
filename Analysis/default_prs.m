@@ -4,7 +4,7 @@ if nargin<2, session_id = 1; end
 getnthcell = @(x,n) x{n};
 
 prs.monk_Ody = 0; % This will run AddLOGData_Ody instead.  
-prs.isRipple = 1; % To run AddLOGData_NYU instead.
+prs.isRipple = 0; % To run AddLOGData_NYU instead.
 %% session specific parameters
 monkeyInfoFile_joysticktask;
 monkeyInfo = monkeyInfo([monkeyInfo.session_id]==session_id & [monkeyInfo.monk_id]==monk_id);
@@ -293,7 +293,7 @@ prs.corr_neuronbehverr = false;
 prs.event_potential = true;
 prs.compute_spectrum = true;
 prs.extract_band_passed = true; % AnalyseLFP.m
-prs.analyse_band_passed = true; % AnalysePopulation.m
+prs.analyse_band_passed = false; % AnalysePopulation.m
 prs.band_pass_acc_thresh_low_third = 21.6666; % distance in cm -- threshold for band pass vs accuracy
 prs.band_pass_acc_thresh_upper_third = 43.3332; % distance in cm -- threshold for band pass vs accuracy
 prs.compute_psd = true;

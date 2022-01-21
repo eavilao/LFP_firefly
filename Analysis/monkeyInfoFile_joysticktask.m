@@ -7966,7 +7966,7 @@ monkeyInfo (end).isRipple = 1;
 
 %% session 4
 monkeyInfo (end+1).monk_id = 71;
-monkeyInfo (end).session_id = 3;
+monkeyInfo (end).session_id = 4;
 monkeyInfo (end).coord.row = nan;
 monkeyInfo (end).coord.column = nan;
 monkeyInfo (end).coord.depth = nan;
