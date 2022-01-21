@@ -40,6 +40,7 @@ function plot_LFPpop_sim(monk,all_monks,plot_type)
 % 'spectrogram_reward_density_all_beta_diff'
 % 'spectrogram_reward_density_diff'
 % 'spectro_all_monks' <----
+% 'spectro_all_monks_mba' <------ move before after
 % 'spectrogram_trl'
 % 'spectrogram_trl_align_stop'  <----
 % 'spectrogram_trl_session_align_target'
@@ -2488,8 +2489,8 @@ switch plot_type
         % extract
         freq = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_freq;
         ts = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_ts;
-        p_spectro_corr = all_monks.trialtype.reward(1).area.(areas).events.(ev).all_monks_mu;
-        p_spectro_incorr = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_mu;
+        p_spectro_corr = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_mu;
+        p_spectro_incorr = all_monks.trialtype.reward(1).area.(areas).events.(ev).all_monks_mu;
         max_p = max( [ max(max(all_monks.trialtype.reward(1).area.(areas).events.(ev).all_monks_mu(4:50,:))) max(max(all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_mu(4:50,:))) ]);
         
         % plot correct
@@ -2520,6 +2521,112 @@ switch plot_type
         xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
         title([(areas) ' Ratio']); vline([-0.3 0], 'w'); 
 
+        case 'spectro_all_monks_mba'
+        ev = 'target'
+        areas = 'MST'
+        % extract
+        freq = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_freq;
+        ts = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_ts;
+        p_spectro_corr_before = all_monks.trialtype.reward(5).area.(areas).events.(ev).all_monks_mu;
+        p_spectro_corr_after = all_monks.trialtype.reward(6).area.(areas).events.(ev).all_monks_mu;
+        p_spectro_incorr_before = all_monks.trialtype.reward(3).area.(areas).events.(ev).all_monks_mu;
+        p_spectro_incorr_after = all_monks.trialtype.reward(4).area.(areas).events.(ev).all_monks_mu;
+        
+        max_p = max( [ max(max(all_monks.trialtype.reward(3).area.(areas).events.(ev).all_monks_mu(4:50,:))) max(max(all_monks.trialtype.reward(4).area.(areas).events.(ev).all_monks_mu(4:50,:))) ...
+           max(max(all_monks.trialtype.reward(5).area.(areas).events.(ev).all_monks_mu(4:50,:))) max(max(all_monks.trialtype.reward(6).area.(areas).events.(ev).all_monks_mu(4:50,:))) ]);
+        max_p = 8e-05; % 50 PPC, 16 PFC, 6e-05 MST
+        
+        %normalize
+        p_spectro_corr_before = p_spectro_corr_before/max_p;
+        p_spectro_corr_after = p_spectro_corr_after/max_p;
+        p_spectro_incorr_before = p_spectro_incorr_before/max_p;
+        p_spectro_incorr_after = p_spectro_incorr_after/max_p;
+        
+        
+        %% plot correct 
+        % before
+        figure; hold on
+        imagesc(ts-0.3,freq,p_spectro_corr_before, [0 1]); axis xy; colorbar; % PFC
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
+        title([(areas) 'Corr before']); vline([-0.3 0], 'w'); 
+        % theta
+        figure(10); hold on
+        shadedErrorBar(ts-0.3,nanmean(p_spectro_corr_before(freq>=4 & freq<12,:)), nanstd(p_spectro_corr_before(freq>=4 & freq<12,:))/sqrt(size(p_spectro_corr_before(freq>=4 & freq<12,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
+        title([(areas) ' theta before']); vline([-0.3 0], 'k');
+        % beta
+        figure(11); hold on
+        shadedErrorBar(ts-0.3,nanmean(p_spectro_corr_before(freq>=12 & freq<=20,:)), nanstd(p_spectro_corr_before(freq>=12 & freq<=20,:))/sqrt(size(p_spectro_corr_before(freq>=12 & freq<=20,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
+        title([(areas) ' beta before']); vline([-0.3 0], 'k');
+        
+        % after
+        figure; hold on
+        imagesc(ts-0.3,freq,p_spectro_corr_after, [0 1]); axis xy; colorbar; % PFC
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
+        title([(areas) 'Corr after']); vline([-0.3 0], 'w'); 
+        % theta
+        figure(10); hold on
+        shadedErrorBar(ts-0.3,nanmean(p_spectro_corr_after(freq>=4 & freq<12,:)), nanstd(p_spectro_corr_after(freq>=4 & freq<12,:))/sqrt(size(p_spectro_corr_after(freq>=4 & freq<12,:),1)),'lineprops',{'--g'})
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
+        title([(areas) ' theta after']); vline([-0.3 0], 'k');
+        % beta
+        figure(11); hold on
+        shadedErrorBar(ts-0.3,nanmean(p_spectro_corr_after(freq>=12 & freq<=20,:)), nanstd(p_spectro_corr_after(freq>=12 & freq<=20,:))/sqrt(size(p_spectro_corr_after(freq>=12 & freq<=20,:),1)),'lineprops',{'--g'})
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
+        title([(areas) ' beta after']); vline([-0.3 0], 'k');
+        
+        %% plot incorrect
+        % before
+        figure; hold on
+        imagesc(ts-0.3,freq,p_spectro_incorr_before, [0 1]); axis xy; colorbar; % PFC
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
+        title([(areas) 'Err before']); vline([-0.3 0], 'w');
+        % theta
+        figure(10); hold on
+        shadedErrorBar(ts-0.3,nanmean(p_spectro_incorr_before(freq>=4 & freq<12,:)), nanstd(p_spectro_incorr_before(freq>=4 & freq<12,:))/sqrt(size(p_spectro_incorr_before(freq>=4 & freq<12,:),1)),'lineprops',{'Color', 'k'})
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
+        title([(areas) ' theta Err after']); vline([-0.3 0], 'k');
+        % beta
+        figure(11); hold on
+        shadedErrorBar(ts-0.3,nanmean(p_spectro_incorr_before(freq>=12 & freq<=20,:)), nanstd(p_spectro_incorr_before(freq>=12 & freq<=20,:))/sqrt(size(p_spectro_incorr_before(freq>=12 & freq<=20,:),1)),'lineprops',{'Color', 'k'})
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
+        title([(areas) ' theta Err after']); vline([-0.3 0], 'k');
+        
+        
+        % after
+        figure; hold on
+        imagesc(ts-0.3,freq,p_spectro_incorr_after, [0 1]); axis xy; colorbar; % PFC
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
+        title([(areas) 'Err after']); vline([-0.3 0], 'w');
+        % theta
+        figure(10); hold on
+        shadedErrorBar(ts-0.3,nanmean(p_spectro_incorr_after(freq>=4 & freq<12,:)), nanstd(p_spectro_incorr_after(freq>=4 & freq<12,:))/sqrt(size(p_spectro_incorr_after(freq>=4 & freq<12,:),1)),'lineprops',{'--k'})
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
+        title([(areas) ' theta Err after']); vline([-0.3 0], 'k');
+        % beta
+        figure(11); hold on
+        shadedErrorBar(ts-0.3,nanmean(p_spectro_incorr_after(freq>=12 & freq<=20,:)), nanstd(p_spectro_incorr_after(freq>=12 & freq<=20,:))/sqrt(size(p_spectro_incorr_after(freq>=12 & freq<=20,:),1)),'lineprops',{'--k'})
+        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
+        title([(areas) ' theta Err after']); vline([-0.3 0], 'k');
+        
+        
+      
+        
+       
+        
     case 'spectrogram_trl'
         % aligned to target onset
         type = 'reward'
