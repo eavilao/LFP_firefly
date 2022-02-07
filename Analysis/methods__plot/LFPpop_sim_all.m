@@ -4,9 +4,9 @@ function LFPpop_sim_all(exp)
 % experiments.m
 % If running for the first time, you don't need (exp) just hit run
 %% Choose what to analyze and save
-extract_exp_out = false; % load experiments.m file and extract. If saved 'exp_out', make it false.
-save_exp_out = false; % save mat file without raw lfp signal
-save_pop = false; % if this is true it will only extract pop
+extract_exp_out = true; % load experiments.m file and extract. If saved 'exp_out', make it false.
+save_exp_out = true; % save mat file without raw lfp signal
+save_pop = true; % if this is true it will only extract pop
 
 extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
@@ -23,8 +23,8 @@ save_band_pass_analysis = false; % extract band passed lfp signal only (used onl
 do_band_passed_pop = false;  % needs pop
 do_phases = false; % needs pop
 
-name_output_exp_out_file = 'exp_out_lfp_spectro_2022_01_20';
-name_output_file = 'lfp_spectro_test_2022_01_20';
+name_output_exp_out_file = 'exp_out_lfp_spectro_mba_2022_02_05';
+name_output_file = 'lfp_spectro_mba_2022_02_05';
 
 %% Extract
 if extract_exp_out
@@ -456,7 +456,8 @@ if save_spectro_per_trial
     end
     
     %% average across monkeys
-    if avg_monks
+     if avg_monks
+        areas = {'PPC', 'PFC', 'MST'}; 
         for a = 1:length(areas)
             for type = 1:length(trialtype)
                 clear cond
@@ -464,7 +465,7 @@ if save_spectro_per_trial
                     for ev = 2:4 %1:length(events)
                         clear spectro_trl_freq monk_sess_mu monk_mu
                         if strcmp((areas{a}),'PFC')
-                            for i = 3 % change if adding one more monkey
+                            for i = [3 4] % change if adding one more monkey
                                 for nsess = 1:length(monk(i).sess)
                                     ts = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).ts;
                                     for trl = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl)

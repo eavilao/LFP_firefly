@@ -4,7 +4,7 @@ if nargin<2, session_id = 1; end
 getnthcell = @(x,n) x{n};
 
 prs.monk_Ody = 0; % This will run AddLOGData_Ody instead.  
-prs.isRipple = 0; % To run AddLOGData_NYU instead.
+prs.isRipple = 1; % To run AddLOGData_NYU instead.
 %% session specific parameters
 monkeyInfoFile_joysticktask;
 monkeyInfo = monkeyInfo([monkeyInfo.session_id]==session_id & [monkeyInfo.monk_id]==monk_id);
@@ -296,11 +296,11 @@ prs.extract_band_passed = true; % AnalyseLFP.m
 prs.analyse_band_passed = false; % AnalysePopulation.m
 prs.band_pass_acc_thresh_low_third = 21.6666; % distance in cm -- threshold for band pass vs accuracy
 prs.band_pass_acc_thresh_upper_third = 43.3332; % distance in cm -- threshold for band pass vs accuracy
-prs.compute_psd = true;
+prs.compute_psd = false;
 prs.lfp_eye = false; 
-prs.compute_spectrum_whole_trial = true;
-prs.compute_spectrum_whole_trial_align_stop = false; 
-prs.compute_spectrum_whole_trial_align_stop_per_band = false;
+prs.compute_spectrum_whole_trial = false; % AnalysePopulation.m
+prs.compute_spectrum_whole_trial_align_stop = false; % AnalysePopulation.m
+prs.compute_spectrum_whole_trial_align_stop_per_band = false; % AnalysePopulation.m
 prs.analyse_theta = true; % compute tunings
 prs.analyse_alpha = false; % compute tunings
 prs.analyse_beta = true; % compute tunings
@@ -308,8 +308,8 @@ prs.analyse_wideband = false; % compute tunings
 prs.compute_coherencyLFP = false;
 prs.compute_coherogram = false;
 prs.compute_coherogram_band_passed = false;
-prs.analyse_phase = false;
-prs.analyse_phase_within_area = false;
+prs.analyse_phase = true;
+prs.analyse_phase_within_area = true; %to compute phase in all freq
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;

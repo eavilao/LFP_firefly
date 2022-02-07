@@ -1,7 +1,7 @@
 %Run batch of files to analyze LFP
 
-name_exp = 'band_passed';
-extract_behv_only = true;
+name_exp = 'spectro_move_ba';
+extract_behv_only = false;
 
 
 if extract_behv_only
@@ -52,6 +52,7 @@ else
     % %
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(44,185,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Quigley_185_' name_exp], 'experiments', '-v7.3')
     clear experiments
     % %
@@ -67,6 +68,7 @@ else
     % %
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(44,188,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Quigley_188_' name_exp], 'experiments', '-v7.3')
     clear experiments
     % %
@@ -162,6 +164,7 @@ else
     % % % %
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(44,207,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Quigley_207_' name_exp], 'experiments', '-v7.3')
     clear experiments
     % %
@@ -244,21 +247,25 @@ else
     %% Bruno
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(51,38,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Bruno_38_' name_exp, 'experiments'], '-v7.3')
     clear experiments
     %
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(51,41,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Bruno_41_' name_exp], 'experiments', '-v7.3')
     clear experiments
     
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(51,42,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Bruno_42_' name_exp], 'experiments', '-v7.3')
     clear experiments
     %
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(51,43,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Bruno_43_' name_exp], 'experiments', '-v7.3')
     clear experiments
     
@@ -266,6 +273,7 @@ else
     %% Schro
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(53,86,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Schro_86_' name_exp], 'experiments', '-v7.3')
     clear experiments
     %
@@ -281,6 +289,7 @@ else
     %
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(53,107,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Schro_107_' name_exp], 'experiments', '-v7.3')
     clear experiments
     
@@ -291,7 +300,27 @@ else
     %
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(53,113,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Schro_113_' name_exp], 'experiments', '-v7.3')
     clear experiments
     %
+    
+    %% Viktor
+    experiments = experiment('firefly-monkey');
+    experiments.AddSessions(71,1,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
+    save(['experiments_lfp_Vik_1_' name_exp], 'experiments', '-v7.3')
+    clear experiments
+    %
+    experiments = experiment('firefly-monkey');
+    experiments.AddSessions(71,3,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
+    save(['experiments_lfp_Vik_3_' name_exp], 'experiments', '-v7.3')
+    clear experiments
+    %
+    experiments = experiment('firefly-monkey');
+    experiments.AddSessions(71,4,{'behv','lfps','pop'})
+    cd('E:\Output\spectrograms\move_before_after')
+    save(['experiments_lfp_Vik_4_' name_exp], 'experiments', '-v7.3')
+    clear experiments
 end
