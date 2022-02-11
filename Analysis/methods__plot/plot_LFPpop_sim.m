@@ -41,8 +41,7 @@ function plot_LFPpop_sim(monk,all_monks,plot_type)
 % 'spectrogram_reward_density_diff'
 % 'spectro_all_monks' <----
 % 'spectro_all_monks_mba' <------ move before after
-% 'spectrogram_trl'
-% 'spectrogram_trl_align_stop'  <----
+% 'spectrogram_trl' <----
 % 'spectrogram_trl_session_align_target'
 % 'spectrogram_trl_session_align_stop'
 % 'coherogram_move'
@@ -2484,70 +2483,66 @@ switch plot_type
         end
         
     case 'spectro_all_monks'
-        ev = 'stop'
-        areas = 'PFC'
+        ev = 'reward'
+        areas = 'PPC'
         % extract
         freq = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_freq;
         ts = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_ts;
         p_spectro_corr = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_mu;
         p_spectro_incorr = all_monks.trialtype.reward(1).area.(areas).events.(ev).all_monks_mu;
-        p_spectro_all = [ all_monks.trialtype.reward(1).area.(areas).events.(ev).all_monks_mu(4:50,:) all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_mu(4:50,:) ]; 
-        %max_p = max( [ max(max(all_monks.trialtype.reward(1).area.(areas).events.(ev).all_monks_mu(4:50,:))) max(max(all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_mu(4:50,:))) ]);
         
-        % max_p = 15; % 50 PPC, 15 PFC, 7.3077e-05 MST
+        ts_s = ts; % ts or ts-0.3
+        win = [-1 1];  % [-0.5 0.5];   [-1.5 1.5]; 
+        % stop  [-0.2 2.4] 
+        % targ  [-0.2 2.4]
+        ylim_theta = [1 2.5];  % PPC [0 1.5]  PFC [1.2 2.4]  MST [0.5 2.8] 
+        ylim_beta = [0.5 1.5];   % PPC [0.5 2]  PFC [0.4 1.2]  MST [-0.1 1] 
         
-%         p_spectro_corr = p_spectro_corr/max_p;
-%         p_spectro_incorr = p_spectro_incorr/max_p;
-        
-        p_spectro_corr = p_spectro_corr-nanmean(nanmean(p_spectro_all))./nanstd(nanstd(p_spectro_all));
-        % p_spectro_corr = p_spectro_corr-nanmean(nanmean(p_spectro_corr))./nanstd(nanstd(p_spectro_corr)); % for reward only
-        p_spectro_incorr = p_spectro_incorr-nanmean(nanmean(p_spectro_all))./nanstd(nanstd(p_spectro_all));
-        
-        % PPC [-3 60] % PFC [-1.5 15] 
         % plot correct
         J = customcolormap_preset('black_teal_white');
         figure; hold on; colormap(J); % ts-0.3 to plot aligned to target off
-        imagesc(ts,freq,p_spectro_corr,[-1.5 15]); axis xy; colorbar; % PPC
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[4 50], 'FontSize', 22)
+        imagesc(ts_s,freq,p_spectro_corr,[-0.2 1.5]); axis xy; colorbar; % MST reward
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[4 50], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
         title([(areas) ' Corr']); vline(0, 'w');  %vline([-0.3 0], 'w');
         % theta
         figure(10); hold on
-        shadedErrorBar(ts,nanmean(p_spectro_corr(freq>=4 & freq<12,:)), nanstd(p_spectro_corr(freq>=4 & freq<12,:))/sqrt(size(p_spectro_corr(freq>=4 & freq<12,:),1)),'lineprops',{'Color', 'g'})
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[8 50], 'FontSize', 22) 
+        shadedErrorBar(ts_s,nanmean(p_spectro_corr(freq>=3.5 & freq<12,:)), nanstd(p_spectro_corr(freq>=3.5 & freq<12,:))/sqrt(size(p_spectro_corr(freq>=3.5 & freq<12,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_theta(1) ylim_theta(2)], 'FontSize', 22) 
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
         title([(areas) ' theta']); vline(0, 'k'); %vline([-0.3 0], 'k');
         % beta
-        figure(11); hold on
-        shadedErrorBar(ts,nanmean(p_spectro_corr(freq>=12 & freq<=20,:)), nanstd(p_spectro_corr(freq>=12 & freq<=20,:))/sqrt(size(p_spectro_corr(freq>=12 & freq<=20,:),1)),'lineprops',{'Color', 'g'})
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[5 30], 'FontSize', 22)
+        figure(11); hold on 
+        %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+        shadedErrorBar(ts_s,nanmean(p_spectro_corr(freq>=11 & freq<=21,:)), nanstd(p_spectro_corr(freq>=11 & freq<=21,:))/sqrt(size(p_spectro_corr(freq>=11 & freq<=21,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_beta(1) ylim_beta(2)], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
         title([(areas) ' beta']); vline(0, 'k'); %vline([-0.3 0], 'k');
         
         
         % plot incorrect
         figure; hold on; colormap(J);
-        imagesc(ts,freq,p_spectro_incorr, [-1.5 15]); axis xy; colorbar; % MST
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[4 50], 'FontSize', 22)
+        imagesc(ts_s,freq,p_spectro_incorr, [-0.2 1.5]); axis xy; colorbar; % MST
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[4 50], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
-        title([(areas) ' Err']); vline(0, 'w'); %vline([-0.3 0], 'w');
+        title([(areas) ' Err']); vline(0, 'w'); vline([-0.3 0], 'w');
         % theta
         figure(10); hold on
-        shadedErrorBar(ts,nanmean(p_spectro_incorr(freq>=4 & freq<12,:)), nanstd(p_spectro_incorr(freq>=4 & freq<12,:))/sqrt(size(p_spectro_incorr(freq>=4 & freq<12,:),1)),'lineprops',{'Color', 'k'})
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[8 50], 'FontSize', 22)
+        shadedErrorBar(ts_s,nanmean(p_spectro_incorr(freq>=3.5 & freq<12,:)), nanstd(p_spectro_incorr(freq>=3.5 & freq<12,:))/sqrt(size(p_spectro_incorr(freq>=3.5 & freq<12,:),1)),'lineprops',{'Color', 'k'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_theta(1) ylim_theta(2)], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
-        title([(areas) ' theta']); vline(0, 'k'); %vline([-0.3 0], 'k');
+        title([(areas) ' theta']); vline(0, 'k'); vline([-0.3 0], 'k');
         % beta
         figure(11); hold on
-        shadedErrorBar(ts,nanmean(p_spectro_incorr(freq>=12 & freq<=20,:)), nanstd(p_spectro_incorr(freq>=12 & freq<=20,:))/sqrt(size(p_spectro_incorr(freq>=12 & freq<=20,:),1)),'lineprops',{'Color', 'k'})
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[5 30], 'FontSize', 22)
+        shadedErrorBar(ts_s,nanmean(p_spectro_incorr(freq>=11 & freq<=21,:)), nanstd(p_spectro_incorr(freq>=11 & freq<=21,:))/sqrt(size(p_spectro_incorr(freq>=12 & freq<=21,:),1)),'lineprops',{'Color', 'k'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_beta(1) ylim_beta(2)], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
-        title([(areas) ' beta']); vline(0, 'k'); %vline([-0.3 0], 'k');
+        title([(areas) ' beta']); vline(0, 'k'); vline([-0.3 0], 'k');
         
 
         % diff
         figure; hold on; colormap(J);
-        imagesc(ts,freq,p_spectro_incorr./p_spectro_corr,[-3 3]); axis xy; colorbar;
+        imagesc(ts_s,freq,p_spectro_incorr./p_spectro_corr,[-3 3]); axis xy; colorbar;
         set(gca,'xlim',[-0.5 0.5], 'ylim',[5 30], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
         title([(areas) ' Ratio']); vline([-0.3 0], 'w'); 
@@ -2563,241 +2558,106 @@ switch plot_type
         p_spectro_incorr_before = all_monks.trialtype.reward(3).area.(areas).events.(ev).all_monks_mu;
         p_spectro_incorr_after = all_monks.trialtype.reward(4).area.(areas).events.(ev).all_monks_mu;
         
-        p_spectro_all = [ all_monks.trialtype.reward(3).area.(areas).events.(ev).all_monks_mu(4:50,:) all_monks.trialtype.reward(4).area.(areas).events.(ev).all_monks_mu(4:50,:) ...
-            all_monks.trialtype.reward(5).area.(areas).events.(ev).all_monks_mu(4:50,:) all_monks.trialtype.reward(6).area.(areas).events.(ev).all_monks_mu(4:50,:) ]; 
+        ts_s = ts; % ts or ts-0.3
+        win = [-1 1];  % [-0.5 0.5];   [-1.5 1.5]; 
+        % stop  [-0.2 2.4] 
+        % targ  [-0.2 2.4]
+        ylim_theta = [0.5 2.8];  % PPC [0 1.5]  PFC [1.2 2.4]  MST [0.5 2.8] 
+        ylim_beta = [-0.1 1];   % PPC [0.5 2]  PFC [0.4 1.2]  MST [-0.1 1] 
         
-        max_p = max( [ max(max(all_monks.trialtype.reward(3).area.(areas).events.(ev).all_monks_mu(4:50,:))) max(max(all_monks.trialtype.reward(4).area.(areas).events.(ev).all_monks_mu(4:50,:))) ...
-            max(max(all_monks.trialtype.reward(5).area.(areas).events.(ev).all_monks_mu(4:50,:))) max(max(all_monks.trialtype.reward(6).area.(areas).events.(ev).all_monks_mu(4:50,:))) ]);
-        max_p = 50; % 112 PPC, 15 PFC, 7.3077e-05 MST
-        
-        % normalize
-%         p_spectro_corr_before = p_spectro_corr_before/max_p;
-%         p_spectro_corr_after = p_spectro_corr_after/max_p;
-%         p_spectro_incorr_before = p_spectro_incorr_before/max_p;
-%         p_spectro_incorr_after = p_spectro_incorr_after/max_p;
-
-        p_spectro_corr_before = p_spectro_corr_before-nanmean(nanmean(p_spectro_all))./nanstd(nanstd(p_spectro_all));
-        p_spectro_corr_after = p_spectro_corr_after-nanmean(nanmean(p_spectro_all))./nanstd(nanstd(p_spectro_all));
-        p_spectro_incorr_before = p_spectro_incorr_before-nanmean(nanmean(p_spectro_all))./nanstd(nanstd(p_spectro_all));
-        p_spectro_incorr_after = p_spectro_incorr_after-nanmean(nanmean(p_spectro_all))./nanstd(nanstd(p_spectro_all));
-        
-        %% plot correct 
+        %% plot correct
         % before
-        figure; hold on
-        J = customcolormap_preset('black_teal_white');colormap(J);
-        imagesc(ts-0.3,freq,p_spectro_corr_before, [0 1]); axis xy; colorbar; % PFC
-        set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22)
+        J = customcolormap_preset('black_teal_white');
+        figure; hold on; colormap(J); % ts-0.3 to plot aligned to target off
+        imagesc(ts_s,freq,p_spectro_corr_before,[-0.2 2.4]); axis xy; colorbar; % MST reward
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[4 50], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
-        title([(areas) 'Corr before']); vline([-0.3 0], 'w'); 
+        title([(areas) ' Corr before']); vline(0, 'w');  %vline([-0.3 0], 'w');
         % theta
         figure(10); hold on
-        shadedErrorBar(ts-0.3,nanmean(p_spectro_corr_before(freq>=4 & freq<12,:)), nanstd(p_spectro_corr_before(freq>=4 & freq<12,:))/sqrt(size(p_spectro_corr_before(freq>=4 & freq<12,:),1)),'lineprops',{'Color', 'g'})
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[0 1], 'FontSize', 22)
+        shadedErrorBar(ts_s,nanmean(p_spectro_corr_before(freq>=3.5 & freq<12,:)), nanstd(p_spectro_corr_before(freq>=3.5 & freq<12,:))/sqrt(size(p_spectro_corr_before(freq>=3.5 & freq<12,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_theta(1) ylim_theta(2)], 'FontSize', 22) 
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
-        title([(areas) ' theta before']); vline([-0.3 0], 'k');
+        title([(areas) ' theta before']); vline(0, 'k'); vline([-0.3 0], 'k');
         % beta
-        figure(11); hold on
-        shadedErrorBar(ts-0.3,nanmean(p_spectro_corr_before(freq>=12 & freq<=20,:)), nanstd(p_spectro_corr_before(freq>=12 & freq<=20,:))/sqrt(size(p_spectro_corr_before(freq>=12 & freq<=20,:),1)),'lineprops',{'Color', 'g'})
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[0 1], 'FontSize', 22)
+        figure(11); hold on 
+        %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+        shadedErrorBar(ts_s,nanmean(p_spectro_corr_before(freq>=11 & freq<=21,:)), nanstd(p_spectro_corr_before(freq>=11 & freq<=21,:))/sqrt(size(p_spectro_corr_before(freq>=11 & freq<=21,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_beta(1) ylim_beta(2)], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
-        title([(areas) ' beta before']); vline([-0.3 0], 'k');
+        title([(areas) ' beta before']); vline(0, 'k'); vline([-0.3 0], 'k');
         
         % after
-        figure; hold on
-        imagesc(ts-0.3,freq,p_spectro_corr_after, [0 1]); axis xy; colorbar; % PFC
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[4 50], 'FontSize', 22)
+        J = customcolormap_preset('black_teal_white');
+        figure; hold on; colormap(J); % ts-0.3 to plot aligned to target off
+        imagesc(ts_s,freq,p_spectro_corr_after,[-0.2 2.4]); axis xy; colorbar; % MST reward
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[4 50], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
-        title([(areas) 'Corr after']); vline([-0.3 0], 'w'); 
+        title([(areas) ' Corr after']); vline(0, 'w');  %vline([-0.3 0], 'w');
         % theta
         figure(10); hold on
-        shadedErrorBar(ts-0.3,nanmean(p_spectro_corr_after(freq>=4 & freq<12,:)), nanstd(p_spectro_corr_after(freq>=4 & freq<12,:))/sqrt(size(p_spectro_corr_after(freq>=4 & freq<12,:),1)),'lineprops',{'--g'})
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[0 1], 'FontSize', 22)
+        shadedErrorBar(ts_s,nanmean(p_spectro_corr_after(freq>=3.5 & freq<12,:)), nanstd(p_spectro_corr_after(freq>=3.5 & freq<12,:))/sqrt(size(p_spectro_corr_after(freq>=3.5 & freq<12,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_theta(1) ylim_theta(2)], 'FontSize', 22) 
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
-        title([(areas) ' theta after']); vline([-0.3 0], 'k');
+        title([(areas) ' theta after']); vline(0, 'k'); vline([-0.3 0], 'k');
         % beta
-        figure(11); hold on
-        shadedErrorBar(ts-0.3,nanmean(p_spectro_corr_after(freq>=12 & freq<=20,:)), nanstd(p_spectro_corr_after(freq>=12 & freq<=20,:))/sqrt(size(p_spectro_corr_after(freq>=12 & freq<=20,:),1)),'lineprops',{'--g'})
-        set(gca,'xlim',[-1.5 1.5], 'ylim',[0 1], 'FontSize', 22)
+        figure(11); hold on 
+        %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+        shadedErrorBar(ts_s,nanmean(p_spectro_corr_after(freq>=11 & freq<=21,:)), nanstd(p_spectro_corr_after(freq>=11 & freq<=21,:))/sqrt(size(p_spectro_corr_after(freq>=11 & freq<=21,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_beta(1) ylim_beta(2)], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
-        title([(areas) ' beta after']); vline([-0.3 0], 'k');
+        title([(areas) ' beta after']); vline(0, 'k'); vline([-0.3 0], 'k');
         
         %% plot incorrect
         % before
-        figure; hold on
-        imagesc(ts-0.3,freq,p_spectro_incorr_before, [0 1]); axis xy; colorbar; % PFC
-        set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22)
+        J = customcolormap_preset('black_teal_white');
+        figure; hold on; colormap(J); % ts-0.3 to plot aligned to target off
+        imagesc(ts_s,freq,p_spectro_incorr_before,[-0.2 2.4]); axis xy; colorbar; % MST reward
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[4 50], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
-        title([(areas) 'Err before']); vline([-0.3 0], 'w');
+        title([(areas) ' Err before']); vline(0, 'w');  %vline([-0.3 0], 'w');
         % theta
         figure(10); hold on
-        shadedErrorBar(ts-0.3,nanmean(p_spectro_incorr_before(freq>=4 & freq<12,:)), nanstd(p_spectro_incorr_before(freq>=4 & freq<12,:))/sqrt(size(p_spectro_incorr_before(freq>=4 & freq<12,:),1)),'lineprops',{'Color', 'k'})
-        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        shadedErrorBar(ts_s,nanmean(p_spectro_incorr_before(freq>=3.5 & freq<12,:)), nanstd(p_spectro_incorr_before(freq>=3.5 & freq<12,:))/sqrt(size(p_spectro_incorr_before(freq>=3.5 & freq<12,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_theta(1) ylim_theta(2)], 'FontSize', 22) 
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
-        title([(areas) ' theta Err after']); vline([-0.3 0], 'k');
+        title([(areas) ' theta before']); vline(0, 'k'); vline([-0.3 0], 'k');
         % beta
-        figure(11); hold on
-        shadedErrorBar(ts-0.3,nanmean(p_spectro_incorr_before(freq>=12 & freq<=20,:)), nanstd(p_spectro_incorr_before(freq>=12 & freq<=20,:))/sqrt(size(p_spectro_incorr_before(freq>=12 & freq<=20,:),1)),'lineprops',{'Color', 'k'})
-        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        figure(11); hold on 
+        %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+        shadedErrorBar(ts_s,nanmean(p_spectro_incorr_before(freq>=11 & freq<=21,:)), nanstd(p_spectro_incorr_before(freq>=11 & freq<=21,:))/sqrt(size(p_spectro_incorr_before(freq>=11 & freq<=21,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_beta(1) ylim_beta(2)], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
-        title([(areas) ' theta Err after']); vline([-0.3 0], 'k');
-        
+        title([(areas) ' beta before']); vline(0, 'k'); vline([-0.3 0], 'k');
         
         % after
-        figure; hold on
-        imagesc(ts-0.3,freq,p_spectro_incorr_after, [0 1]); axis xy; colorbar; % PFC
-        set(gca,'xlim',[-0.5 0.5], 'ylim',[4 50], 'FontSize', 22)
+        J = customcolormap_preset('black_teal_white');
+        figure; hold on; colormap(J); % ts-0.3 to plot aligned to target off
+        imagesc(ts_s,freq,p_spectro_incorr_after,[-0.2 2.4]); axis xy; colorbar; % MST reward
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[4 50], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
-        title([(areas) 'Err after']); vline([-0.3 0], 'w');
+        title([(areas) ' Err after']); vline(0, 'w');  %vline([-0.3 0], 'w');
         % theta
         figure(10); hold on
-        shadedErrorBar(ts-0.3,nanmean(p_spectro_incorr_after(freq>=4 & freq<12,:)), nanstd(p_spectro_incorr_after(freq>=4 & freq<12,:))/sqrt(size(p_spectro_incorr_after(freq>=4 & freq<12,:),1)),'lineprops',{'--k'})
-        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        shadedErrorBar(ts_s,nanmean(p_spectro_incorr_after(freq>=3.5 & freq<12,:)), nanstd(p_spectro_incorr_after(freq>=3.5 & freq<12,:))/sqrt(size(p_spectro_incorr_after(freq>=3.5 & freq<12,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_theta(1) ylim_theta(2)], 'FontSize', 22) 
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
-        title([(areas) ' theta Err after']); vline([-0.3 0], 'k');
+        title([(areas) ' theta after']); vline(0, 'k'); vline([-0.3 0], 'k');
         % beta
-        figure(11); hold on
-        shadedErrorBar(ts-0.3,nanmean(p_spectro_incorr_after(freq>=12 & freq<=20,:)), nanstd(p_spectro_incorr_after(freq>=12 & freq<=20,:))/sqrt(size(p_spectro_incorr_after(freq>=12 & freq<=20,:),1)),'lineprops',{'--k'})
-        set(gca,'xlim',[-0.5 0.5], 'ylim',[0 1], 'FontSize', 22)
+        figure(11); hold on 
+        %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+        shadedErrorBar(ts_s,nanmean(p_spectro_incorr_after(freq>=11 & freq<=21,:)), nanstd(p_spectro_incorr_after(freq>=11 & freq<=21,:))/sqrt(size(p_spectro_incorr_after(freq>=11 & freq<=21,:),1)),'lineprops',{'Color', 'g'})
+        set(gca,'xlim',[win(1) win(2)], 'ylim',[ylim_beta(1) ylim_beta(2)], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('Normalized power'); axis square
-        title([(areas) ' theta Err after']); vline([-0.3 0], 'k');
-        
+        title([(areas) ' beta after']); vline(0, 'k'); vline([-0.3 0], 'k');
         
       
-        
-       
-        
     case 'spectrogram_trl'
-        % aligned to target onset
         type = 'reward'
+        ev_num = 3 % 1 = move, 2=target, 3=stop, 4=reward
         delta = [0.5 4];
-        theta = [4 12];
-        low_beta = [12 20];
-        high_beta = [20 30];
-        for nmonk = 3 %1:length(monk)
-            for nsess = 1:length(monk(nmonk).sess)
-                areas = fieldnames(monk(nmonk).sess(nsess).trialtype.(type)(1).area);
-                for narea = 1:length(areas)
-                    for cond = 1:2%length(monk(nmonk).sess(nsess).trialtype.(type))
-                        % get trl indx and behavior marker
-                        clear trl_end move_on t_sacc t_fix t_rew pad_size_trials ts
-                        indx_trls = monk(nmonk).behavior(nsess).stats.trialtype.(type)(cond).trlindx; trl_num = find(indx_trls);
-                        for j = 1:length(trl_num)
-                            trl_end(j) = monk(nmonk).behavior(nsess).trials(trl_num(j)).events.t_end;
-                            move_on(j) = monk(nmonk).behavior(nsess).trials(trl_num(j)).events.t_move;
-                            t_sacc{j} = monk(nmonk).behavior(nsess).trials(trl_num(j)).events.t_sac;
-                            t_fix{j} = monk(nmonk).behavior(nsess).trials(trl_num(j)).events.t_fix;
-                            t_rew(j) = monk(nmonk).behavior(nsess).trials(trl_num(j)).events.t_rew;
-                            pad_size_trials(j) = size(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(j).spectro,1);
-                        end
-                        %% find max trials, pad with Nans and then sort
-                        [~,indx_max] = max(pad_size_trials); % find the longest trial
-                        pad_size = size(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(indx_max).spectro,1); % find how big it is
-                        freq = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(1).freq;
-                        ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(indx_max).ts-1;
-                        % Pad with NaNs to compensate for different sized vectors
-                        for ntrl = 1:length(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl)
-                            % find location of t_rew
-                            %                             if cond >= 2
-                            %                                 this_ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).ts;
-                            %                                 indx_rew = this_ts(this_ts<=t_rew(ntrl)+0.250); indx_rew = length(indx_rew);
-                            %                                 monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro(indx_rew+1:pad_size,:) = NaN;
-                            %                             else
-                            this_ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).ts;
-                            indx_end = this_ts(this_ts<=trl_end(ntrl)+0.250); indx_end = length(indx_end);
-                            this_spectro = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro;
-                            this_spectro(indx_end+1:pad_size,:) = NaN;
-                            %                             end
-                            padded_spectro(ntrl).spectro = this_spectro;
-                        end
-                        % sort spectrograms
-                        
-                        [trl_end_sort, trl_end_sort_indx] = sort(trl_end); % sort the trials
-                        spectro_sorted = padded_spectro(trl_end_sort_indx)';
-                        % extract different bands, average and normalize by max
-                        clear de th be_low be_high max_de max_th max_be_low max_be_high de_norm th_norm be_low_norm be_high_norm
-                        for ntrl = 1:length(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl)
-                            de(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=delta(1) & freq<=delta(2)),2); max_de(ntrl) = max(de(:,ntrl)); de_norm(:,ntrl) = (de(:,ntrl)./max_de(ntrl));
-                            th(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=theta(1) & freq<=theta(2)),2); max_th(ntrl) = max(th(:,ntrl)); th_norm(:,ntrl) = (th(:,ntrl)./max_th(ntrl));
-                            be_low(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=low_beta(1) & freq<=low_beta(2)),2); max_be_low(ntrl) = max(be_low(:,ntrl)); be_low_norm(:,ntrl) = (be_low(:,ntrl)./max_be_low(ntrl));
-                            be_high(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=high_beta(1) & freq<=high_beta(2)),2); max_be_high(ntrl) = max(be_high(:,ntrl)); be_high_norm(:,ntrl) = (be_high(:,ntrl)./max_be_high(ntrl));
-                        end
-                        max_bands = max([max(max_th) max(max_be_low) max(max_be_high)]);
-                        
-                        % plot
-                        figure('Position',[1838 295 1679 381],'Name',['Session ', num2str(nsess)]); hold on; %colormap(winter);
-                        %% plot delta
-                        % figure; hold on; colormap(winter);
-                        subplot(1,4,1); hold on;
-                        imagesc(ts,1:size(de_norm,2),de_norm'); colorbar;
-                        if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
-                        % imagesc(ts,1:size(th,2),(th./max_bands)'); colorbar;
-                        % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(th,2)], 'FontSize', 22)
-                        set(gca,'xlim',[-0.25 4],'ylim',[0 size(th,2)], 'FontSize', 22)
-                        title(['delta M' num2str(nmonk) ' area ' (areas{narea}) ' cond ' num2str(cond)])
-                        %ylabel('trial number'); xlabel('Time (s)'); axis square
-                        %% plot theta
-                        %figure; hold on; colormap(winter);
-                        subplot(1,4,2);hold on;
-                        imagesc(ts,1:size(th_norm,2),th_norm'); colorbar;
-                        if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
-                        % imagesc(ts,1:size(th,2),(th./max_bands)'); colorbar;
-                        % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(th,2)], 'FontSize', 22)
-                        set(gca,'xlim',[-0.25 4],'ylim',[0 size(th,2)], 'FontSize', 22)
-                        title(['Theta M' num2str(nmonk) ' area ' (areas{narea}) ' cond ' num2str(cond)])
-                        %ylabel('trial number'); xlabel('Time (s)'); axis square
-                        %% plot low beta
-                        %figure; hold on; colormap(winter);
-                        subplot(1,4,3);hold on;
-                        imagesc(ts,1:size(be_low_norm,2),be_low_norm'); colorbar;
-                        if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
-                        % imagesc(ts,1:size(be_low,2),(be_low./max_bands)'); colorbar;
-                        % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(be_low,2)], 'FontSize', 22)
-                        set(gca,'xlim',[-0.25 4],'ylim',[0 size(th,2)], 'FontSize', 22)
-                        title(['Low-B M' num2str(nmonk) ' area ' (areas{narea}) ' cond ' num2str(cond)])
-                        %ylabel('trial number'); xlabel('Time (s)');axis square
-                        %% plot high beta
-                        %figure; hold on; colormap(winter);
-                        subplot(1,4,4);hold on;
-                        imagesc(ts,1:size(be_high_norm,2),be_high_norm'); colorbar;
-                        if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
-                        % imagesc(ts,1:size(be_high,2),(be_high./max_bands)'); colorbar;
-                        % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(be_high,2)], 'FontSize', 22)
-                        set(gca,'xlim',[-0.25 4],'ylim',[0 size(th,2)], 'FontSize', 22)
-                        title(['High-B M' num2str(nmonk) ' area ' (areas{narea}) ' cond ' num2str(cond)])
-                        %ylabel('trial number'); xlabel('Time (s)'); axis square
-                        
-                        %% plot by trial to inspect
-%                         figure('Name',['Monk ' num2str(nmonk) ' area ' (areas{narea}) ' cond ' num2str(cond) ' sess ' num2str(nsess)]); hold on;
-%                         %p = numSubplots(50);
-%                         p = numSubplots(size(th_norm,2));
-%                         % pick_trls = randperm(size(th_norm,2)); cnt=1;
-%                         % for ntrl = pick_trls(1:50)
-%                         for ntrl = 1:size(th_norm,2)
-%                             freq = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).freq;
-%                             ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).ts-1;
-%                             spectro = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro';
-%                             subplot(p(1),p(2),ntrl); %colormap(winter);
-%                             imagesc(ts,freq, spectro); axis xy; %colorbar;
-%                             set(gca,'xlim',[-0.25 ts(end)],'ylim',[0 50], 'FontSize', 22)
-%                             %xlabel('time (s)'); ylabel('frequency (Hz)');
-%                             %title(['Monkey ' num2str(nmonk) ' area ' (areas{narea}) ' trial ' num2str(ntrl) ' cond ' num2str(cond)])
-%                             hline([4 12 20 30],'-w'); vline(0,'-w'); vline(0.3,'-w'); %vline(move_on(ntrl),'-r');
-%                             %if cond == 2, vline(t_rew,'-r'), end
-%                             axis off;
-%                             % cnt=cnt+1;
-%                         end
-                        
-                    end
-                end
-            end
-        end
-        
-    case 'spectrogram_trl_align_stop'
-        % aligned to target onset
-        type = 'reward'
-        delta = [0.5 4];
-        theta = [4 12];
-        low_beta = [12 20];
+        theta = [3 12];
+        low_beta = [12 21];
         high_beta = [20 30];
         area.MST.th_norm_monk_corr=[]; area.MST.th_norm_monk_err=[]; area.MST.be_low_norm_monk_corr=[]; area.MST.be_low_norm_monk_err=[];
         area.PPC.th_norm_monk_corr=[]; area.PPC.th_norm_monk_err=[]; area.PPC.be_low_norm_monk_corr=[]; area.PPC.be_low_norm_monk_err=[];
@@ -2805,6 +2665,8 @@ switch plot_type
         for nmonk = 1:length(monk) % 1:length(monk)  % [1 3]
             areas = fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area);
             for narea = 1:length(areas)
+                events = fieldnames(monk(nmonk).sess(1).trialtype.(type)(1).area.(areas{narea}).events);
+                for ev = ev_num % 2:length(events)
                 th_norm_all_err = []; be_low_norm_all_err = []; th_norm_all_corr = []; be_low_norm_all_corr = [];
                 for nsess = 1:length(monk(nmonk).sess)
                     for cond = 1:length(monk(nmonk).sess(nsess).trialtype.(type))
@@ -2817,52 +2679,53 @@ switch plot_type
                             t_sacc{j} = monk(nmonk).behavior(nsess).trials(trl_num(j)).events.t_sac;
                             t_fix{j} = monk(nmonk).behavior(nsess).trials(trl_num(j)).events.t_fix;
                             t_rew(j) = monk(nmonk).behavior(nsess).trials(trl_num(j)).events.t_rew;
-                            pad_size_trials(j) = size(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(j).spectro,1);
+                            pad_size_trials(j) = size(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).events.(events{ev}).pw_trl(j).spectro,1);
                         end
                         %% find max trials, pad with Nans and then sort
                         [~,indx_max] = max(pad_size_trials); % find the longest trial
-                        pad_size = size(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(indx_max).spectro,1); % find how big it is
-                        freq = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(1).freq;
-                        ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(indx_max).ts;
+                        pad_size = size(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).events.(events{ev}).pw_trl(indx_max).spectro,1); % find how big it is
+                        freq = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).events.(events{ev}).pw_trl(1).freq;
+                        ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).events.(events{ev}).pw_trl(indx_max).ts;
                         % Pad with NaNs to compensate for different sized vectors
-                        for ntrl = 1:length(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl)
+                        for ntrl = 1:length(monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).events.(events{ev}).pw_trl)
                             % find location of t_rew
 %                             if cond >= 2
 %                                 this_ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).ts;
 %                                 indx_rew = this_ts(this_ts<=t_rew(ntrl)+0.250); indx_rew = length(indx_rew);
 %                                 monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro(indx_rew+1:pad_size,:) = NaN;
 %                             else
-                            this_ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).ts;
-                            this_spectro = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).pw_trl(ntrl).spectro;
-                            indx_end = this_ts(this_ts<=trl_end(ntrl)+0.250); indx_end = length(indx_end);
-                            this_spectro(indx_end+1:pad_size,:) = NaN;
+                            this_ts = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).events.(events{ev}).pw_trl(ntrl).ts;
+                            this_spectro = monk(nmonk).sess(nsess).trialtype.(type)(cond).area.(areas{narea}).events.(events{ev}).pw_trl(ntrl).spectro;
+%                             indx_end = this_ts(this_ts<=trl_end(ntrl)+0.250); indx_end = length(indx_end);
+%                             this_spectro(indx_end+1:pad_size,:) = NaN;
                             %                             end
-                             padded_spectro(ntrl).spectro = this_spectro;
-                            % padded_spectro(ntrl).spectro = this_spectro(ts>-1.59 & ts<1.59,:); % uncomment to be able to avg (works for plotting
+                             padded_spectro(ntrl).spectro = this_spectro; % store per trial
                         end
                         % sort spectrograms
-                        
                         [trl_end_sort, trl_end_sort_indx] = sort(trl_end); % sort the trials
-                        % spectro_sorted = padded_spectro(trl_end_sort_indx)';
+                        % spectro_sorted =
+                        % padded_spectro(trl_end_sort_indx)'; % uncomment to sort
                         spectro_sorted = padded_spectro; % to plot without sorting
                         % extract different bands, average and normalize by max
                         clear de th be_low be_high max_de max_th max_be_low max_be_high de_norm th_norm be_low_norm be_high_norm
-                        for ntrl = 1:length(monk(nmonk).sess(nsess).trialtype.(type)(1).area.(areas{narea}).pw_trl) % fix ntrl to error trials
-                            de(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=delta(1) & freq<=delta(2)),2); max_de(ntrl) = max(de(:,ntrl)); de_norm(:,ntrl) = (de(:,ntrl)./max_de(ntrl));
-                            th(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=theta(1) & freq<=theta(2)),2); [max_th(ntrl),indx_th(ntrl)] = max(th(:,ntrl)); th_norm(:,ntrl) = (th(:,ntrl)./max_th(ntrl));
-                            be_low(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=low_beta(1) & freq<=low_beta(2)),2);[max_be_low(ntrl),indx_be_low(ntrl)] = max(be_low(:,ntrl)); be_low_norm(:,ntrl) = (be_low(:,ntrl)./max_be_low(ntrl));
-                            be_high(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=high_beta(1) & freq<=high_beta(2)),2); max_be_high(ntrl) = max(be_high(:,ntrl)); be_high_norm(:,ntrl) = (be_high(:,ntrl)./max_be_high(ntrl));
+                        for ntrl = 1:length(monk(nmonk).sess(nsess).trialtype.(type)(1).area.(areas{narea}).events.(events{ev}).pw_trl) % fix ntrl to error trials
+                            de(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=delta(1) & freq<=delta(2)),2); % max_de(ntrl) = max(de(:,ntrl)); de_norm(:,ntrl) = (de(:,ntrl)./max_de(ntrl));
+                            th(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=theta(1) & freq<=theta(2)),2); % [max_th(ntrl),indx_th(ntrl)] = max(th(:,ntrl)); th_norm(:,ntrl) = (th(:,ntrl)./max_th(ntrl));
+                            be_low(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=low_beta(1) & freq<=low_beta(2)),2);%[max_be_low(ntrl),indx_be_low(ntrl)] = max(be_low(:,ntrl)); be_low_norm(:,ntrl) = (be_low(:,ntrl)./max_be_low(ntrl));
+                            be_high(:,ntrl) = nanmean(spectro_sorted(ntrl).spectro(:,freq>=high_beta(1) & freq<=high_beta(2)),2);% max_be_high(ntrl) = max(be_high(:,ntrl)); be_high_norm(:,ntrl) = (be_high(:,ntrl)./max_be_high(ntrl));
                         
                             % select max per band after movement stop
-                            th_max_after_stop(ntrl) = ts(indx_th(ntrl)); 
-                            be_low_max_after_stop(ntrl) = ts(indx_be_low(ntrl));
+%                             th_max_after_stop(ntrl) = ts(indx_th(ntrl)); 
+%                             be_low_max_after_stop(ntrl) = ts(indx_be_low(ntrl));
                         end
-                        th_max_after_stop(th_max_after_stop<0)= 20; % to get them out of the way
-                        be_low_max_after_stop(be_low_max_after_stop<0)=20;
+%                         th_max_after_stop(th_max_after_stop<0)= 20; % to get them out of the way
+%                         be_low_max_after_stop(be_low_max_after_stop<0)=20;
                         
-                        max_bands = max([max(max_th) max(max_be_low) max(max_be_high)]);
-                        J = customcolormap_preset('pasteljet');
-                         
+%                         max_bands = max([max(max_th) max(max_be_low) max(max_be_high)]);
+                        J = customcolormap_preset('black_teal_white');
+                        
+                        if ev == 2, ts = ts-0.3; x_lim = [-0.5 0.5];, elseif ev == 3, x_lim = [-1.5 1.5];, else, x_lim = [-1 1]; end
+                        
                         % plot
                         figure('Position',[1838 295 1679 381],'Name',['Session ', num2str(nsess)]); hold on; colormap(J);
                         %% plot delta
@@ -2870,10 +2733,10 @@ switch plot_type
                         subplot(1,4,1); hold on;
                         %                         pcolor(ts,1:size(de_norm,2),de_norm'); colorbar;
                         %                         shading interp;
-                        imagesc(ts,1:size(de_norm,2),de_norm'); colorbar;
+                        imagesc(ts,1:size(de,2),de'); colorbar;
                         % imagesc(ts,1:size(th,2),(th./max_bands)'); colorbar;
                         % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(th,2)], 'FontSize', 22)
-                        set(gca,'xlim',[-1.5 1.5],'ylim',[0 size(th,2)], 'FontSize', 22)
+                        set(gca,'xlim',[x_lim(1) x_lim(2)],'ylim',[0 size(th,2)], 'FontSize', 22)
                         title(['delta M' num2str(nmonk) ' ' (areas{narea}) ' cond ' num2str(cond)])
                         ylabel('trial number'); xlabel('Stop Time (s)'); axis square;vline(0,'-w'); vline(0,'-w');vline([-0.5 0.5], '--w')
                         %                         if cond==2, c = [0 1 0]; else c = [0 0 0]; end
@@ -2883,12 +2746,12 @@ switch plot_type
                         %% plot theta
                         %figure; hold on; colormap(winter);
                         subplot(1,4,2);hold on;
-                        imagesc(ts,1:size(th_norm,2),th_norm',[0 1]); colorbar;
+                        imagesc(ts,1:size(th,2),th',[0 0.3]); colorbar;
                         % scatter(th_max_after_stop,1:size(th_norm,2),1,'k','filled');
                         % if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
                         % imagesc(ts,1:size(th,2),(th./max_bands)'); colorbar;
                         % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(th,2)], 'FontSize', 22)
-                        set(gca,'xlim',[-1.5 1.5],'ylim',[0 size(th,2)], 'FontSize', 22)
+                        set(gca,'xlim',[x_lim(1) x_lim(2)],'ylim',[0 size(th,2)], 'FontSize', 22)
                         title(['theta M' num2str(nmonk) ' ' (areas{narea}) ' cond ' num2str(cond)]); axis square; vline(0,'-w'); %vline([-0.5 0.5], '--w')
                         
                         %                         plot(ts,nanmean(th_norm'*(size(th_norm',1))), 'LineWidth',1, 'k');
@@ -2898,12 +2761,12 @@ switch plot_type
                         %% plot low beta
                         %figure; hold on; colormap(winter);
                         subplot(1,4,3);hold on;
-                        imagesc(ts,1:size(be_low_norm,2),be_low_norm', [0 1]); colorbar;
+                        imagesc(ts,1:size(be_low,2),be_low',[0 0.3] ); colorbar;
                         % scatter(be_low_max_after_stop,1:size(be_low_norm,2),1,'k','filled');
                         % if cond==2,scatter(sort(t_rew)-0.75,1:size(t_rew,2),3,'k','filled'); end
                         % imagesc(ts,1:size(be_low,2),(be_low./max_bands)'); colorbar;
                         % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(be_low,2)], 'FontSize', 22)
-                        set(gca,'xlim',[-1.5 1.5],'ylim',[0 size(th,2)], 'FontSize', 22)
+                        set(gca,'xlim',[x_lim(1) x_lim(2)],'ylim',[0 size(th,2)], 'FontSize', 22)
                         title(['Low-B M' num2str(nmonk) ' ' (areas{narea}) ' cond ' num2str(cond)]); axis square;vline(0,'-w');%vline([-0.5 0.5], '--w')
                         %ylabel('trial number'); xlabel('Time (s)');axis square
                         
@@ -2912,10 +2775,10 @@ switch plot_type
                         %% plot high beta
                         %figure; hold on; colormap(winter);
                         subplot(1,4,4);hold on;
-                        imagesc(ts,1:size(be_high_norm,2),be_high_norm'); colorbar;
+                        imagesc(ts,1:size(be_high,2),be_high'); colorbar;
                         % imagesc(ts,1:size(be_high,2),(be_high./max_bands)'); colorbar;
                         % set(gca,'xlim',[-0.25 trl_end_sort(end)],'ylim',[0 size(be_high,2)], 'FontSize', 22)
-                        set(gca,'xlim',[-1.5 1.5],'ylim',[0 size(th,2)], 'FontSize', 22)
+                        set(gca,'xlim',[x_lim(1) x_lim(2)],'ylim',[0 size(th,2)], 'FontSize', 22)
                         title(['High-B M' num2str(nmonk) ' ' (areas{narea}) ' cond ' num2str(cond)]); axis square; vline(0,'-w');vline([-0.5 0.5], '--w')
                         %ylabel('trial number'); xlabel('Time (s)'); axis square
                         
@@ -2939,38 +2802,38 @@ switch plot_type
                         if cond==2, c = [0 1 0]; else c = [0 0 0]; end
                         % plot(ts,nanmean(de_norm'), 'LineWidth',1, 'Color', c);
                         shadedErrorBar(ts,nanmean(de_norm'),nanstd(de_norm')/sqrt(size(de_norm',1)), 'lineprops',{'Color', c})
-                        set(gca,'xlim',[-0.8 0.8],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k')
+                        set(gca,'xlim',[-0.8 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k')
                         
                         subplot(1,4,2); hold on; title theta;
                         if cond==2, c = [0 1 0]; else c = [0 0 0]; end
                         % plot(ts,nanmean(th_norm'), 'LineWidth',1, 'Color', c);
-                        shadedErrorBar(ts,nanmean(th_norm'),nanstd(th_norm')/sqrt(size(th_norm',1)), 'lineprops',{'Color', c})
-                        set(gca,'xlim',[-0.8 0.8],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k')
+                        shadedErrorBar(ts,nanmean(th'),nanstd(th')/sqrt(size(th',1)), 'lineprops',{'Color', c})
+                        set(gca,'xlim',[-0.8 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k')
                         
                         subplot(1,4,3); hold on; title Low-B;
                         if cond==2, c = [0 1 0]; else c = [0 0 0]; end
                         % plot(ts,nanmean(be_low_norm'), 'LineWidth',1, 'Color', c);
-                        shadedErrorBar(ts,nanmean(be_low_norm'),nanstd(be_low_norm')/sqrt(size(be_low_norm',1)), 'lineprops',{'Color', c})
-                        set(gca,'xlim',[-0.8 0.8],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k')
+                        shadedErrorBar(ts,nanmean(be_low'),nanstd(be_low')/sqrt(size(be_low',1)), 'lineprops',{'Color', c})
+                        set(gca,'xlim',[-0.8 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k')
                         
                         subplot(1,4,4); hold on; title High-B;
                         if cond==2, c = [0 1 0]; else c = [0 0 0]; end
                         % plot(ts,nanmean(be_high_norm'), 'LineWidth',1, 'Color', c);
                         shadedErrorBar(ts,nanmean(be_high_norm'),nanstd(be_high_norm')/sqrt(size(be_high_norm',1)), 'lineprops',{'Color', c})
-                        set(gca,'xlim',[-0.8 0.8],'ylim',[0.1 0.8],'yTick', [0.1 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k')
+                        set(gca,'xlim',[-0.8 0.8],'TickDir','out', 'FontSize', 22);  axis square; vline(0,'-k');vline([-0.5 0.5], '--k')
                         
                         
                         if cond == 1
                             % th_norm_all_err = [th_norm_all_err ; th_norm(1:65,:)'];
-                            th_norm_all_err = [th_norm_all_err ; th_norm(ts>-1.559 & ts<1.559,:)'];
+                            th_norm_all_err = [th_norm_all_err ; th(ts>-1.559 & ts<1.559,:)'];
                             % be_low_norm_all_err = [be_low_norm_all_err ; be_low_norm(1:65,:)'];
-                            be_low_norm_all_err = [be_low_norm_all_err ; be_low_norm(ts>-1.559 & ts<1.559,:)'];
+                            be_low_norm_all_err = [be_low_norm_all_err ; be_low(ts>-1.559 & ts<1.559,:)'];
                         else
                             
                             % th_norm_all_corr = [th_norm_all_corr ; th_norm(1:65,:)'];
-                            th_norm_all_corr = [th_norm_all_corr ; th_norm(ts>-1.559 & ts<1.559,:)'];
+                            th_norm_all_corr = [th_norm_all_corr ; th(ts>-1.559 & ts<1.559,:)'];
                             % be_low_norm_all_corr = [be_low_norm_all_corr ; be_low_norm(1:65,:)'];
-                            be_low_norm_all_corr = [be_low_norm_all_corr ; be_low_norm(ts>-1.559 & ts<1.559,:)'];
+                            be_low_norm_all_corr = [be_low_norm_all_corr ; be_low(ts>-1.559 & ts<1.559,:)'];
                         end
                         % plot by trial to inspect
                         %                         figure('Name',['Monk ' num2str(nmonk) ' area ' (areas{narea}) ' cond ' num2str(cond) ' sess ' num2str(nsess)]); hold on;
@@ -3017,6 +2880,7 @@ switch plot_type
                 else
                     area.PFC.th_norm_monk_corr = [area.PFC.th_norm_monk_corr ; th_norm_all_corr];  area.PFC.be_low_norm_monk_corr = [area.PFC.be_low_norm_monk_corr ; be_low_norm_all_corr];
                     area.PFC.th_norm_monk_err = [area.PFC.th_norm_monk_err ; th_norm_all_err];   area.PFC.be_low_norm_monk_err = [area.PFC.be_low_norm_monk_err ; be_low_norm_all_err];
+                end
                 end
             end
         end
