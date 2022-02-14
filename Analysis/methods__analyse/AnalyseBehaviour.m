@@ -110,19 +110,20 @@ if prs.split_trials
     % rewarded trials
     stats.trialtype.reward(2).trlindx = [logical.reward] & goodtrls & ~replaytrls;
     stats.trialtype.reward(2).val = 'rewarded';
-    % rewarded trials and moved before target onset
-    stats.trialtype.reward(3).trlindx = ~[logical.reward] & goodtrls & ~replaytrls & moved_before_indx;
-    stats.trialtype.reward(3).val = 'unrewarded_move_before';
-    % rewarded trials and moved before target onset
-    stats.trialtype.reward(4).trlindx = ~[logical.reward] & goodtrls & ~replaytrls & moved_after_indx;
-    stats.trialtype.reward(4).val = 'unrewarded_move_after';
-    % rewarded trials and moved before target onset
-    stats.trialtype.reward(5).trlindx = [logical.reward] & goodtrls & ~replaytrls & moved_before_indx;
-    stats.trialtype.reward(5).val = 'rewarded_move_before';
-    % rewarded trials and moved before target onset
-    stats.trialtype.reward(6).trlindx = [logical.reward] & goodtrls & ~replaytrls & moved_after_indx;
-    stats.trialtype.reward(6).val = 'rewarded_move_after';
-    
+    if prs.analyse_move_before_after
+        % rewarded trials and moved before target onset
+        stats.trialtype.reward(3).trlindx = ~[logical.reward] & goodtrls & ~replaytrls & moved_before_indx;
+        stats.trialtype.reward(3).val = 'unrewarded_move_before';
+        % rewarded trials and moved before target onset
+        stats.trialtype.reward(4).trlindx = ~[logical.reward] & goodtrls & ~replaytrls & moved_after_indx;
+        stats.trialtype.reward(4).val = 'unrewarded_move_after';
+        % rewarded trials and moved before target onset
+        stats.trialtype.reward(5).trlindx = [logical.reward] & goodtrls & ~replaytrls & moved_before_indx;
+        stats.trialtype.reward(5).val = 'rewarded_move_before';
+        % rewarded trials and moved before target onset
+        stats.trialtype.reward(6).trlindx = [logical.reward] & goodtrls & ~replaytrls & moved_after_indx;
+        stats.trialtype.reward(6).val = 'rewarded_move_after';
+    end
   
     
 %     % different densities

@@ -542,7 +542,7 @@ if compute_coherencyLFP
     
 end
 
-%% compute spectrogram for each trial for all channels (average all channels per trial) and per channel aligned to target/move.stop/reward onset
+%% compute spectrogram for each trial for all channels (average all channels per trial) and per channel aligned to target/move/stop/reward onset
 if prs.compute_spectrum_whole_trial
     fprintf('**********Computing spectrogram for the whole trial between LFPs********** \n');
     fprintf(['Time:  ' num2str(clock) '\n']);
@@ -568,13 +568,14 @@ if prs.compute_spectrum_whole_trial
                                 %                                     mtspecgramc(lfp_trl_area(n,:),prs.spectrogram_movingwin,spectralparams);
                             end
                             % compute spectrogram for all channels for each trial
-                            [stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).events.(gettuning{ev}).pop_trl(j).spectrogram, stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).events.(gettuning{ev}).pop_trl(j).ts_spectrogram,...
+                            [stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).events.(gettuning{ev}).pop_trl(j).spectrogram,...
+                                stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).events.(gettuning{ev}).pop_trl(j).ts_spectrogram,...
                                 stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).events.(gettuning{ev}).pop_trl(j).freq_spectrogram] = ...
                                 mtspecgramc(lfp_trl_area',prs.spectrogram_movingwin,spectralparams);
                             
                             stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).events.(gettuning{ev}).pop_trl(j).ts_spectrogram = ...
                                 stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).events.(gettuning{ev}).pop_trl(j).ts_spectrogram-...
-                                abs(lfps(1).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.ts_lfp_align(1));
+                                abs(lfps(ar(n)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.ts_lfp_align(end));
                             %                                                         figure; imagesc((stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).events.(gettuning{ev}).pop_trl(j).ts_spectrogram),stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).events.(gettuning{ev}).pop_trl(j).freq_spectrogram,...
                             %                                                             stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).events.(gettuning{ev}).pop_trl(j).spectrogram'); axis xy;
                             %                                                         set(gca, 'ylim',[0 50])
@@ -608,12 +609,12 @@ if prs.compute_spectrum_whole_trial_align_stop
                         for n = 1:length(ar)  % first 24 ch for MST if applicable
                             lfp_trl_area(n,:) =  lfps(ar(n)).stats.trialtype.(trialtypes{type})(cond).events.stop.all_freq.lfp_align(:,j); % extract lfp for all ch per trial  % get # of trials (samp x ch) 334xch
                             % compute spectrogram for each trial for each channel
-                            [stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).ch(n).trl(j).spectrogram_stop,...
-                                stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).ch(n).trl(j).ts_spectrogram_stop,...
-                                stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).ch(n).trl(j).freq_spectrogram_stop] = ...
-                                mtspecgramc(lfp_trl_area(n,:),prs.spectrogram_movingwin,spectralparams);
-                            stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).ch(n).trl(j).ts_spectrogram_stop = stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).ch(n).trl(j).ts_spectrogram_stop-...
-                                abs(lfps(ar(n)).stats.trialtype.(trialtypes{type})(cond).events.stop.all_freq.ts_lfp_align(1));
+%                             [stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).ch(n).trl(j).spectrogram_stop,...
+%                                 stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).ch(n).trl(j).ts_spectrogram_stop,...
+%                                 stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).ch(n).trl(j).freq_spectrogram_stop] = ...
+%                                 mtspecgramc(lfp_trl_area(n,:),prs.spectrogram_movingwin,spectralparams);
+%                             stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).ch(n).trl(j).ts_spectrogram_stop = stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).ch(n).trl(j).ts_spectrogram_stop-...
+%                                 (lfps(ar(n)).stats.trialtype.(trialtypes{type})(cond).events.stop.all_freq.ts_lfp_align(1));
                         end
                         % compute spectrogram
                         [stats.trialtype.(trialtypes{type})(cond).area.(unique_brain_areas{area}).pop_trl(j).spectrogram_stop,...
@@ -724,7 +725,7 @@ if prs.compute_coherogram
                             
                             stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).coherogram.([unique_brain_areas{area2} unique_brain_areas{area1}]).coher_ts = ...
                                 stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).coherogram.([unique_brain_areas{area2} unique_brain_areas{area1}]).coher_ts-...
-                                abs(lfps(1).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.ts_lfp_align(1));
+                                (lfps(1).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.ts_lfp_align(1));
                             
                             %                                                     figure; imagesc((stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).([unique_brain_areas{area2} unique_brain_areas{area1}]).coher_ts)-1,...
                             %                                                         stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).([unique_brain_areas{area2} unique_brain_areas{area1}]).coher_freq,...
@@ -838,7 +839,7 @@ if prs.analyse_band_passed
     gettuning = prs.tuning_events;
     %% add variable with all 95th pct timings per channel per condition
     for area = 1:num_brain_areas
-        for ev = 1:length(gettuning)
+        for ev = 2:length(gettuning)
             unitindx = strcmp({units.brain_area}, unique_brain_areas{area});
             % extract all 95th pct timings per channel
             ar = find(unitindx); corr_trl = find(corr_indx); incorr_trl = find(incorr_indx); low_half_indx = find(stats.indx_accuracy.low_half_indx); upper_half_indx = find(stats.indx_accuracy.upper_half_indx);
@@ -913,28 +914,34 @@ if prs.analyse_phase
                     for ch = 1:length(ar)
                         f = lfps(1).stats.trialtype.reward(2).events.move.all_freq.freq_spectrogram;
                         % gather phase for each freq for all channels
-                        if prs.analyse_phase_within_area, plv_all(ch,:,:) = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.plv; end
+                        if prs.analyse_phase_within_area, plv_all(ch,:,:) = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.plv; 
                         
                        stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.lfp_angle(ch,:,:,:)...
-                            = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.lfp_angle;
+                            = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.lfp_angle; end
                         
                         %% gather angles at each time point for each electrode for band passed signal
                         % theta
                         if prs.analyse_theta
                             t_temp_theta = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ts_lfp_align;
-                            ntrls = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(1).events.(gettuning{ev}).theta.lfp_align,2); % % match trial number. PLV is sensitive to trial num
-                            theta_angle = angle(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.lfp_align);
-                            % store to later compute plv across areas
-                            stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.angle_mu(ch,:,:) = theta_angle;
-                            %% Compute phase clustering for all trials in one timepoint for each electrode: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))
-                            if ~isempty(theta_angle)
-                                for tmp_indx = 1:length(t_temp_theta)
-                                    theta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * theta_angle(tmp_indx,1:ntrls) ) ) ) ;
-                                    % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
-                                    theta(ch).itpc_pval = exp(-ntrls * (theta(ch).itpc(tmp_indx,:))^2);
-                                end
+                            if prs.analyse_move_before_after
+                                for all_cond = 1:nconds, num_trls(all_cond) = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(all_cond).events.(gettuning{ev}).theta.lfp_align,2);end
+                                ntrls = min(num_trls);
+                            else
+                                ntrls = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(1).events.(gettuning{ev}).theta.lfp_align,2); % % match trial number. PLV is sensitive to trial num
                             end
-                            
+                        end
+                        theta_angle = angle(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.lfp_align);
+                        % store to later compute plv across areas
+                        stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.angle_mu(ch,:,:) = theta_angle;
+                        %% Compute phase clustering for all trials in one timepoint for each electrode: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))
+                        if ~isempty(theta_angle)
+                            for tmp_indx = 1:length(t_temp_theta)
+                                theta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * theta_angle(tmp_indx,1:ntrls) ) ) ) ;
+                                % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
+                                theta(ch).itpc_pval = exp(-ntrls * (theta(ch).itpc(tmp_indx,:))^2);
+                            end
+                        end
+                        
                             %% compute Rayleigh test for non-uniformiuty of circular
                             % data for each time point
                             if ~isempty(theta_angle)
@@ -947,7 +954,13 @@ if prs.analyse_phase
                         % beta
                         if prs.analyse_beta
                             t_temp_beta = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ts_lfp_align;
-                            ntrls = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(1).events.(gettuning{ev}).beta.lfp_align,2); % % match trial number. PLV is sensitive to trial num
+                                if prs.analyse_move_before_after
+                                    for all_cond = 1:nconds, num_trls(all_cond) = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(all_cond).events.(gettuning{ev}).theta.lfp_align,2);end
+                                    ntrls = min(num_trls);
+                                else
+                                    ntrls = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(1).events.(gettuning{ev}).theta.lfp_align,2); % % match trial number. PLV is sensitive to trial num
+                                end
+                            end
                             beta_angle = angle(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.lfp_align);
                             % store to later compute plv across areas
                             stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.angle_mu(ch,:,:) = beta_angle;
@@ -1033,8 +1046,15 @@ if prs.analyse_phase
     for area1 = 1:num_brain_areas
         for area2 = find(1:num_brain_areas ~= area1)
             for ev = 1:length(gettuning)
-              theta_all_corr = []; theta_all_incorr = []; beta_all_corr = []; beta_all_incorr = []; theta_all_pli_corr = []; theta_all_pli_incorr = []; beta_all_pli_corr = []; beta_all_pli_incorr = [];
+                theta_all_corr = []; theta_all_incorr = []; beta_all_corr = []; beta_all_incorr = []; theta_all_pli_corr = []; theta_all_pli_incorr = []; beta_all_pli_corr = []; beta_all_pli_incorr = [];
                 for cond = 1:nconds
+                    if prs.analyse_move_before_after
+                        clear num_trls
+                        for all_cond = 1:nconds, num_trls(all_cond) = sum(behv_stats.trialtype.reward(all_cond).trlindx);end
+                        ntrls = min(num_trls);
+                    else
+                        ntrls = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(1).events.(gettuning{ev}).theta.lfp_align,2); % % match trial number. PLV is sensitive to trial num
+                    end
                     ntrls = sum(behv_stats.trialtype.reward(1).trlindx); % match trial number. PLV is sensitive to trial num
                     if (ev == 4 && cond == 1) % no reward in cond==1
                         stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).(['ch' num2str(ch_area1) '_to_' num2str(ch_area2)]) = NaN;

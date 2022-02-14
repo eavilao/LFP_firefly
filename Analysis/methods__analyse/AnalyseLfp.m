@@ -95,7 +95,7 @@ if event_potential
                     end
                     %%
                     if extract_band_pass && strcmp(trialtypes{i},'reward')
-                        if j ==1   % incorrect
+                        if j==1   % incorrect
                             % for every trial take 95th percentile value
                             for ntrl = 1:sum(trlindx)
                                 stats.band_passed.move.err.ts = stats.trialtype.(trialtypes{i})(j).events.move.beta.ts_lfp_align;
@@ -111,7 +111,7 @@ if event_potential
                                 % stats.band_passed.move.err.trl(ntrl).beta.lfp_move = this_beta;
                                 stats.band_passed.move.err.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                             end
-                        else % correct
+                        elseif j==2 % correct
                             for ntrl = 1:sum(trlindx)
                                 stats.band_passed.move.corr.ts = stats.trialtype.(trialtypes{i})(j).events.move.beta.ts_lfp_align;
                                 % theta
@@ -139,7 +139,7 @@ if event_potential
                                 [b,a] = butter(prs.lfp_filtorder,[freq(f_indx) freq(f_indx+1)]/(prs.fs_lfp/2));
                                 lfp_filt = filtfilt(b,a,this_lfp);
                                 lfp_angle = angle(hilbert(lfp_filt)); % extract phase for that freq
-%                                 stats.trialtype.(trialtypes{i})(j).events.move.all_freq.lfp_angle(f_indx,:,:) = lfp_angle;
+                                % stats.trialtype.(trialtypes{i})(j).events.move.all_freq.lfp_angle(f_indx,:,:) = lfp_angle;
                                 % Compute phase clustering for all trials
                                 % in one timepoint: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))-->(Lachaux et al 1999)
                                 if analyse_phase_within_area
@@ -181,7 +181,7 @@ if event_potential
                     [stats.trialtype.(trialtypes{i})(j).events.target.all_freq.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.target.all_freq.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.target.all_freq.freq_spectrogram] = ...
                         mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.target.all_freq.lfp_align,prs.spectrogram_movingwin,spectralparams);
                     stats.trialtype.(trialtypes{i})(j).events.target.all_freq.ts_spectrogram = stats.trialtype.(trialtypes{i})(j).events.target.all_freq.ts_spectrogram -...
-                        abs(stats.trialtype.(trialtypes{i})(j).events.target.all_freq.ts_lfp_align(1));
+                        (stats.trialtype.(trialtypes{i})(j).events.target.all_freq.ts_lfp_align(1));
                     %% align band passed to event lfp theta
                     if analyse_theta
                         [trials_lfps_temp2,ts] = ShiftLfps(trials_lfps_temp,continuous_temp,[events_temp.t_targ], 'lfp_theta');
@@ -212,7 +212,7 @@ if event_potential
                                 % stats.band_passed.target.err.trl(ntrl).beta.lfp_target = this_beta;
                                 stats.band_passed.target.err.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                             end
-                        else % correct
+                        elseif j==2 % correct
                             for ntrl = 1:sum(trlindx)
                                 stats.band_passed.target.corr.ts = stats.trialtype.(trialtypes{i})(j).events.target.beta.ts_lfp_align;
                                 % theta
@@ -240,7 +240,7 @@ if event_potential
                                 [b,a] = butter(prs.lfp_filtorder,[freq(f_indx) freq(f_indx+1)]/(prs.fs_lfp/2));
                                 lfp_filt = filtfilt(b,a,this_lfp);
                                 lfp_angle = angle(hilbert(lfp_filt)); % extract phase for that freq
-%                                 stats.trialtype.(trialtypes{i})(j).events.target.all_freq.lfp_angle(f_indx,:,:) = lfp_angle;
+                                % stats.trialtype.(trialtypes{i})(j).events.target.all_freq.lfp_angle(f_indx,:,:) = lfp_angle;
                                 % Compute phase clustering for all trials
                                 % in one timepoint: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))-->(Lachaux et al 1999)
                                 if analyse_phase_within_area
@@ -282,7 +282,7 @@ if event_potential
                 [stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.p_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_spectrogram, stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.freq_spectrogram] = ...
                     mtspecgramc(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.lfp_align,prs.spectrogram_movingwin,spectralparams);       
                 stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_spectrogram = stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_spectrogram-...
-                    abs(stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_lfp_align(1));
+                    (stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.ts_lfp_align(1));
                 
                 %% compute spectrogram lfp theta
                 if analyse_theta
@@ -321,7 +321,7 @@ if event_potential
                             % stats.band_passed.stop.err.trl(ntrl).beta.lfp_stop = this_beta;
                             stats.band_passed.stop.err.trl(ntrl).beta_95_indx = this_beta > this_95_beta;
                         end
-                    else % correct
+                    elseif j==2 % correct
                         for ntrl = 1:sum(trlindx)
                             stats.band_passed.stop.corr.ts = stats.trialtype.(trialtypes{i})(j).events.stop.beta.ts_lfp_align;
                             % theta
@@ -349,7 +349,7 @@ if event_potential
                             [b,a] = butter(prs.lfp_filtorder,[freq(f_indx) freq(f_indx+1)]/(prs.fs_lfp/2));
                             lfp_filt = filtfilt(b,a,this_lfp);
                             lfp_angle = angle(hilbert(lfp_filt)); % extract phase for that freq
-%                             stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.lfp_angle(f_indx,:,:) = lfp_angle;
+                            % stats.trialtype.(trialtypes{i})(j).events.stop.all_freq.lfp_angle(f_indx,:,:) = lfp_angle;
                             % Compute phase clustering for all trials
                             % in one timepoint: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))-->(Lachaux et al 1999)
                             if analyse_phase_within_area
@@ -393,7 +393,7 @@ if event_potential
                 %                     set(gca,'xlim',[-0.75 0.75])
                 if ~isempty(stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.ts_lfp_align)
                     stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.ts_spectrogram = stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.ts_spectrogram - ...
-                        abs(stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.ts_lfp_align(1));
+                        (stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.ts_lfp_align(1));
                 end
                 %% compute spectrogram lfp theta
                 if analyse_theta
@@ -463,7 +463,7 @@ if event_potential
                                 [b,a] = butter(prs.lfp_filtorder,[freq(f_indx) freq(f_indx+1)]/(prs.fs_lfp/2));
                                 lfp_filt = filtfilt(b,a,this_lfp);
                                 lfp_angle = angle(hilbert(lfp_filt)); % extract phase for that freq
-                        %        stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.lfp_angle(f_indx,:,:) = lfp_angle;
+                               % stats.trialtype.(trialtypes{i})(j).events.reward.all_freq.lfp_angle(f_indx,:,:) = lfp_angle;
                                 % Compute phase clustering for all trials
                                 % in one timepoint: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))-->(Lachaux et al 1999)
                                 if analyse_phase_within_area

@@ -308,19 +308,19 @@ else
     %% Viktor
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(71,1,{'behv','lfps','pop'})
-    cd('E:\Output\spectrograms\move_before_after')
+    cd('E:\Output\band_passed')
     save(['experiments_lfp_Vik_1_' name_exp], 'experiments', '-v7.3')
     clear experiments
     %
     experiments = experiment('firefly-monkey');
-    experiments.AddSessions(71,3,{'behv','lfps','pop'})
+    experiments.AddSessions(71,2,{'behv','lfps','pop'})
     cd('E:\Output\spectrograms\move_before_after')
     save(['experiments_lfp_Vik_3_' name_exp], 'experiments', '-v7.3')
     clear experiments
     %
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(71,4,{'behv','lfps','pop'})
-    cd('E:\Output\spectrograms\move_before_after')
+    cd('E:\Output\band_passed')
     save(['experiments_lfp_Vik_4_' name_exp], 'experiments', '-v7.3')
     clear experiments
 end
