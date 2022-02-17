@@ -24,7 +24,7 @@ do_band_passed_pop = false;  % needs pop
 do_phases = false; % needs pop
 
 name_output_exp_out_file = 'exp_out_lfp_spectro_mba_2022_02_05';
-name_output_file = 'lfp_spectro_mba_2022_02_05';
+name_output_file = 'lfp_spectro_mba_2022_11_05';
 
 %% Extract
 if extract_exp_out
@@ -484,33 +484,33 @@ if save_spectro_per_trial
                                 end
                                 monk_mu(i,:,:) = squeeze(nanmean(monk_sess_mu)); % store avg per monkey
                                 %% sanity plot per monkey
-                                if ~isnan(monk_mu(:,1,1))
-                                    J = customcolormap_preset('black_teal_white');
-                                    f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
-                                    figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
-                                    ts = ts(ts>-1.51 & ts<1.514);
-                                    if ev == 2, ts = ts-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
-                                    imagesc(ts,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
-                                    set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
-                                    xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
-                                    title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
-                                    % theta
-                                    if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
-                                    figure; hold on
-                                    shadedErrorBar(ts,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
-                                        nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
-                                    set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-                                    xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-                                    title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-                                    % beta
-                                    figure; hold on
-                                    %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
-                                    shadedErrorBar(ts,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
-                                        nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
-                                    set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-                                    xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-                                    title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-                                end
+%                                 if ~isnan(monk_mu(:,1,1))
+%                                      J = customcolormap_preset('black_teal_white');
+%                                     f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
+%                                     figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
+%                                     ts_plot = ts(ts>-1.51 & ts<1.514);
+%                                     if ev == 2, ts_plot = ts_plot-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
+%                                     imagesc(ts_plot,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
+%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
+%                                     xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
+%                                     title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
+%                                     % theta
+%                                     if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
+%                                     figure; hold on
+%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
+%                                         nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
+%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+%                                     title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+%                                     % beta
+%                                     figure; hold on
+%                                     %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
+%                                         nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
+%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+%                                     title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+%                                 end
                             end
                             % average for all monkeys
                             monk_sess_mu(1,:,:) = []; monk_sess_mu(2,:,:) = []; % hardcoded because the first and second monks have no MST rec
@@ -533,33 +533,33 @@ if save_spectro_per_trial
                                 end
                                 monk_mu(i,:,:) = squeeze(nanmean(monk_sess_mu)); % store avg per monkey
                                 %% sanity plot per monkey
-                                if ~isnan(monk_mu(:,1,1))
-                                    J = customcolormap_preset('black_teal_white');
-                                    f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
-                                    figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
-                                    ts = ts(ts>-1.51 & ts<1.514);
-                                    if ev == 2, ts = ts-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
-                                    imagesc(ts,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
-                                    set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
-                                    xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
-                                    title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
-                                    % theta
-                                    if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
-                                    figure; hold on
-                                    shadedErrorBar(ts,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
-                                        nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
-                                    set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-                                    xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-                                    title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-                                    % beta
-                                    figure; hold on
-                                    %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
-                                    shadedErrorBar(ts,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
-                                        nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
-                                    set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-                                    xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-                                    title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-                                end
+%                                 if ~isnan(monk_mu(:,1,1))
+%                                     J = customcolormap_preset('black_teal_white');
+%                                     f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
+%                                     figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
+%                                     ts_plot = ts(ts>-1.51 & ts<1.514);
+%                                     if ev == 2, ts_plot = ts_plot-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
+%                                     imagesc(ts_plot,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
+%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
+%                                     xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
+%                                     title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
+%                                     % theta
+%                                     if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
+%                                     figure; hold on
+%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
+%                                         nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
+%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+%                                     title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+%                                     % beta
+%                                     figure; hold on
+%                                     %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
+%                                         nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
+%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+%                                     title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+%                                 end
                             end
                             % average for all monkeys
                             monk_sess_mu(2,:,:) = []; % hardcoded because the second monk has no MST rec
@@ -582,33 +582,33 @@ if save_spectro_per_trial
                                 end
                                 monk_mu(i,:,:) = squeeze(nanmean(monk_sess_mu)); % store avg per monkey
                                 %% sanity plot per monkey
-                                if ~isnan(monk_mu(:,1,1))
-                                    J = customcolormap_preset('black_teal_white');
-                                    f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
-                                    figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
-                                    ts = ts(ts>-1.51 & ts<1.514);
-                                    if ev == 2, ts = ts-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
-                                    imagesc(ts,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
-                                    set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
-                                    xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
-                                    title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
-                                    % theta
-                                    if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
-                                    figure; hold on
-                                    shadedErrorBar(ts,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
-                                        nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
-                                    set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-                                    xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-                                    title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-                                    % beta
-                                    figure; hold on
-                                    %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
-                                    shadedErrorBar(ts,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
-                                        nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
-                                    set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-                                   xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-                                    title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-                                end
+%                                 if ~isnan(monk_mu(:,1,1))
+%                                    J = customcolormap_preset('black_teal_white');
+%                                     f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
+%                                     figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
+%                                     ts_plot = ts(ts>-1.51 & ts<1.514);
+%                                     if ev == 2, ts_plot = ts_plot-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
+%                                     imagesc(ts_plot,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
+%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
+%                                     xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
+%                                     title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
+%                                     % theta
+%                                     if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
+%                                     figure; hold on
+%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
+%                                         nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
+%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+%                                     title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+%                                     % beta
+%                                     figure; hold on
+%                                     %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
+%                                         nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
+%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+%                                     title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+%                                 end
                             end
                             % average for all monkeys
                             all_monks.trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).all_monks_mu = squeeze(nanmean(monk_sess_mu));

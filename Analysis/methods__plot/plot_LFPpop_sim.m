@@ -2483,7 +2483,7 @@ switch plot_type
         end
         
     case 'spectro_all_monks'
-        ev = 'reward'
+        ev = 'target'
         areas = 'PPC'
         % extract
         freq = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_freq;
@@ -2491,17 +2491,17 @@ switch plot_type
         p_spectro_corr = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_mu;
         p_spectro_incorr = all_monks.trialtype.reward(1).area.(areas).events.(ev).all_monks_mu;
         
-        ts_s = ts; % ts or ts-0.3
-        win = [-1 1];  % [-0.5 0.5];   [-1.5 1.5]; 
+        ts_s = ts-0.3; % ts or ts-0.3
+        win = [-0.5 0 .5];  % [-0.5 0.5];   [-1.5 1.5]; 
         % stop  [-0.2 2.4] 
         % targ  [-0.2 2.4]
-        ylim_theta = [1 2.5];  % PPC [0 1.5]  PFC [1.2 2.4]  MST [0.5 2.8] 
-        ylim_beta = [0.5 1.5];   % PPC [0.5 2]  PFC [0.4 1.2]  MST [-0.1 1] 
+        ylim_theta = [1 1.5];  % PPC [0 1.5]  PFC [1.2 2.4]  MST [0.5 2.8] 
+        ylim_beta = [0.5 2];   % PPC [0.5 2]  PFC [0.4 1.2]  MST [-0.1 1] 
         
         % plot correct
         J = customcolormap_preset('black_teal_white');
         figure; hold on; colormap(J); % ts-0.3 to plot aligned to target off
-        imagesc(ts_s,freq,p_spectro_corr,[-0.2 1.5]); axis xy; colorbar; % MST reward
+        imagesc(ts_s,freq,p_spectro_corr,[-0.2 2.4]); axis xy; colorbar; % MST reward
         set(gca,'xlim',[win(1) win(2)], 'ylim',[4 50], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
         title([(areas) ' Corr']); vline(0, 'w');  %vline([-0.3 0], 'w');
@@ -2522,7 +2522,7 @@ switch plot_type
         
         % plot incorrect
         figure; hold on; colormap(J);
-        imagesc(ts_s,freq,p_spectro_incorr, [-0.2 1.5]); axis xy; colorbar; % MST
+        imagesc(ts_s,freq,p_spectro_incorr, [-0.2 2.4]); axis xy; colorbar; % MST
         set(gca,'xlim',[win(1) win(2)], 'ylim',[4 50], 'FontSize', 22)
         xlabel([ev ' time (s)']); ylabel('frequency (Hz)'); axis square
         title([(areas) ' Err']); vline(0, 'w'); vline([-0.3 0], 'w');
@@ -4099,10 +4099,10 @@ switch plot_type
         
         
     case 'pop_psth_band_passed'
-        ar = 'PFC'     % MST PPC PFC
+        ar = 'PPC'     % MST PPC PFC
         band = 'theta'
-        win = [-1.5 1.5];
-        ev = 'stop'
+        ev = 'reward'
+        x_lim = [-1 1]; 
 
         r_corr_all = [];
         r_incorr_all = [];
@@ -4110,9 +4110,10 @@ switch plot_type
         peak_t_incorr_all = [];
         mod_indx_corr = [];
         mod_indx_incorr = [];
+        if strcmp(ar,'MST'), monk_ids = [1 3]; elseif strcmp(ar,'PFC'), monk_ids = [3 4]; else monk_ids = 1:length(monk); end
         
-        for m = 1%:length(monk)  % [1 3] % 1:length(monk)
-            
+        for m = monk_ids  
+            clear peak_t_corr peak_t_incorr min_t_corr min_t_incorr
             for nsess = 1:length(monk(m).sess)
                 %% gather
                 ts = monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.ts_rate_95(1,:);
@@ -4176,12 +4177,13 @@ switch plot_type
                           
                 %% plot mean +/- sem psth per area for corr and incorr per session
                 figure(1); hold on
+                if strcmp(ev,'target'), ts_align = ts-0.3; else ts_align = ts; end
                 %subplot(1,length(nsess),nsess); hold on
-                shadedErrorBar(ts,smooth(r_corr(nsess,:),8),r_corr_sem(nsess,:), 'lineprops', 'g')
-                shadedErrorBar(ts,smooth(r_incorr(nsess,:),8),r_incorr_sem(nsess,:), 'lineprops', 'k')
-                set(gca, 'xlim', [-1.5 1.5],'yLim', [0 33],'yTick', [0 30], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+                shadedErrorBar(ts_align,smooth(r_corr(nsess,:),8),r_corr_sem(nsess,:), 'lineprops', 'g')
+                shadedErrorBar(ts_align,smooth(r_incorr(nsess,:),8),r_incorr_sem(nsess,:), 'lineprops', 'k')
+                set(gca, 'xlim', [x_lim(1) x_lim(2)],'yLim', [0 33],'yTick', [0 30], 'TickDir', 'out', 'FontSize', 22); axis square; box off
                 title([(ar) ' ' num2str(nsess)]);
-                xlabel('Time(s)'); vline(0,'-k');
+                xlabel('Time(s)'); if strcmp(ev,'target'), vline([-0.3 0],'-k'); else vline(0, '-k'); end
                 
                 %% plot pre and post max th
 %                 figure; hold on
@@ -4243,16 +4245,16 @@ switch plot_type
            %% plot mean for all sessions for one monkey
             % psth
             figure; hold on
-            shadedErrorBar(ts,smooth(mean(r_corr),8),mean(r_corr_sem), 'lineprops', 'g')
-            shadedErrorBar(ts,smooth(mean(r_incorr),8),mean(r_incorr_sem), 'lineprops', 'k')
-            set(gca, 'xlim', [-1.5 1.5], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 20], 'yTick', [0 10 20]); axis square; box off
-            xlabel('Time(s)'); vline(0,'-k')
+            shadedErrorBar(ts_align,smooth(mean(r_corr),8),mean(r_corr_sem), 'lineprops', 'g')
+            shadedErrorBar(ts_align,smooth(mean(r_incorr),8),mean(r_incorr_sem), 'lineprops', 'k')
+            set(gca, 'xlim', [x_lim(1) x_lim(2)], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 20], 'yTick', [0 10 20]); axis square; box off
+            xlabel('Time(s)'); if strcmp(ev,'target'), vline([-0.3 0],'-k'); else vline(0, '-k'); end
             
             % ratio
             figure; hold on
-            plot(ts,smooth(mean(r_corr)./mean(r_incorr),8), '-k', 'LineWidth',2)
+            plot(ts_align,smooth(mean(r_corr)./mean(r_incorr),8), '-k', 'LineWidth',2)
             %plot(ts,mean(r_corr)./mean(r_incorr), '-k', 'LineWidth',2)
-            set(gca, 'xlim', [-1.5 1.5],'ylim',[0 3],'yTick',[0 1 2 3], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+            set(gca, 'xlim', [x_lim(1) x_lim(2)],'ylim',[0 3],'yTick',[0 1 2 3], 'TickDir', 'out', 'FontSize', 22); axis square; box off
             ylabel('Correct / Incorrect'); xlabel('Time(s)')
             hline(1,'--k')
             
@@ -4260,7 +4262,7 @@ switch plot_type
             figure(18); hold on
             errorbar(m,mean(mean(peak_t_corr)), mean(std(peak_t_corr)/sqrt(size(peak_t_corr,1))),'.g', 'MarkerSize', 40, 'CapSize', 0);
             errorbar(m+0.2,mean(mean(peak_t_incorr)), mean(std(peak_t_incorr)/sqrt(size(peak_t_incorr,1))),'ok', 'MarkerSize', 10,'CapSize', 0);
-            set(gca, 'xlim', [0 3.2],'yLim',[-1 1.4],'yTick',[-1 0 1], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+            set(gca, 'xlim', [0 4.2],'yLim',[-1 1.4],'yTick',[-1 0 1], 'TickDir', 'out', 'FontSize', 22); axis square; box off
             hline(0,'--k'); ylabel([(ev) ' time (s)']); title(['monk ' num2str(m)])
             
             %% plot mean trough for all sessions
@@ -4273,15 +4275,15 @@ switch plot_type
         
         %% plot psth all monks
         figure; hold on
-        shadedErrorBar(ts,smooth(mean(r_corr_all),8),smooth(std(r_corr_all)/sqrt(size(r_corr_all,1))), 'lineprops', 'g')
-        shadedErrorBar(ts,smooth(mean(r_incorr_all),8),smooth(std(r_incorr_all)/sqrt(size(r_incorr_all,1))), 'lineprops', 'k')
-        set(gca, 'xlim', [-1.2 1.2], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 22], 'yTick', [0 20]); axis square; box off
-        xlabel([(ev) ' time (s)']); vline(0,'-k');
+        shadedErrorBar(ts_align,smooth(mean(r_corr_all),8),smooth(std(r_corr_all)/sqrt(size(r_corr_all,2))), 'lineprops', 'g')
+        shadedErrorBar(ts_align,smooth(mean(r_incorr_all),8),smooth(std(r_incorr_all)/sqrt(size(r_incorr_all,2))), 'lineprops', 'k')
+        set(gca, 'xlim', [x_lim(1) x_lim(2)], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 20], 'yTick', [0 20]); axis square; box off
+        xlabel([(ev) ' time (s)']); if strcmp(ev,'target'), vline([-0.3 0],'-k'); else vline(0, '-k'); end
         
         %% plot ratio all monks
         figure; hold on;
-        plot(ts,smooth(mean(r_corr_all)./mean(r_incorr_all)), '-k', 'LineWidth',2)
-        set(gca, 'xlim', [-1.5 1.5],'ylim',[0 4.5],'yTick',[0 1 4.5], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+        plot(ts_align,smooth(mean(r_corr_all)./mean(r_incorr_all)), '-k', 'LineWidth',2)
+        set(gca, 'xlim', [x_lim(1) x_lim(2)],'ylim',[0 2],'yTick',[0 1 2], 'TickDir', 'out', 'FontSize', 22); axis square; box off
         ylabel('Correct / Incorrect'); xlabel([(ev) ' time (s)']);
         hline(1,'--k')
         
