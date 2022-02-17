@@ -315,7 +315,7 @@ else
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(71,2,{'behv','lfps','pop'})
     cd('E:\Output\spectrograms\move_before_after')
-    save(['experiments_lfp_Vik_3_' name_exp], 'experiments', '-v7.3')
+    save(['experiments_lfp_Vik_2_' name_exp], 'experiments', '-v7.3')
     clear experiments
     %
     experiments = experiment('firefly-monkey');
