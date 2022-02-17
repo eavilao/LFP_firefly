@@ -1,18 +1,18 @@
 
-%%
+% %%
 % rerun_analyseLFP = true; 
 % rerun_AddPop = true; 
 % disp('Loading file 1... . . ')
 % load('experiments_lfp_Schro_113_spectro_move_ba')
 % prs = default_prs(53,113);
 % if rerun_analyseLFP, experiments.sessions.AnalyseLfps(prs); end
-if rerun_AddPop
-experiments.sessions(1).populations(1)=[];
-experiments.sessions(1).AddPopulation('lfps',prs)  
-end
-disp('Saving... . .' )
-save('experiments_lfp_Schro_113_phase_mba', 'experiments', '-v7.3')
-clear
+% if rerun_AddPop
+% experiments.sessions(1).populations(1)=[];
+% experiments.sessions(1).AddPopulation('lfps',prs)  
+% end
+% disp('Saving... . .' )
+% save('experiments_lfp_Schro_113_phase_mba', 'experiments', '-v7.3')
+% clear
 %%
 rerun_analyseLFP = true; 
 rerun_AddPop = true;
