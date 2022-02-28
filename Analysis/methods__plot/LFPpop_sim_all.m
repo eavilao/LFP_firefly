@@ -4,15 +4,15 @@ function LFPpop_sim_all(exp)
 % experiments.m
 % If running for the first time, you don't need (exp) just hit run
 %% Choose what to analyze and save
-extract_exp_out = false; % load experiments.m file and extract. If saved 'exp_out', make it false.
-save_exp_out = false; % save mat file without raw lfp signal
-save_pop = false; % if this is true it will only extract pop
+extract_exp_out = true; % load experiments.m file and extract. If saved 'exp_out', make it false.
+save_exp_out = true; % save mat file without raw lfp signal
+save_pop = true; % if this is true it will only extract pop
 
 extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
 do_PSD = false;  % extract power spectral densities
 save_spectro = false;
-save_spectro_per_trial = true;
+save_spectro_per_trial = false;
 save_spectro_per_trial_align_stop = false;
 avg_monks = true; % average for all monkeys?
 do_cohero = false; % extract coherograms
@@ -21,10 +21,10 @@ doCSD = false; % Perform CSD analysis for MST recordings?
 do_ERP = false; % extract ERPs (evoked LFPs)
 save_band_pass_analysis = false; % extract band passed lfp signal only (used only for plotting)
 do_band_passed_pop = false;  % needs pop
-do_phases = false; % needs pop
+do_phases = true; % needs pop
 
-name_output_exp_out_file = 'exp_out_lfp_spectro_mba_2022_02_05';
-name_output_file = 'lfp_spectro_mba_2022_11_05';
+name_output_exp_out_file = 'exp_out_lfp_phases_mba_2022_02_27';
+name_output_file = 'lfp_phases_mba_2022_02_27';
 
 %% Extract
 if extract_exp_out
@@ -821,7 +821,7 @@ end
 %% Gather pop analyses for monks without MST rec
 if do_ERP
     monks = unique([exp.monk_id]);
-    for ii = 2  %Bruno 1:length(monks)
+    for ii = [2 4]  %Bruno Vik 1:length(monks)
         m = [exp.monk_id] == monks(ii); p_monk = exp(m);
         for j = 1:length(p_monk)
             monk(ii).pop(j) = p_monk(j).pop;
@@ -851,7 +851,7 @@ end
 %% Gather erp's for PFC on Schro for now
 if do_ERP
     monks = unique([exp.monk_id]);
-    for ii = 3  %3 Schro  1:length(monks)
+    for ii = [3 4] %3 Schro Vik  1:length(monks)
         m = [exp.monk_id] == monks(ii); p_monk = exp(m);
         for j = 1:length(p_monk)
             monk(ii).pop(j) = p_monk(j).pop;
