@@ -20,6 +20,7 @@ function plot_LFPpop_sim(monk,all_monks,plot_type)
 % 'erp_before_after_move_MST'
 % 'erp_all_PPC' (and max amp and time)
 % 'erp_reward_densities_PPC' (and max amp and time)
+% 'erp_reward_densities_PFC'
 % 'erp_move_before_after_PPC'
 % 'PSD_all'
 % 'PSD_all_together'
@@ -1294,9 +1295,9 @@ switch plot_type
         
         % Mean all channels per session
         for m = 1:length(monk)
-            for sess = 1:length(monk(m).pop)
+            for sess = 1:length(monk(m).erp.PPC.sess)
                 for cond = 1:ncond
-                    for ch = 1:length(monk(m).cont.PPC.sess(sess).lfps)
+                    for ch = 1:length(monk(m).erp.PPC.sess(sess).lfps)
                         monk(m).sess(sess).(type)(cond).erp_move(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.move.erp_mu; % move
                         monk(m).sess(sess).(type)(cond).erp_target(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.target.erp_mu; % move
                         monk(m).sess(sess).(type)(cond).erp_stop(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.stop.erp_mu; % move
@@ -1308,7 +1309,7 @@ switch plot_type
         
         % average across channels
         for m = 1:length(monk)
-            for sess = 1:length(monk(m).sess)
+            for sess = 1:length(monk(m).erp.PPC.sess)
                 for cond = 1:ncond
                     monk(m).sess(sess).(type)(cond).erp_move_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_move);
                     monk(m).sess(sess).(type)(cond).erp_target_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_target);
@@ -1322,8 +1323,8 @@ switch plot_type
         for m = 1:length(monk)
             clear th_v th_w bet_v bet_w
             for cond = 1:ncond
-                for sess = 1:length(monk(m).sess)
-                    
+                clear erp_move_sess erp_target_sess erp_stop_sess erp_reward_sess
+                for sess = 1:length(monk(m).erp.PPC.sess) 
                     erp_move_sess(sess,:) =  monk(m).sess(sess).(type)(cond).erp_move_mu_ch; ...
                         [max_move_sess(sess,:),indx_move] = max(abs(monk(m).sess(sess).(type)(cond).erp_move_mu_ch(1,ts_move>=-0.5 & ts_move<=0.5))); max_move_time(sess,:) = ts_move_win(indx_move);
                     erp_target_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_target_mu_ch; ...
@@ -1332,7 +1333,6 @@ switch plot_type
                         [max_stop_sess(sess,:),indx_stop] = max(abs(monk(m).sess(sess).(type)(cond).erp_stop_mu_ch(1,ts_stop>=-0.5 & ts_stop<=0.5))); max_stop_time(sess,:) = ts_stop_win(indx_stop);
                     erp_reward_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_reward_mu_ch; ...
                         [max_reward_sess(sess,:),indx_reward] = max(abs(monk(m).sess(sess).(type)(cond).erp_reward_mu_ch(1,ts_reward>=-0.5 & ts_reward<=0.5))); max_reward_time(sess,:) = ts_reward_win(indx_reward);
-                    
                 end
                 
                 % mean

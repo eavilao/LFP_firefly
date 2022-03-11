@@ -6,11 +6,11 @@ function LFPpop_sim_all(exp)
 %% Choose what to analyze and save
 extract_exp_out = true; % load experiments.m file and extract. If saved 'exp_out', make it false.
 save_exp_out = true; % save mat file without raw lfp signal
-save_pop = true; % if this is true it will only extract pop
+save_pop = false; % if this is true it will only extract pop
 
 extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
-do_PSD = false;  % extract power spectral densities
+do_PSD = true;  % extract power spectral densities
 save_spectro = false;
 save_spectro_per_trial = false;
 save_spectro_per_trial_align_stop = false;
@@ -18,13 +18,13 @@ avg_monks = true; % average for all monkeys?
 do_cohero = false; % extract coherograms
 do_cohero_band_passed = false; % extract coherograms per band
 doCSD = false; % Perform CSD analysis for MST recordings?
-do_ERP = false; % extract ERPs (evoked LFPs)
+do_ERP = true; % extract ERPs (evoked LFPs)
 save_band_pass_analysis = false; % extract band passed lfp signal only (used only for plotting)
 do_band_passed_pop = false;  % needs pop
-do_phases = true; % needs pop
+do_phases = false; % needs pop
 
-name_output_exp_out_file = 'exp_out_lfp_phases_mba_2022_02_27';
-name_output_file = 'lfp_phases_mba_2022_02_27';
+name_output_exp_out_file = 'exp_out_lfp_psd_erp_2022_04_01';
+name_output_file = 'lfp_psd_erp_2022_04_01';
 
 %% Extract
 if extract_exp_out
@@ -37,58 +37,13 @@ if extract_exp_out
         fprintf(['****   Loading file ' num2str(fnames(i).name) '   ****' '\n'])
         load(fnames(i).name);
         for sess = 1:length(experiments.sessions)
-            %         if ~isempty(experiments.sessions(sess).lfps(1).stats)
             if ~isempty(experiments.sessions(sess).lfps(1).trials)
-                %                 %% Read areas
-                %                 if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 91
-                %                     for nlfps = 1:length(experiments.sessions(1).lfps)
-                %                         indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
-                %                         indx_PFC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PFC');
-                %                         indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
-                %                     end
-                %                 else
-                %                     for nlfps = 1:length(experiments.sessions(1).lfps)
-                %                         indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
-                %                         indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
-                %                     end
-                %                 end
-                
                 %% Read areas
                 for nlfps = 1:length(experiments.sessions(sess).lfps)
                     indx_MST(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'MST');
                     indx_PFC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PFC');
                     indx_PPC(nlfps) = strcmp(experiments.sessions(sess).lfps(nlfps).brain_area, 'PPC');
                 end
-                %% extract per area
-                %                 if save_pop
-                %                     exp(cnt).behavior = [experiments.sessions(sess).behaviours];
-                %                     exp(cnt).pop = experiments.sessions(sess).populations.lfps.stats;
-                %                     exp(cnt).monk_id = experiments.sessions(sess).monk_id;
-                %                 else
-                %                     if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 91
-                %                         if save_band_pass_analysis
-                %                             mst_ch = find(indx_MST); ppc_ch = find(indx_PPC); pfc_ch = find(indx_PFC);
-                %                             for ch = 1:sum(indx_MST), exp(cnt).area.MST.band_passed(ch) = experiments.sessions(sess).lfps(mst_ch(ch)).stats.band_passed;end % extract band passed signal
-                %                             for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.band_passed(ch) = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.band_passed;end
-                %                             for ch = 1:sum(indx_PFC), exp(cnt).area.PFC.band_passed(ch) = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.band_passed;end
-                %                         else
-                %                             exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
-                %                             exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
-                %                             exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
-                %                         end
-                %                     else
-                %                         if save_band_pass_analysis
-                %                             mst_ch = find(indx_MST); ppc_ch = find(indx_PPC);
-                %                             for ch = 1:sum(indx_MST), exp(cnt).area.MST.band_passed(ch) = experiments.sessions(sess).lfps(mst_ch(ch)).stats.band_passed;end % extract band passed signal
-                %                             for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.band_passed(ch) = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.band_passed;end
-                %                         else
-                %                             exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
-                %                             exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
-                %                         end
-                %                     end
-                %                     exp(cnt).behavior = [experiments.sessions(sess).behaviours];
-                %                     exp(cnt).monk_id = experiments.sessions(sess).monk_id;
-                %                 end
                 %% extract per area
                 if save_pop
                     exp(cnt).behavior = [experiments.sessions(sess).behaviours];
@@ -936,7 +891,7 @@ end
 % This file is needed to plot in plotLFPpop_sim.m
 
 %%
-disp('                 Done, saving . . .     ')
+disp('                 Done, now saving . . .     ')
 fprintf(['Time:  ' num2str(clock) '\n']);
 save(name_output_file, 'monk','all_monks', '-v7.3')
 % load train
