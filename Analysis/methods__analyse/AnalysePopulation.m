@@ -950,99 +950,103 @@ if prs.analyse_phase
                                     = circ_rtest(theta_angle(tmp_indx,1:ntrls));
                             end
                         end
-                    end
-                    % beta
-                    if prs.analyse_beta
-                        t_temp_beta = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ts_lfp_align;
-                        if prs.analyse_move_before_after
-                            for all_cond = 1:nconds, num_trls(all_cond) = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(all_cond).events.(gettuning{ev}).theta.lfp_align,2);end
-                            ntrls = min(num_trls);
-                        else
-                            ntrls = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(1).events.(gettuning{ev}).theta.lfp_align,2); % % match trial number. PLV is sensitive to trial num
+                        
+                        % beta
+                        if prs.analyse_beta
+                            t_temp_beta = lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ts_lfp_align;
+                            if prs.analyse_move_before_after
+                                for all_cond = 1:nconds, num_trls(all_cond) = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(all_cond).events.(gettuning{ev}).theta.lfp_align,2);end
+                                ntrls = min(num_trls);
+                            else
+                                ntrls = size(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(1).events.(gettuning{ev}).theta.lfp_align,2); % % match trial number. PLV is sensitive to trial num
+                            end
                         end
+                        beta_angle = angle(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.lfp_align);
+                        % store to later compute plv across areas
+                        stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.angle_mu(ch,:,:) = beta_angle;
+                        %%%%%%%%%   f = instantaneous_frequency( amplitude (abs(x)), Fs ); % f contains "instantaneous frequency"
+                        
+                        %% Compute phase clustering for all trials in one timepoint for each electrode: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))
+                        if ~isempty(beta_angle)
+                            for tmp_indx = 1:length(t_temp_beta)
+                                beta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * beta_angle(tmp_indx,1:ntrls) ) ) ) ;
+                                % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
+                                beta(ch).itpc_pval = exp(-ntrls * (beta(ch).itpc(tmp_indx,:))^2);
+                            end
+                        end
+                        % plot sanity check
+                        %                     figure; hold on
+                        %                     plot(t_temp_theta, theta(ch).itpc);
+                        %                     plot(t_temp_beta,theta(ch).itpc); xlim([-1.5 1.5]); ylim([0 5])
+                        
+                        %% compute Rayleigh test for non-uniformiuty of circular
+                        if ~isempty(beta_angle)
+                            for tmp_indx = 1:length(t_temp_beta)
+                                [stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.pval_circ(tmp_indx), stats.area.(unique_brain_areas{area}).trialtype.reward(cond).events.(gettuning{ev}).chan(ch).beta.z_val_circ(tmp_indx)]...
+                                    = circ_rtest(beta_angle(tmp_indx,1:ntrls));
+                            end
+                        end
+                        
                     end
-                    beta_angle = angle(lfps(ar(ch)).stats.trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.lfp_align);
-                    % store to later compute plv across areas
-                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.angle_mu(ch,:,:) = beta_angle;
-                    %%%%%%%%%   f = instantaneous_frequency( amplitude (abs(x)), Fs ); % f contains "instantaneous frequency"
+                        %                     % plot polar plot and histogram
+                        %                     figure(1); hold on; set(gcf, 'Position',[1 704 1919 401]); title(['channel ' num2str(ch)])
+                        %                     for i = 1:length(timepoints)
+                        %                         subplot(4,10,i)
+                        %                         polarplot([zeros(1,ntrl);squeeze(stats.area.(unique_brain_areas{area}).band.beta.reward(cond).angle(1,:,i))],[zeros(1,ntrl); ones(1,ntrl)],'k', 'LineWidth', 0.01);
+                        %                         thetaticks(0:90:315)
+                        %
+                        %                         hold on; subplot(4,10,i+10)
+                        %                         histogram(rad2deg(squeeze(stats.area.(unique_brain_areas{area}).band.beta.reward(cond).angle(1,:,i))),20)
+                        %                         set(gca, 'xlim', [-180 180], 'xTick', []); box off
+                        %                         xlabel([ num2str(timepoints(i)) 's'])
+                        %                     end
+                        
+                        %% average itpc for all channels -1.5 to 1.5s store
+                        if prs.analyse_phase_within_area, stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.plv_all = squeeze(nanmean(plv_all)); end
+                        
+                        % for theta and beta only
+                        if prs.analyse_theta | prs.analyse_beta
+                            for ch = 1:length(ar)
+                                if ~isempty(theta_angle)
+                                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc(ch,:) = theta(ch).itpc;
+                                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ts = t_temp_theta;
+                                end
+                                if ~isempty(beta_angle)
+                                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc(ch,:) = beta(ch).itpc;
+                                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ts = t_temp_beta;
+                                end
+                            end
+                            % theta
+                            if ~isempty(theta_angle)
+                                stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc_mu = ...
+                                    nanmean(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc);
+                                stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc_sem = ...
+                                    nanstd(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc)/sqrt(size(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc,2));
+                            end
+                            % beta
+                            if ~isempty(beta_angle)
+                                stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc_mu = ...
+                                    nanmean(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc);
+                                stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc_sem = ...
+                                    nanstd(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc)/sqrt(size(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc,2));
+                            end
+                        end
                     
-                    %% Compute phase clustering for all trials in one timepoint for each electrode: abs(mean(exp(1i*angles_at_one_time_point_across_trials)))
-                    if ~isempty(beta_angle)
-                        for tmp_indx = 1:length(t_temp_beta)
-                            beta(ch).itpc(tmp_indx,:) = abs ( nanmean ( exp ( 1i * beta_angle(tmp_indx,1:ntrls) ) ) ) ;
-                            % compute p-value of the observed ITPC p = exp(-trl*ITPC^2)
-                            beta(ch).itpc_pval = exp(-ntrls * (beta(ch).itpc(tmp_indx,:))^2);
-                        end
-                    end
-                    % plot sanity check
-                    %                     figure; hold on
-                    %                     plot(t_temp_theta, theta(ch).itpc);
-                    %                     plot(t_temp_beta,theta(ch).itpc); xlim([-1.5 1.5]); ylim([0 5])
+                    % plot for all channels for one area
+                    %                     try
+                    %                         figure; hold on; title([(unique_brain_areas{area}) ' ' (gettuning{ev}) ' cond ' num2str(cond)])
+                    %                         for ch = 1:length(ar)
+                    %                             plot(t_temp_beta,stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.itpc)
+                    %                             plot(t_temp_beta,(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.pval_circ)<0.05)
+                    %                             xlabel('time to event'); ylabel('ITPC'); xlim([-1.5 1.5])
+                    %                         end
+                    %                     end
                     
-                    %% compute Rayleigh test for non-uniformiuty of circular
-                    if ~isempty(beta_angle)
-                        for tmp_indx = 1:length(t_temp_beta)
-                            [stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.pval_circ(tmp_indx), stats.area.(unique_brain_areas{area}).trialtype.reward(cond).events.(gettuning{ev}).chan(ch).beta.z_val_circ(tmp_indx)]...
-                                = circ_rtest(beta_angle(tmp_indx,1:ntrls));
-                        end
-                    end
+                    
                 end
-                
-                %                     % plot polar plot and histogram
-                %                     figure(1); hold on; set(gcf, 'Position',[1 704 1919 401]); title(['channel ' num2str(ch)])
-                %                     for i = 1:length(timepoints)
-                %                         subplot(4,10,i)
-                %                         polarplot([zeros(1,ntrl);squeeze(stats.area.(unique_brain_areas{area}).band.beta.reward(cond).angle(1,:,i))],[zeros(1,ntrl); ones(1,ntrl)],'k', 'LineWidth', 0.01);
-                %                         thetaticks(0:90:315)
-                %
-                %                         hold on; subplot(4,10,i+10)
-                %                         histogram(rad2deg(squeeze(stats.area.(unique_brain_areas{area}).band.beta.reward(cond).angle(1,:,i))),20)
-                %                         set(gca, 'xlim', [-180 180], 'xTick', []); box off
-                %                         xlabel([ num2str(timepoints(i)) 's'])
-                %                     end
             end
-            %% average itpc for all channels -1.5 to 1.5s store
-            if prs.analyse_phase_within_area, stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).all_freq.plv_all = squeeze(nanmean(plv_all)); end
-            
-            % for theta and beta only
-            if prs.analyse_theta | prs.analyse_beta
-                if ~isempty(theta_angle)
-                    for ch = 1:length(ar)
-                            stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc(ch,:) = theta(ch).itpc;
-                            stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ts = t_temp_theta;
-                        if ~isempty(beta(ch).itpc)
-                            stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc(ch,:) = beta(ch).itpc;
-                            stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ts = t_temp_beta;
-                        end
-                    end
-                    % theta
-                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc_mu = ...
-                        nanmean(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc);
-                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc_sem = ...
-                        nanstd(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc)/sqrt(size(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).theta.ang_itpc,2));
-                    
-                    % beta
-                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc_mu = ...
-                        nanmean(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc);
-                    stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc_sem = ...
-                        nanstd(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc)/sqrt(size(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).beta.ang_itpc,2));
-                end
-            end
-            % plot for all channels for one area
-            %                     try
-            %                         figure; hold on; title([(unique_brain_areas{area}) ' ' (gettuning{ev}) ' cond ' num2str(cond)])
-            %                         for ch = 1:length(ar)
-            %                             plot(t_temp_beta,stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.itpc)
-            %                             plot(t_temp_beta,(stats.area.(unique_brain_areas{area}).trialtype.(trialtypes{type})(cond).events.(gettuning{ev}).chan(ch).beta.pval_circ)<0.05)
-            %                             xlabel('time to event'); ylabel('ITPC'); xlim([-1.5 1.5])
-            %                         end
-            %                     end
-            
-            
         end
     end
-    
-    
     
     % compute phase locking value across areas (plv, Lachaux 1999)
     for area1 = 1:num_brain_areas
@@ -1058,7 +1062,7 @@ if prs.analyse_phase
                         ntrls = sum(behv_stats.trialtype.reward(1).trlindx); % match trial number. PLV is sensitive to trial num
                     end
                     
-                    if (ev == 4 && cond == 1) % no reward in cond==1
+                    if (ev == 4 && cond == 1)||(ev == 4 && cond == 3)||(ev == 4 && cond == 4)  % no reward in cond==1
                         stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(cond).events.(gettuning{ev}).(['ch' num2str(ch_area1) '_to_' num2str(ch_area2)]) = NaN;
                     else
                         clear e_theta theta_plv e_beta beta_plv phase_lag_indx_theta phase_lag_indx_beta all_freq_plv phase_lag_indx_theta phase_lag_indx_theta_dir phase_lag_indx_beta phase_lag_indx_beta_dir
