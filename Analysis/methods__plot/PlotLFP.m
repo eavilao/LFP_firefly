@@ -20,7 +20,7 @@ if electrode_id ~= 0
             figure; plot(f,nanmean(psd), 'LineWidth',2);
             xlim([2 50]); xlabel('Frequency (Hz)'); ylabel('Power spectral density (\muV^2/Hz)');
         case 'PSDarray'
-            nlfps = 48;
+            nlfps = 64;
             [xloc,yloc] = map_utaharray([],electrode);
             [channel_id,electrode_id] = MapChannel2Electrode(electrode);
             [~,indx] = sort(electrode_id); reorderindx = channel_id(indx);
