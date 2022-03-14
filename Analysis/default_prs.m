@@ -4,7 +4,7 @@ if nargin<2, session_id = 1; end
 getnthcell = @(x,n) x{n};
 
 prs.monk_Ody = 0; % This will run AddLOGData_Ody instead.  
-prs.isRipple = 1; % To run AddLOGData_NYU instead.
+if monk_id == 71, prs.isRipple = 1; else, prs.isRipple = 0; end  % To run AddLOGData_NYU instead.
 %% session specific parameters
 monkeyInfoFile_joysticktask;
 monkeyInfo = monkeyInfo([monkeyInfo.session_id]==session_id & [monkeyInfo.monk_id]==monk_id);
