@@ -23,8 +23,8 @@ save_band_pass_analysis = false; % extract band passed lfp signal only (used onl
 do_band_passed_pop = false;  % needs pop
 do_phases = false; % needs pop
 
-name_output_exp_out_file = 'exp_out_lfp_psd_erp_2022_04_01';
-name_output_file = 'lfp_psd_erp_2022_04_01';
+name_output_exp_out_file = 'exp_out_lfp_psd_erp_2022_03_14';
+name_output_file = 'lfp_psd_erp_2022_03_14';
 
 %% Extract
 if extract_exp_out
@@ -52,13 +52,32 @@ if extract_exp_out
                 else
                     if save_band_pass_analysis
                         mst_ch = find(indx_MST); ppc_ch = find(indx_PPC); pfc_ch = find(indx_PFC);
-                        for ch = 1:sum(indx_MST), exp(cnt).area.MST.band_passed(ch) = experiments.sessions(sess).lfps(mst_ch(ch)).stats.band_passed;end % extract band passed signal
+                        if experiments.sessions(sess).monk_id == 44 || experiments.sessions(sess).monk_id == 53 ...
+                                for ch = 1:sum(indx_MST), exp(cnt).area.MST.band_passed(ch) = experiments.sessions(sess).lfps(mst_ch(ch)).stats.band_passed;end;
+                        end % extract band passed signal
+                        if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 71 ...
+                                for ch = 1:sum(indx_PFC), exp(cnt).area.PFC.band_passed(ch) = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.band_passed;end;
+                        end
                         for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.band_passed(ch) = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.band_passed;end
-                        for ch = 1:sum(indx_PFC), exp(cnt).area.PFC.band_passed(ch) = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.band_passed;end
                     else
-                        exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
-                        exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
-                        exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
+                        
+                        mst_ch = find(indx_MST); ppc_ch = find(indx_PPC); pfc_ch = find(indx_PFC);
+                        if experiments.sessions(sess).monk_id == 44 || experiments.sessions(sess).monk_id == 53 ...
+                                for ch = 1:sum(indx_MST), exp(cnt).area.MST.lfps.stats(ch) = experiments.sessions(sess).lfps(mst_ch(ch)).stats.trialtype;end;
+                        end % extract band passed signal
+                        if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 71 ...
+                                for ch = 1:sum(indx_PFC), exp(cnt).area.PFC.lfps.stats(ch) = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.trialtype;end;
+                        end
+                        for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.lfps(ch).stats.trialtype.reward = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.trialtype.reward;end
+                        
+                        %
+                        %                         if experiments.sessions(sess).monk_id == 44 || experiments.sessions(sess).monk_id == 53 ...
+                        %                                 exp(cnt).area.MST.lfps.stats = [experiments.sessions(sess).lfps(indx_MST).stats];
+                        %                         end
+                        %                         if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 71 ...
+                        %                                 exp(cnt).area.PFC.lfps.stats = [experiments.sessions(sess).lfps(indx_PFC).stats];
+                        %                         end
+                        %                         exp(cnt).area.PPC.lfps.stats = [experiments.sessions(sess).lfps(indx_PPC).stats];
                     end
                     
                     exp(cnt).behavior = [experiments.sessions(sess).behaviours];
