@@ -843,7 +843,8 @@ if prs.analyse_band_passed
             unitindx = strcmp({units.brain_area}, unique_brain_areas{area});
             % extract all 95th pct timings per channel
             ar = find(unitindx); corr_trl = find(corr_indx); incorr_trl = find(incorr_indx); low_half_indx = find(stats.indx_accuracy.low_half_indx); upper_half_indx = find(stats.indx_accuracy.upper_half_indx);
-            theta_corr.low_half=[]; beta_corr.low_half = []; theta_corr.upper_half=[]; beta_corr.upper_half=[];
+            theta_corr.low_half=[]; beta_corr.low_half = []; theta_corr.upper_half=[]; beta_corr.upper_half=[]; corr_theta = []; incorr_theta = []; corr_beta = []; incorr_beta = []; 
+            corr_theta_bef_stop = []; corr_theta_af_stop = []; incorr_theta_bef_stop = []; incorr_theta_af_stop = []; corr_beta_bef_stop = []; corr_beta_af_stop = []; incorr_beta_bef_stop = []; incorr_beta_af_stop = [];
             %% corr
             for ch = 1:length(ar)  % first 24 ch for MST if applicable
                 %% move
@@ -889,10 +890,40 @@ if prs.analyse_band_passed
                     BandPassedAmp2Rate(theta.chan(ch).incorr.trl, [-2:prs.temporal_binwidth:2], prs.temporal_binwidth);
                 [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.incorr.rate_95(ch,:),stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.incorr.ts_rate_95(ch,:)] = ...
                     BandPassedAmp2Rate(beta.chan(ch).incorr.trl, [-2:prs.temporal_binwidth:2], prs.temporal_binwidth);
+                %% gather
+                if ev == 2
+                    ts = mean(stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.incorr.ts_rate_95);
+                    % theta
+                    corr_theta = [corr_theta ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.corr.rate_95(ch,ts>=0 & ts<=0.3)']
+                    incorr_theta = [incorr_theta ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.incorr.rate_95(ch,ts>=0 & ts<=0.3)']
+                    % beta
+                    corr_beta = [corr_beta ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.corr.rate_95(ch,ts>=0 & ts<=0.3)']
+                    incorr_beta = [incorr_beta ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.incorr.rate_95(ch,ts>=0 & ts<=0.3)']
+                elseif ev == 3
+                    ts = mean(stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.incorr.ts_rate_95);
+                    % theta
+                    corr_theta_bef_stop = [corr_theta_bef_stop ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.corr.rate_95(ch,ts>=-1.5 & ts<=0)'];
+                    corr_theta_af_stop = [corr_theta_af_stop ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.corr.rate_95(ch,ts>=0 & ts<=1.5)'];
+                    incorr_theta_bef_stop = [incorr_theta_bef_stop ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.incorr.rate_95(ch,ts>=-1.5 & ts<=0)']
+                    incorr_theta_af_stop = [incorr_theta_af_stop ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.incorr.rate_95(ch,ts>=0 & ts<=1.5)']
+                    % beta
+                    corr_beta_bef_stop = [corr_beta_bef_stop ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.corr.rate_95(ch,ts>=-1.5 & ts<=0)'];
+                    corr_beta_af_stop = [corr_beta_af_stop ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.corr.rate_95(ch,ts>=0 & ts<=1.5)'];
+                    incorr_beta_bef_stop = [incorr_beta_bef_stop ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.incorr.rate_95(ch,ts>=-1.5 & ts<=0)']
+                    incorr_beta_af_stop = [incorr_beta_af_stop ; stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.incorr.rate_95(ch,ts>=0 & ts<=1.5)']
+                end
+            end
+            % compute stats between correct vs incorrect responses in each
+            % area and using the window of interest
+            if ev == 2
+           
+                stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val = kstest(corr_theta,incorr_theta) 
+                stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.pval
                 
-                
+            elseif ev == 3
                 
             end
+
         end
     end
 end
