@@ -4,8 +4,8 @@ function LFPpop_sim_all(exp)
 % experiments.m
 % If running for the first time, you don't need (exp) just hit run
 %% Choose what to analyze and save
-extract_exp_out = true; % load experiments.m file and extract. If saved 'exp_out', make it false.
-save_exp_out = true; % save mat file without raw lfp signal
+extract_exp_out = false; % load experiments.m file and extract. If saved 'exp_out', make it false.
+save_exp_out = false; % save mat file without raw lfp signal
 save_pop = false; % if this is true it will only extract pop
 
 extract_lfp_raw = false; % raw and per trial lfps
@@ -63,10 +63,10 @@ if extract_exp_out
                         
                         mst_ch = find(indx_MST); ppc_ch = find(indx_PPC); pfc_ch = find(indx_PFC);
                         if experiments.sessions(sess).monk_id == 44 || experiments.sessions(sess).monk_id == 53 ...
-                                for ch = 1:sum(indx_MST), exp(cnt).area.MST.lfps.stats(ch) = experiments.sessions(sess).lfps(mst_ch(ch)).stats.trialtype;end;
+                                for ch = 1:sum(indx_MST), exp(cnt).area.MST.lfps(ch).stats = experiments.sessions(sess).lfps(mst_ch(ch)).stats.trialtype;end;
                         end % extract band passed signal
                         if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 71 ...
-                                for ch = 1:sum(indx_PFC), exp(cnt).area.PFC.lfps.stats(ch) = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.trialtype;end;
+                                for ch = 1:sum(indx_PFC), exp(cnt).area.PFC.lfps(ch).stats = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.trialtype;end;
                         end
                         for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.lfps(ch).stats.trialtype.reward = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.trialtype.reward;end
                         
@@ -117,35 +117,35 @@ end
 %% PSD
 %% avg per session
 if do_PSD
-    trialtype = fieldnames(exp(1).area.PPC.lfps.stats(1).trialtype); events = fieldnames(exp(1).area.PPC.lfps.stats(1).trialtype.all.events);
+    trial_type = fieldnames(exp(1).area.PPC.lfps(1).stats.trialtype); events = fieldnames(exp(1).area.PPC.lfps(1).stats.trialtype.reward(2).events);
     for i = 1:length(exp) % num of sessions
         nareas = numel(fieldnames(exp(i).area)); areas = fieldnames(exp(i).area);
         for a = 1:length(areas) % num of areas
-            for type = 1:length(trialtype) % num of trial types
-                if ~isempty(exp(i).area.(areas{a}).lfps.stats)
-                    nconds = length(exp(i).area.(areas{a}).lfps.stats(1).trialtype.(trialtype{type})); clear cond
+            for type = 1:length(trial_type) % num of trial types
+                if ~isempty(exp(i).area.(areas{a}).lfps)
+                    nconds = length(exp(i).area.(areas{a}).lfps(1).stats.trialtype.(trial_type{type})); clear cond
                     for cond = 1:nconds
                         clear pow pow_eye
-                        for ch = 1:length(exp(i).area.(areas{a}).lfps.stats) % extract per channel
-                            if strcmp((trialtype{type}), 'eyesfree') | strcmp((trialtype{type}), 'eyesfixed')
-                                pow_eye(ch,:) = exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).spectrum.psd;
-                                freq_eye = exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).spectrum.freq;
+                        for ch = 1:length(exp(i).area.(areas{a}).lfps) % extract per channel
+                            if strcmp((trial_type{type}), 'eyesfree') | strcmp((trial_type{type}), 'eyesfixed')
+                                pow_eye(ch,:) = exp(i).area.(areas{a}).lfps(ch).stats.trialtype.(trial_type{type})(cond).spectrum.psd;
+                                freq_eye = exp(i).area.(areas{a}).lfps(ch).stats.trialtype.(trial_type{type})(cond).spectrum.freq;
                             else
-                                pow(ch,:) = exp(i).area.(areas{a}).lfps.stats(ch).trialtype.(trialtype{type})(cond).spectrum.psd;
+                                pow(ch,:) = exp(i).area.(areas{a}).lfps(ch).stats.trialtype.(trial_type{type})(cond).spectrum.psd;
                             end
                         end
                         % store
-                        freq = exp(i).area.(areas{a}).lfps.stats(1).trialtype.all.spectrum.freq;
-                        if strcmp((trialtype{type}), 'eyesfree') | strcmp((trialtype{type}), 'eyesfixed')
-                            psden_eye(i).area.(areas{a}).(trialtype{type})(cond).ch = pow_eye;
-                            psden_eye(i).area.(areas{a}).(trialtype{type})(cond).mu = nanmean(pow_eye);
-                            psden_eye(i).area.(areas{a}).(trialtype{type})(cond).sem = nanstd(pow_eye)/sqrt(length(ch));
-                            psden_eye(i).area.(areas{a}).(trialtype{type})(cond).max = max(max(nanmean(pow_eye)));
+                        freq = exp(i).area.(areas{a}).lfps(1).stats.trialtype.reward(cond).spectrum.freq;
+                        if strcmp((trial_type{type}), 'eyesfree') | strcmp((trial_type{type}), 'eyesfixed')
+                            psden_eye(i).area.(areas{a}).(trial_type{type})(cond).ch = pow_eye;
+                            psden_eye(i).area.(areas{a}).(trial_type{type})(cond).mu = nanmean(pow_eye);
+                            psden_eye(i).area.(areas{a}).(trial_type{type})(cond).sem = nanstd(pow_eye)/sqrt(length(ch));
+                            psden_eye(i).area.(areas{a}).(trial_type{type})(cond).max = max(max(nanmean(pow_eye)));
                         else
-                            psden(i).area.(areas{a}).(trialtype{type})(cond).ch = pow;
-                            psden(i).area.(areas{a}).(trialtype{type})(cond).mu = nanmean(pow);
-                            psden(i).area.(areas{a}).(trialtype{type})(cond).sem = nanstd(pow)/sqrt(length(ch));
-                            psden(i).area.(areas{a}).(trialtype{type})(cond).max = max(max(nanmean(pow)));
+                            psden(i).area.(areas{a}).(trial_type{type})(cond).ch = pow;
+                            psden(i).area.(areas{a}).(trial_type{type})(cond).mu = nanmean(pow);
+                            psden(i).area.(areas{a}).(trial_type{type})(cond).sem = nanstd(pow)/sqrt(length(ch));
+                            psden(i).area.(areas{a}).(trial_type{type})(cond).max = max(max(nanmean(pow)));
                         end
                     end
                 end

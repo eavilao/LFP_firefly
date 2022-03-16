@@ -4623,7 +4623,6 @@ switch plot_type
         ar = 'PPC'     % MST PPC PFC
         win = [-0.5 0.5]; % [-1.513 1.513];  % [-0.513 1]; for target
         ev = 'target'
-        
         for m =  1:length(monk) % [1 3]  % 1:length(monk)
             freq = 1:74;
             for f = 1:length(freq)
@@ -4714,19 +4713,22 @@ switch plot_type
         end
         
     case 'mean_plv'
-        ar = 'PPC'     % MST PPC PFC
+        ar = 'PFC'     % MST PPC PFC
         band = 'beta'
         win = [-0.5 1.5];
         ev = 'target'
+        %1:incorrect 2:correct 3:incorr move before  4:incorr move after  5:corr move before  6:corr move after
+        incorr_indx = 1;
+        corr_indx = 2;
         
-        itpc_corr_all = []; itpc_incorr_all = []; t_max_itpc_corr = []; t_max_itpc_incorr = []; itpc_corr_sem_all= []; itpc_incorr_sem_all = []; 
+         itpc_corr_all = []; itpc_incorr_all = []; t_max_itpc_corr = []; t_max_itpc_incorr = []; itpc_corr_sem_all= []; itpc_incorr_sem_all = []; 
         
-        for m = 1:length(monk)  % [1 3] 
+        for m = [3 4] %1:length(monk)  % [1 3] 
            
             clear itpc_corr itpc_incorr itpc_corr_sem itpc_incorr_sem
             for nsess = 1:length(monk(m).sess)
-                ts_corr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ts; 
-                ts_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ts;
+                ts_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(incorr_indx).events.(ev).(band).ts;
+                ts_corr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(corr_indx).events.(ev).(band).ts; 
                 %% correct 
 %                 % Z-score
 %                 for nCh = 1:size(monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc,1)
@@ -4734,9 +4736,9 @@ switch plot_type
 %                     nanmean(monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc(:,ts_corr>win(1) & ts_corr<win(2))))./std(monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc(:,ts_corr>win(1) & ts_corr<win(2)));
 %                 end
                 %
-                phase_clust_corr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_mu(1,ts_corr>win(1) & ts_corr<win(2));
+                phase_clust_corr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(corr_indx).events.(ev).(band).ang_itpc_mu(1,ts_corr>win(1) & ts_corr<win(2));
                 if ev == 'target', itpc_corr(nsess,:) = phase_clust_corr(1:333);  else itpc_corr(nsess,:) = phase_clust_corr(1:500); end % making sure all vectors are the same length because of extra sample here and there
-                phase_clust_corr_sem = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_sem(1,ts_corr>win(1) & ts_corr<win(2));
+                phase_clust_corr_sem = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(corr_indx).events.(ev).(band).ang_itpc_sem(1,ts_corr>win(1) & ts_corr<win(2));
                 if ev == 'target', itpc_corr_sem(nsess,:) = phase_clust_corr_sem(1:333); else itpc_corr_sem(nsess,:) = phase_clust_corr_sem(1:500); end 
                 % itpc_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_mu']); itpc_corr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_sem']);
                 % store
@@ -4747,9 +4749,9 @@ switch plot_type
                 [~,indx_t_corr] = max(itpc_corr(nsess,:)); 
                 
                 %% incorrect
-                phase_clust_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ang_itpc_mu(1,ts_incorr>win(1) & ts_incorr<win(2));
+                phase_clust_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(incorr_indx).events.(ev).(band).ang_itpc_mu(1,ts_incorr>win(1) & ts_incorr<win(2));
                 if ev == 'target', itpc_incorr(nsess,:) = phase_clust_incorr(1:333); else itpc_incorr(nsess,:) = phase_clust_incorr(1:500); end % making sure all vectors are the same length because of extra sample here and there
-                phase_clust_incorr_sem = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).ang_itpc_sem(1,ts_incorr>win(1) & ts_incorr<win(2));
+                phase_clust_incorr_sem = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(incorr_indx).events.(ev).(band).ang_itpc_sem(1,ts_incorr>win(1) & ts_incorr<win(2));
                 if ev == 'target', itpc_incorr_sem(nsess,:) = phase_clust_incorr_sem(1:333); else itpc_incorr_sem(nsess,:) = phase_clust_incorr_sem(1:500); end 
                 % itpc_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).([(band) '_ang_itpc_mu']); itpc_incorr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).([(band) '_ang_itpc_sem']);
                 % store
@@ -4779,7 +4781,7 @@ switch plot_type
             figure; hold on;
             shadedErrorBar(ts_corr_win, mean(itpc_corr),mean(itpc_corr_sem),'lineprops',{'Color', [0.78,0.77,0]});
             shadedErrorBar(ts_incorr_win, mean(itpc_incorr),mean(itpc_incorr_sem), 'lineprops', 'k')
-            set(gca,'ylim',[0 0.41], 'yTick',[0 0.2 0.4], 'FontSize', 22); axis square
+            set(gca,'ylim',[0 0.3], 'yTick',[0 0.1 0.2 0.3], 'FontSize', 22); axis square
             ylabel('phase clustering'); xlabel('time (s)')
             title(['monkey ' num2str(m)])
         end
@@ -4793,7 +4795,7 @@ switch plot_type
         
         figure; hold on;
         area(ts_incorr_win, mean(itpc_incorr_all),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
-        area(ts_corr_win, mean(itpc_corr_all),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        area(ts_corr_win, mean(itpc_corr_all),'FaceColor',[0.78,0.77,0],'EdgeColor','none'); alpha(0.7)
         % set(gca,'xlim',[win(1) win(2)],'ylim',[0 1.5], 'yTick',[0 0.5 1], 'FontSize', 22, 'TickDir', 'out'); axis square; vline(0,'--k');%vline(ts_corr_win(indx_max_corr),'g'); vline(ts_incorr_win(indx_max_incorr),'k');
         set(gca,'xlim',[-0.5 0.5],'ylim',[0 1], 'yTick',[0 0.5 1], 'FontSize', 22, 'TickDir', 'out'); axis square; vline(0,'--k'); vline(-0.3,'--k'); % for target 
         ylabel('phase clustering'); xlabel([ev ' time (s)']); title('all monks')
@@ -4877,70 +4879,66 @@ switch plot_type
         xlabel ([ev ' time (s)']); ylabel('count'); vline(-0.3,'--k')
         
     case 'plv_across_area'
-        ar = 'MST_PPC_PLV'     % MST_PPC_PLV // MST_PFC_PLV // PFC_PPC_PLV
-        win = [-1.501 1.501];
-        ev = 'reward'
-        band = 'beta'
+        ar = 'PFC_PPC_PLV'     % MST_PPC_PLV // MST_PFC_PLV // PFC_PPC_PLV
+        win = [-1.01 1.01];
+        x_lim = [-0.5 0.5];
+        ev = 'target'
+        band = 'theta'
         
         plv_all_corr = []; plv_all_corr_sem = []; plv_all_incorr = []; plv_all_incorr_sem = [];
-        for m = [1 3] % [1 3]
+        for m = [3 4] % [1 3] [3 4]
             ts_corr = monk(m).sess(1).pop.area.PPC.trialtype.reward(2).events.(ev).(band).ts; ts_win_corr = ts_corr(ts_corr > win(1) & ts_corr < win(2));
-%              ts_incorr = monk(m).sess(1).pop.area.PPC.trialtype.reward(1).events.(ev).(band).ts; ts_win_incorr = ts_incorr(ts_incorr > win(1) & ts_incorr < win(2));
+            ts_incorr = monk(m).sess(1).pop.area.PPC.trialtype.reward(1).events.(ev).(band).ts; ts_win_incorr = ts_incorr(ts_incorr > win(1) & ts_incorr < win(2));
             clear plv_sess_corr plv_sess_incorr
             for nsess = 1:length(monk(m).sess)
-                plv_sess_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLV_mu_Z(ts_corr > win(1) & ts_corr < win(2));
+                plv_sess_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLV_mu(ts_corr > win(1) & ts_corr < win(2)); 
                 plv_sess_corr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
                 
-%                  plv_sess_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_mu_Z(ts_corr > win(1) & ts_corr < win(2));
-%                  plv_sess_incorr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
+                plv_sess_incorr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_mu(ts_corr > win(1) & ts_corr < win(2));
+                plv_sess_incorr_sem(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_sem(ts_corr > win(1) & ts_corr < win(2));
             end
             % average per monkey
             plv_monk_corr = nanmean(plv_sess_corr); plv_monk_corr_sem = nanmean(plv_sess_corr_sem);
-%              plv_monk_incorr = nanmean(plv_sess_incorr); plv_monk_incorr_sem = nanmean(plv_sess_incorr_sem);
+            plv_monk_incorr = nanmean(plv_sess_incorr); plv_monk_incorr_sem = nanmean(plv_sess_incorr_sem);
             
-            plv_all_corr = [plv_all_corr ; plv_monk_corr]; plv_all_corr_sem = [plv_all_corr_sem ; plv_monk_corr_sem];
-%              plv_all_incorr = [plv_all_incorr ; plv_monk_incorr]; plv_all_incorr_sem = [plv_all_incorr_sem ; plv_monk_incorr_sem];
+            plv_all_corr = [plv_all_corr ; plv_monk_corr./max(plv_monk_corr)]; plv_all_corr_sem = [plv_all_corr_sem ; plv_monk_corr_sem]; %Store normalized to correct max response
+            plv_all_incorr = [plv_all_incorr ; plv_monk_incorr./max(plv_monk_corr)]; plv_all_incorr_sem = [plv_all_incorr_sem ; plv_monk_incorr_sem];
             
         end
         
         %% plot two monks
+        if strcmp(ev,'target'), ts_align = ts_win_corr-0.3; else ts_align=ts_win_corr; end
+        
         figure; hold on
-        shadedErrorBar(ts_win_corr,nanmean(plv_all_corr),nanmean(plv_all_corr_sem), 'lineprops','g');
-        shadedErrorBar(ts_win_corr,nanmean(plv_all_incorr),nanmean(plv_all_incorr_sem), 'lineprops','k');
-        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+        shadedErrorBar(ts_align,nanmean(plv_all_corr),nanmean(plv_all_corr_sem), 'lineprops',{'Color', [0.78,0.77,0]});
+        shadedErrorBar(ts_align,nanmean(plv_all_incorr),nanmean(plv_all_incorr_sem), 'lineprops','k');
+        set(gca,'xlim',[x_lim(1) x_lim(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar);
         
         figure; hold on
-        area(ts_win_corr, smooth(nanmean(plv_all_incorr),5),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
-        area(ts_win_corr, smooth(nanmean(plv_all_corr),5),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
-        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+        area(ts_align, smooth(nanmean(plv_all_incorr),5),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+        area(ts_align, smooth(nanmean(plv_all_corr),5),'FaceColor',[0.78,0.77,0],'EdgeColor','none'); alpha(0.7)
+        set(gca,'xlim',[x_lim(1) x_lim(2)],'Fontsize',20, 'TickDir', 'out', 'yTick', [0.5 1]); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); %vline([-0.3 0],'k')
-        ylim([-45 45]);
-        
-        % target
-        figure; hold on
-        area(ts_win_corr-0.3, nanmean(plv_all_incorr),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
-        area(ts_win_corr-0.3, nanmean(plv_all_corr),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
-        set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
-        xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); vline([-0.3 0],'k')
-        ylim([-100 100]);
-        
-        %% plot PFC
-        % temp plot PFC
-        figure; hold on
-        area(ts_win_corr, nanmean(plv_sess_incorr),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
-        area(ts_win_corr, plv_all_corr,'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
-        set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
-        xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); %vline([-0.3 0],'k')
-        ylim([-100 100]);
-
-        % target
-        figure; hold on
-        area(ts_win_corr-0.3, plv_all_incorr,'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
-        area(ts_win_corr-0.3, plv_all_corr,'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
-        set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
-        xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); vline([-0.3 0],'k')
-        ylim([-100 100]);
+        ylim([0.5 1]);  if strcmp(ev,'target'), vline([-0.3 0], 'k'); else vline(0,'k'); end 
+        %ylim([-45 45]); 
+    
+%         %% plot PFC
+%         % temp plot PFC
+%         figure; hold on
+%         area(ts_win_corr, nanmean(plv_sess_incorr),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+%         area(ts_win_corr, plv_all_corr,'FaceColor',[0.78,0.77,0],'EdgeColor','none'); alpha(0.7)
+%         set(gca,'xlim',[win(1) win(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+%         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); %vline([-0.3 0],'k')
+%         ylim([-100 100]);
+% 
+%         % target
+%         figure; hold on
+%         area(ts_win_corr-0.3, plv_all_incorr,'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+%         area(ts_win_corr-0.3, plv_all_corr,'FaceColor',[0.78,0.77,0],'EdgeColor','none'); alpha(0.7)
+%         set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+%         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar); vline([-0.3 0],'k')
+%         ylim([-100 100]);
         
      case 'pli_across_area'
         ar = 'MST_PFC_PLI'     % MST_PPC_PLI // MST_PFC_PLI // PFC_PPC_PLI
