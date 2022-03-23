@@ -1,6 +1,6 @@
 %Run batch of files to analyze LFP
 
-name_exp = 'spectro_move_ba';
+name_exp = 'phase_move_ba';
 extract_behv_only = false;
 
 
@@ -314,7 +314,7 @@ else
     %
     experiments = experiment('firefly-monkey');
     experiments.AddSessions(71,2,{'behv','lfps','pop'})
-    cd('E:\Output\spectrograms\move_before_after')
+    cd('E:\Output\phase')
     save(['experiments_lfp_Vik_2_' name_exp], 'experiments', '-v7.3')
     clear experiments
     %

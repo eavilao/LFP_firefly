@@ -4,8 +4,8 @@ function LFPpop_sim_all(exp)
 % experiments.m
 % If running for the first time, you don't need (exp) just hit run
 %% Choose what to analyze and save
-extract_exp_out = false; % load experiments.m file and extract. If saved 'exp_out', make it false.
-save_exp_out = false; % save mat file without raw lfp signal
+extract_exp_out = true; % load experiments.m file and extract. If saved 'exp_out', make it false.
+save_exp_out = true; % save mat file without raw lfp signal
 save_pop = false; % if this is true it will only extract pop
 
 extract_lfp_raw = false; % raw and per trial lfps
@@ -23,8 +23,8 @@ save_band_pass_analysis = false; % extract band passed lfp signal only (used onl
 do_band_passed_pop = false;  % needs pop
 do_phases = false; % needs pop
 
-name_output_exp_out_file = 'exp_out_lfp_psd_erp_2022_03_14';
-name_output_file = 'lfp_psd_erp_2022_03_14';
+name_output_exp_out_file = 'exp_out_lfp_PSD_ERP_2022_03_20';
+name_output_file = 'lfp_PSD_ERP_2022_03_20';
 
 %% Extract
 if extract_exp_out
@@ -68,7 +68,7 @@ if extract_exp_out
                         if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 71 ...
                                 for ch = 1:sum(indx_PFC), exp(cnt).area.PFC.lfps(ch).stats = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.trialtype;end;
                         end
-                        for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.lfps(ch).stats.trialtype.reward = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.trialtype.reward;end
+                        for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.lfps(ch).stats.trialtype.reward = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.trialtype;end
                         
                         %
                         %                         if experiments.sessions(sess).monk_id == 44 || experiments.sessions(sess).monk_id == 53 ...

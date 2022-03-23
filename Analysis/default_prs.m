@@ -293,7 +293,7 @@ prs.corr_neuronbehverr = false;
 prs.event_potential = true;
 prs.compute_spectrum = true;
 prs.extract_band_passed = false; % AnalyseLFP.m
-prs.analyse_band_passed = true; % AnalysePopulation.m
+prs.analyse_band_passed = false; % AnalysePopulation.m
 prs.band_pass_acc_thresh_low_third = 21.6666; % distance in cm -- threshold for band pass vs accuracy
 prs.band_pass_acc_thresh_upper_third = 43.3332; % distance in cm -- threshold for band pass vs accuracy
 prs.compute_psd = true;
@@ -308,9 +308,9 @@ prs.analyse_wideband = false; % compute tunings
 prs.compute_coherencyLFP = false;
 prs.compute_coherogram = false;
 prs.compute_coherogram_band_passed = false;
-prs.analyse_phase = false;
+prs.analyse_phase = true;
 prs.analyse_phase_within_area = false; %to compute phase in all freq (heavy and slow)
-prs.analyse_move_before_after = false; %AnlyseBehaviour.m
+prs.analyse_move_before_after = true; %AnlyseBehaviour.m
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;
