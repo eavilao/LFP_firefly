@@ -1210,7 +1210,7 @@ if prs.analyse_phase
                     for i = 1:length(n_boot_indx_beta),shuffled_beta(i,:) = randsample(beta_all(n_boot_indx_beta(i),:),length(beta_all(n_boot_indx_beta(i),:)),'true');end
                     for i = 1:length(n_boot_indx_beta),shuffled_beta_pli(i,:) = randsample(beta_all_pli(n_boot_indx_beta(i),:),length(beta_all_pli(n_boot_indx_beta(i),:)),'true');end
                     
-                    % convert plv values to std dev units of the shuffled (null) distribution Z = ( PLV - mean(PLVShuff) )/ std(PLVShuff)
+                    % convert plv values to std dev units of the shuffled (null) distribution Z = ( PLV - mean(PLVShuff) )./ std(PLVShuff) )
                     stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLV']).trialtype.reward(2).events.(gettuning{ev}).theta.shuffled_theta = nanmean(shuffled_theta);
                     stats.area.([unique_brain_areas{area1} '_' unique_brain_areas{area2} '_PLI']).trialtype.reward(2).events.(gettuning{ev}).theta.shuffled_theta_pli = nanmean(shuffled_theta_pli);
                     
