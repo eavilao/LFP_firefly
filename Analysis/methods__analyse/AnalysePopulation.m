@@ -1192,13 +1192,19 @@ if prs.analyse_phase
                 if prs.analyse_theta | prs.analyse_beta
                     %% create a shuffled distr to get signif
                     % find min between the two
-                    if (ev == 4 && cond == 2), min_size_theta = min([size(theta_all_corr,2)]);  min_size_beta = min([size(beta_all_corr,2)]); else ...
-                            min_size_theta = min([size(theta_all_corr,2) size(theta_all_incorr,2)]); min_size_beta = min([size(beta_all_corr,2) size(beta_all_incorr,2)]); end
+                    if (ev == 4 && cond == 2)
+                        min_size_theta = min([size(theta_all_corr,2)]);  min_size_beta = min([size(beta_all_corr,2)]);
+                    else
+                        min_size_theta = min([size(theta_all_corr,2) size(theta_all_incorr,2)]); min_size_beta = min([size(beta_all_corr,2) size(beta_all_incorr,2)]);
+                    end
                     % concatenate correct and incorrect
-                    if (ev == 4 && cond == 2),  theta_all = theta_all_corr(:,1:min_size_theta); theta_all_pli = theta_all_pli_corr(:,1:min_size_theta);
-                        beta_all = beta_all_corr(:,1:min_size_beta); beta_all_pli = beta_all_pli_corr(:,1:min_size_beta); else ...
-                            theta_all = [theta_all_corr(:,1:min_size_theta) ; theta_all_incorr(:,1:min_size_theta)]; theta_all_pli = [theta_all_pli_corr(:,1:min_size_theta) ; theta_all_pli_incorr(:,1:min_size_theta)];
-                        beta_all = [beta_all_corr(:,1:min_size_beta) ; beta_all_incorr(:,1:min_size_beta)]; beta_all_pli = [beta_all_pli_corr(:,1:min_size_beta) ; beta_all_pli_incorr(:,1:min_size_beta)]; end
+                    if (ev == 4 && cond == 2)
+                        theta_all = theta_all_corr(:,1:min_size_theta); theta_all_pli = theta_all_pli_corr(:,1:min_size_theta);
+                        beta_all = beta_all_corr(:,1:min_size_beta); beta_all_pli = beta_all_pli_corr(:,1:min_size_beta);
+                    else
+                        theta_all = [theta_all_corr(:,1:min_size_theta) ; theta_all_incorr(:,1:min_size_theta)]; theta_all_pli = [theta_all_pli_corr(:,1:min_size_theta) ; theta_all_pli_incorr(:,1:min_size_theta)];
+                        beta_all = [beta_all_corr(:,1:min_size_beta) ; beta_all_incorr(:,1:min_size_beta)]; beta_all_pli = [beta_all_pli_corr(:,1:min_size_beta) ; beta_all_pli_incorr(:,1:min_size_beta)];
+                    end
                     
                     n_boot = 1000;
                     n_boot_indx_theta = randi(size(theta_all,1),n_boot,1);

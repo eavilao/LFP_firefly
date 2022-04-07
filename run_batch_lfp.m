@@ -1,12 +1,12 @@
 name_load_exp = 'phase_move_ba';
 name_save_exp = 'phase_move_ba';
 %%
-% rerun_analyseLFP = false; 
-% rerun_AddPop = true; 
-% disp('Loading file 1... . . ')
-% disp(['experiments_lfp_Schro_113_' name_load_exp])
-% load(['experiments_lfp_Schro_113_' name_load_exp])
-% prs = default_prs(53,113);
+rerun_analyseLFP = false; 
+rerun_AddPop = true; 
+disp('Loading file 1... . . ')
+disp(['experiments_lfp_Schro_113_' name_load_exp])
+load(['experiments_lfp_Schro_113_' name_load_exp])
+prs = default_prs(53,113);
 if rerun_analyseLFP, experiments.sessions.AnalyseLfps(prs); end
 if rerun_AddPop
 experiments.sessions(1).populations(1)=[];

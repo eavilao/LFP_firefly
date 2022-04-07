@@ -5045,13 +5045,12 @@ switch plot_type
         if strcmp(ev,'target'), vline([-0.3 0], 'k'); else vline(0,'k'); end
         
     case 'plv_across_area'
-        ar = 'MST_PPC_PLV'     % MST_PPC_PLV // MST_PFC_PLV // PFC_PPC_PLV
-        ev = 'target'
-        band = 'theta'
+        ar = 'PFC_PPC_PLV'     % MST_PPC_PLV // MST_PFC_PLV // PFC_PPC_PLV
+        ev = 'reward'
+        band = 'beta'
         
-        if strcmp(ev,'target'),win = [-1 1]; x_lim = [-0.5 0.5]; elseif strcmp(ev,'stop'), win = [-1.51 1.51]; x_lim = [-1.5 1.5]; else, win = [-1 1]; x_lim = [-1 1]; end
-        
-        
+        if strcmp(ev,'target'),win = [-1 1]; x_lim = [-0.5 0.5]; elseif strcmp(ev,'stop'), win = [-1.51 1.51]; x_lim = [-1 1]; else, win = [-1 1]; x_lim = [-1 1]; end
+
         plv_all_corr = []; plv_all_corr_sem = []; plv_all_incorr = []; plv_all_incorr_sem = [];
         if strcmp(ar,'MST_PPC_PLV'), monk_ids = [1 3]; elseif strcmp(ar,'MST_PFC_PLV'), monk_ids = 3; else monk_ids = [3 4]; end
         
@@ -5068,7 +5067,7 @@ switch plot_type
                 else strcmp(ev,'reward'),  plv_sess_corr(nsess,:) = sess_corr(1:333); plv_sess_corr_sem = sess_corr_sem(1:333); clc;
                 end
                 if ~strcmp(ev,'reward')
-                    sess_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_mu(ts_incorr > win(1) & ts_incorr < win(2));
+                    sess_incorr = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_mu_Z(ts_incorr > win(1) & ts_incorr < win(2));
                     sess_incorr_sem = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).(band).PLV_sem(ts_incorr > win(1) & ts_incorr < win(2));
                     if strcmp(ev,'target'),  plv_sess_incorr(nsess,:) = sess_incorr(1:250); plv_sess_incorr_sem = sess_incorr_sem(1:250);
                     elseif strcmp(ev,'stop'),  plv_sess_incorr(nsess,:) = sess_incorr(1:503); plv_sess_incorr_sem = sess_incorr_sem(1:503);
@@ -5091,6 +5090,13 @@ switch plot_type
         if strcmp(ev,'target'), ts_align = ts_win_corr-0.3; else ts_align=ts_win_corr; end
         
         figure; hold on
+        if ~strcmp(ev,'reward'),plot(ts_align,smooth(nanmean(plv_all_incorr),5), '-k');end
+        plot(ts_align,smooth(nanmean(plv_all_corr),5),'Color', [0.78,0.77,0]);
+        set(gca,'xlim',[x_lim(1) x_lim(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
+        xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar);
+        if strcmp(ev,'target'), vline([-0.3 0], 'k'); else vline(0,'k'); end
+        
+        figure; hold on
         area(ts_align, smooth(nanmean(plv_all_incorr),5),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
         area(ts_align, smooth(nanmean(plv_all_corr),5),'FaceColor',[0.78,0.77,0],'EdgeColor','none'); alpha(0.7)
         set(gca,'xlim',[x_lim(1) x_lim(2)],'Fontsize',20, 'TickDir', 'out', 'yTick', [0.5 1]); axis square; box off
@@ -5103,13 +5109,6 @@ switch plot_type
         %         shadedErrorBar(ts_align,nanmean(plv_all_incorr),nanmean(plv_all_incorr_sem), 'lineprops','k');
         %         set(gca,'xlim',[x_lim(1) x_lim(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         %         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar);
-        
-        figure; hold on
-        if ~strcmp(ev,'reward'),plot(ts_align,smooth(nanmean(plv_all_incorr),5), '-k');end
-        plot(ts_align,smooth(nanmean(plv_all_corr),5),'Color', [0.78,0.77,0]);
-        set(gca,'xlim',[x_lim(1) x_lim(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
-        xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar);
-        if strcmp(ev,'target'), vline([-0.3 0], 'k'); else vline(0,'k'); end
         
         % one monk
         figure; hold on
