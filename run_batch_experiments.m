@@ -1,7 +1,7 @@
 %Run batch of files to analyze LFP
 
-name_exp = 'phase_move_ba';
-extract_behv_only = false;
+name_exp = 'behav';
+extract_behv_only = true;
 
 
 if extract_behv_only
@@ -9,27 +9,36 @@ if extract_behv_only
 %     experiments.AddSessions(44,185,{'behv'})
 %     experiments.AddSessions(44,188,{'behv'})
 %     experiments.AddSessions(44,207,{'behv'})
-%     cd('/Volumes/Extreme SSD/temp_data/Behavior')
+%     cd('/Volumes/Extreme SSD/Output/behavior')
 %     disp('   Saving ....')
 %     save('experiments_lfp_Quigley_185_188_207_only_behv', 'experiments', '-v7.3')
 %     clear experiments
-    
-    experiments = experiment('firefly-monkey');
+%     
+%     experiments = experiment('firefly-monkey');
 %     experiments.AddSessions(51,41,{'behv'})
-    experiments.AddSessions(51,42,{'behv'})
-    experiments.AddSessions(51,43,{'behv'})
-    cd('/Volumes/Extreme SSD/temp_data/Behavior')
-    disp('   Saving ....')
-    save('experiments_lfp_Bruno_38_41_42_43', 'experiments', '-v7.3')
-    clear experiments
+%     experiments.AddSessions(51,42,{'behv'})
+%     experiments.AddSessions(51,43,{'behv'})
+%     cd('/Volumes/Extreme SSD/Output/behavior')
+%     disp('   Saving ....')
+%     save('experiments_lfp_Bruno_38_41_42_43', 'experiments', '-v7.3')
+%     clear experiments
+%     
+%     experiments = experiment('firefly-monkey');
+%     experiments.AddSessions(53,86,{'behv'})
+%     experiments.AddSessions(53,107,{'behv'})
+%     experiments.AddSessions(53,113,{'behv'})
+%     cd('/Volumes/Extreme SSD/Output/behavior')
+%     disp('   Saving ....')
+%     save('experiments_lfp_Schro_86_107_113', 'experiments', '-v7.3')
+%     clear experiments
     
     experiments = experiment('firefly-monkey');
-    experiments.AddSessions(53,86,{'behv'})
-    experiments.AddSessions(53,107,{'behv'})
-    experiments.AddSessions(53,113,{'behv'})
-    cd('/Volumes/Extreme SSD/temp_data/Behavior')
+    experiments.AddSessions(71,1,{'behv'})
+    experiments.AddSessions(71,2,{'behv'})
+    experiments.AddSessions(71,4,{'behv'})
+    cd('/Volumes/Extreme SSD/Output/behavior')
     disp('   Saving ....')
-    save('experiments_lfp_Schro_86_107_113', 'experiments', '-v7.3')
+    save('experiments_lfp_Vik_1_2_4', 'experiments', '-v7.3')
     clear experiments
     
 else
