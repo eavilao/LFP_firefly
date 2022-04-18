@@ -4347,21 +4347,16 @@ switch plot_type
         save(['monkey_' monkey '_' areaToLoad '_' band '_tspk_all'], 'tspk_corr_all', 'tspk_incorr_all');
         
     case 'band_passed_vs_accuracy'
-        ar = 'PFC'     % MST PPC PFC
-        band = 'beta'
-        x_lim = [-0.5 0.5];
+        ar = 'PPC'     % MST PPC PFC
+        band = 'theta';
         ev = 'target'
-        
-        r_corr_all = [];
-        r_incorr_all = [];
-        peak_t_corr_all = [];
-        peak_t_incorr_all = [];
-        mod_indx_corr = [];
-        mod_indx_incorr = [];
-        
+       
+        if strcmp(ev,'target'),win = [-1 1]; x_lim = [-0.5 0.5]; elseif strcmp(ev,'stop'), win = [-1.51 1.51]; x_lim = [-1.5 1.5]; else, win = [-1 1]; x_lim = [-1 1]; end
         if strcmp(ar,'MST'), monk_ids = [1 3]; elseif strcmp(ar,'PFC'), monk_ids = [3 4]; else monk_ids = 1:length(monk); end
         
-        for m = monk_ids % [1 3]; % 1:length(monk)
+        r_corr_all = []; r_incorr_all = []; peak_t_corr_all = []; peak_t_incorr_all = []; mod_indx_corr = []; mod_indx_incorr = [];
+        
+        for m = monk_ids
             clear peak_t_corr peak_t_incorr min_t_corr min_t_incorr
             for nsess = 1:length(monk(m).sess)
                 %% corr
