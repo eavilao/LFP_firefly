@@ -1925,44 +1925,22 @@ switch plot_type
         end
         
     case 'PSD_all_together'
+          ar = 'PPC';  
+        if strcmp(ar,'MST'), monk_ids = [1 3]; elseif strcmp(ar,'PFC'), monk_ids = [3 4]; else monk_ids = 1:length(monk); end
+        
         f = monk(1).pw.freq; % frequency
-        for nmonk = 3 % 1:length(monk)  [1 3]
-            psd_mst(nmonk,:) = monk(nmonk).pw.area.MST.all.mu_sess;
-            psd_mst_sem(nmonk,:) = monk(nmonk).pw.area.MST.all.std_sess;
-            psd_ppc(nmonk,:) = monk(nmonk).pw.area.PPC.all.mu_sess;
-            psd_ppc_sem(nmonk,:) = monk(nmonk).pw.area.PPC.all.std_sess;
-            psd_pfc(nmonk,:) = monk(nmonk).pw.area.PFC.all.mu_sess;
-            psd_pfc_sem(nmonk,:) = monk(nmonk).pw.area.PFC.all.std_sess;
+        for nmonk = monk_ids
+            psd(nmonk,:) = monk(nmonk).pw.area.(ar).all.mu_sess;
+            psd_sem(nmonk,:) = monk(nmonk).pw.area.(ar).all.std_sess;
         end
         
-        figure; %  MST
-        shadedErrorBar(f,mean(psd_mst),mean(psd_mst_sem), 'lineprops','k');
-        xlim([4 50]); xlabel('Frequency (Hz)'); ylabel('Power spectral density (\muV^2/Hz)'); ylim([0 0.08*10e-4])
+        figure; hold on
+        shadedErrorBar(f,mean(psd),mean(psd_sem), 'lineprops','k');
+        xlim([4 50]); xlabel('Frequency (Hz)'); ylabel('Power spectral density (\muV^2/Hz)'); 
         set(gca,'TickDir', 'out', 'FontSize', 22); box off; % set(gca,'TickDir', 'out', 'FontSize', 22, 'YScale', 'log'); box off;
-        title('MST')
-        
-        % Separate for each monkey
-        figure; %  MST
-        plot(f,psd_mst,'k');
-        xlim([4 50]); xlabel('Frequency (Hz)'); ylabel('Power spectral density (\muV^2/Hz)'); ylim([0 0.08*10e-4])
-        set(gca,'TickDir', 'out', 'FontSize', 22); box off; % set(gca,'TickDir', 'out', 'FontSize', 22, 'YScale', 'log'); box off;
-        title('MST')
-        
-        figure; %  PPC
-        shadedErrorBar(f,mean(psd_ppc),mean(psd_ppc_sem), 'lineprops','k');
-        xlim([4 50]); xlabel('Frequency (Hz)'); ylabel('Power spectral density (\muV^2/Hz)'); ylim([0 60])
-        set(gca,'TickDir', 'out', 'FontSize', 22); box off; % set(gca,'TickDir', 'out', 'FontSize', 22, 'YScale', 'log'); box off;
-        title('PPC')
-        
-        %% PFC
-        max_pfc = max(max(psd_pfc));
-        figure;
-        shadedErrorBar(f,mean(psd_pfc)./max_pfc,mean(psd_pfc_sem)./max_pfc, 'lineprops','k');
-        xlim([4 50]); xlabel('Frequency (Hz)'); ylabel('Power spectral density (\muV^2/Hz)'); ylim([0 0.01])
-        set(gca,'TickDir', 'out','yTick',[0 0.005 0.01], 'FontSize', 22); box off; % set(gca,'TickDir', 'out', 'FontSize', 22, 'YScale', 'log'); box off;
-        title('PFC')
-        
-        
+        if strcmp(ar,'MST'), ylim([0 0.08*10e-4]); elseif strcmp(ar,'PFC'), ylim([0 0.4]); else ylim([0 0.04]); end  
+        title(ar)
+
     case 'PSD_move'
         for nmonk = 1:length(monk)
             areas = fieldnames(monk(1).pw.area);

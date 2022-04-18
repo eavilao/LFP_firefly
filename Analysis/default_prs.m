@@ -308,7 +308,7 @@ prs.analyse_wideband = false; % compute tunings
 prs.compute_coherencyLFP = false;
 prs.compute_coherogram = false;
 prs.compute_coherogram_band_passed = false;
-prs.analyse_phase = true;
+prs.analyse_phase = false;
 prs.analyse_phase_within_area = false; %to compute phase in all freq (heavy and slow)
 prs.analyse_move_before_after = true; %AnlyseBehaviour.m
 
