@@ -917,19 +917,18 @@ if prs.analyse_band_passed
             % area and using the window of interest
             if ev == 2
                 % theta
-                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val, stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_flag] = ranksum(corr_theta,incorr_theta);
+                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val, stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_flag] = kstest2(corr_theta,incorr_theta); % KS test
                 % beta
-                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val, stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val_flag] = ranksum(corr_beta,incorr_beta);
+                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val, stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_flag] = kstest2(corr_theta,incorr_theta); % KS test
                 
             elseif ev == 3
                 %theta
-                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_bef_stop,stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_flag_bef_stop] = ranksum(corr_theta_bef_stop, incorr_theta_bef_stop);
-                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_af_stop,stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_flag_af_stop] = ranksum(corr_theta_af_stop, incorr_theta_af_stop);
+                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_bef_stop,stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_flag_bef_stop] = kstest2(corr_theta_bef_stop, incorr_theta_bef_stop);
+                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_af_stop,stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).theta.p_val_flag_af_stop] = kstest2(corr_theta_af_stop, incorr_theta_af_stop);
                 %beta
-                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val_bef_stop,stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val_flag_bef_stop] = ranksum(corr_beta_bef_stop, incorr_beta_bef_stop);
-                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val_af_stop,stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val_flag_af_stop] = ranksum(corr_beta_af_stop, incorr_beta_af_stop);
-            end
-            
+                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val_bef_stop,stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val_flag_bef_stop] = kstest2(corr_beta_bef_stop, incorr_beta_bef_stop);
+                [stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val_af_stop,stats.area.(unique_brain_areas{area}).band_pass.(gettuning{ev}).beta.p_val_flag_af_stop] = kstest2(corr_beta_af_stop, incorr_beta_af_stop);
+            end 
         end
     end
 end

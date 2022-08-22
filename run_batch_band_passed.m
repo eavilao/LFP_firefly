@@ -43,7 +43,7 @@ end
 disp('Saving... . .' )
 save(['experiments_lfp_Schro_86_' name_save_exp], 'experiments', '-v7.3')
 clear experiments
-%
+%%
 rerun_analyseLFP = false; 
 rerun_AddPop = true;  
 disp('Loading file 4... . . ')
@@ -157,8 +157,8 @@ save(['experiments_lfp_Vik_1_' name_save_exp], 'experiments', '-v7.3')
 clear experiments
 %%
 rerun_analyseLFP = false; 
-rerun_AddPop = false;  
-disp('Loading file 11... . . ')
+rerun_AddPop = true;  
+disp('Loading file 12... . . ')
 load(['experiments_lfp_Vik_2_' name_load_exp])
 prs = default_prs(71,2);
 if rerun_analyseLFP, experiments.sessions.AnalyseLfps(prs); end
@@ -185,7 +185,7 @@ clear experiments
 % clear experiments
 %%
 rerun_analyseLFP = false; 
-rerun_AddPop = false;  
+rerun_AddPop = true;  
 disp('Loading file 13... . . ')
 load(['experiments_lfp_Vik_4_' name_load_exp])
 prs = default_prs(71,4);

@@ -4725,7 +4725,8 @@ switch plot_type
                 elseif strcmp(ev,'reward'), itpc_corr_sem(nsess,:) = phase_clust_corr_sem(1:333);
                 else itpc_corr_sem(nsess,:) = phase_clust_corr_sem(1:500); end
                 itpc_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_mu']); itpc_corr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).([(band) '_ang_itpc_sem']);
-                
+                % itpc_corr(nsess,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_mu; itpc_corr_sem(nsess,:) =  monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).(band).ang_itpc_sem;
+
                 % store
                 if strcmp(ev,'target'), ts_corr_win = ts_corr(ts_corr>win(1) & ts_corr<win(2))-0.3; ts_corr_win = ts_corr_win(1:333)
                 elseif strcmp(ev,'reward'), ts_corr_win = ts_corr(ts_corr>win(1) & ts_corr<win(2)); ts_corr_win=ts_corr_win(1:333);...
@@ -4830,8 +4831,9 @@ switch plot_type
         
         
     case 'mean_plv_Z'
+        close all
         ar = 'PFC'     % MST PPC PFC
-        band = 'theta'
+        band = 'beta'
         ev = 'reward'
         %1:incorrect 2:correct 3:incorr move before  4:incorr move after  5:corr move before  6:corr move after
         incorr_indx = 1;
@@ -4909,16 +4911,40 @@ switch plot_type
             itpc_incorr_pop = [itpc_incorr_pop ; itpc_incorr_all];
             end
             %%           plot for each monkey
-%             % plot Z transf for each monkey
+            % plot raw itpc for each monkey
+            figure(1); hold on;
             subplot(1,monk_ids(end), m); hold on
             plot(ts_corr_win, mean(itpc_corr),'Color', [0.78,0.77,0]);
             if ~strcmp(ev, 'reward'), plot(ts_incorr_win, mean(itpc_incorr),'-k'); end
-            box off; axis square
+            set(gca,'xlim',[x_lim(1) x_lim(2)],'TickDir', 'out'); box off; axis square;
             ylabel('phase clustering'); xlabel('time (s)')
             title(['monkey ' num2str(m)])
+            if strcmp(ev,'target'), vline([-0.3 0], 'k'); else vline(0,'k'); end
+            savefig(gcf,[ar '_' band '_' ev '_plv_raw'])
+            
+            % plot z transf per monkey
+            figure(2); hold on;
+            if ~strcmp(ev, 'reward')
+                subplot(1,monk_ids(end), m); hold on
+                plot(ts_corr_win, mean((itpc_corr_monk - nanmean(nanmean(shuffled_dist))) ./ nanstd(nanstd(shuffled_dist))),'Color', [0.78,0.77,0]);
+                if ~strcmp(ev, 'reward'), plot(ts_incorr_win, mean((itpc_incorr_monk - nanmean(nanmean(shuffled_dist))) ./ nanstd(nanstd(shuffled_dist))),'-k'); end
+                set(gca,'xlim',[x_lim(1) x_lim(2)],'TickDir', 'out'); box off; axis square;
+                ylabel('Z transf phase clustering'); xlabel('time (s)')
+                title(['monkey ' num2str(m)])
+                if strcmp(ev,'target'), vline([-0.3 0], 'k'); else vline(0,'k'); end
+                % savefig(gcf,[ar '_' band '_' ev '_plv_Z'])
+            else
+                subplot(1,monk_ids(end), m); hold on
+                plot(ts_corr_win, mean(itpc_corr_monk),'Color', [0.78,0.77,0]);
+                set(gca,'xlim',[x_lim(1) x_lim(2)],'TickDir', 'out'); box off; axis square;
+                ylabel('Z transf phase clustering'); xlabel('time (s)')
+                title(['monkey ' num2str(m)])
+                if strcmp(ev,'target'), vline([-0.3 0], 'k'); else vline(0,'k'); end
+                % savefig(gcf,[ar '_' band '_' ev '_plv_Z'])
+            end
             
         end
-        
+        close all; 
         figure; hold on;
         if ~strcmp(ev, 'reward'),plot(ts_incorr_win, mean(itpc_incorr_pop),'-k'); end
         plot(ts_corr_win, mean(itpc_corr_pop),'Color',[0.78,0.77,0]);
@@ -4926,6 +4952,8 @@ switch plot_type
         ylabel('phase clustering'); xlabel([ev ' time (s)']); title('all monks')
         if strcmp(ev,'target'), vline([-0.3 0], 'k'); else vline(0,'k'); end
         ylim([-20 80]); set(gca,'yTick',[-20 0 30 60])
+         if ~strcmp(ev, 'reward'), save(['data_fig_' ar '_' band '_' ev '_plv_Z' ],'ts_incorr_win', 'ts_corr_win', 'itpc_incorr_pop', 'itpc_corr_pop'); ...
+         else  save(['data_fig_' ar '_' band '_' ev '_plv_Z' ], 'ts_corr_win', 'itpc_corr_pop'); end
         
         % plot mean for all monkeys
         basevalue = -20; 
@@ -4978,11 +5006,11 @@ switch plot_type
         
     case 'plv_stats'
         ar = 'PPC'     % MST PPC PFC
-        band = 'beta'
-        ev = 'target'
+        band = 'theta'
+        ev = 'reward'
         
         if strcmp(ev,'target'), win = [-0.5 0.5]; elseif strcmp(ev,'stop'), win = [-1.5 1.5]; else win = [-1 1]; end
-        pval_corr_all = []; pval_incorr_all = [];
+        pval_corr_set = []; pval_incorr_set = [];  pval_corr_all = []; pval_incorr_all = [];
         if strcmp(ar,'MST'), monk_ids = [1 3]; elseif strcmp(ar,'PFC'), monk_ids = [3 4]; else monk_ids = 1:length(monk); end
         
         for m = monk_ids
@@ -4995,32 +5023,37 @@ switch plot_type
                     p_val_corr(ch,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(2).events.(ev).chan(ch).(band).pval_circ;
                     p_val_corr_win = p_val_corr(ch,ts_corr>win(1) & ts_corr<win(2));
                     if strcmp(ev,'target'), p_val_corr_win = p_val_corr_win(1:166); else p_val_corr_win = p_val_corr_win(1:500); end
-                    pval_corr_all = [pval_corr_all ; p_val_corr_win<=0.01];
+                    pval_corr_set = [pval_corr_set ; p_val_corr_win<=0.01];
+                    pval_corr_all = [pval_corr_all ; p_val_corr_win];  
                     
                     p_val_incorr(ch,:) = monk(m).sess(nsess).pop.area.(ar).trialtype.reward(1).events.(ev).chan(ch).(band).pval_circ;
                     p_val_incorr_win = p_val_incorr(ch,ts_incorr>win(1) & ts_incorr<win(2));
                     if strcmp(ev,'target'), p_val_incorr_win = p_val_incorr_win(1:166); else p_val_incorr_win = p_val_incorr_win(1:500); end
-                    pval_incorr_all = [pval_incorr_all ; p_val_incorr_win<=0.01];
+                    pval_incorr_set = [pval_incorr_set ; p_val_incorr_win<=0.01];
+                    pval_incorr_all = [pval_incorr_all ; p_val_incorr_win];  
                 end
             end
         end
         % determine if signif or not p <0.05
         %         pval_corr_all(pval_corr_all>0.05) = 0;
         %         pval_incorr_all(pval_incorr_all>0.05) = 0;
+        if ~strcmp(ev, 'reward'), save(['plv_stats_' ar '_' band '_' ev '_plv_Z' ], 'pval_corr_all', 'pval_incorr_all'); ...
+         else  save(['plv_stats_' ar '_' band '_' ev '_plv_Z' ], 'pval_corr_all'); end
+        
         
         % plot histogram vs time
         if strcmp(ev,'target'), ts_corr_win = ts_corr_win-0.3; else ts_corr_win=ts_corr_win; end
         figure; hold on
-        area(ts_corr_win(1:166),sum(pval_corr_all),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
-        area(ts_corr_win(1:166),sum(pval_incorr_all),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
+        area(ts_corr_win(1:166),sum(pval_corr_set),'FaceColor',[0 1 0],'EdgeColor','none'); alpha(0.7)
+        area(ts_corr_win(1:166),sum(pval_incorr_set),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)
         set(gca,'xlim',[-0.5 0.5],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('count');
         if strcmp(ev,'target'), vline([-0.3 0], 'k'); else vline(0,'k'); end
         
     case 'plv_across_area'
-        ar = 'PFC_PPC_PLV'     % MST_PPC_PLV // MST_PFC_PLV // PFC_PPC_PLV
-        ev = 'reward'
-        band = 'beta'
+        ar = 'MST_PPC_PLV'     % MST_PPC_PLV // MST_PFC_PLV // PFC_PPC_PLV
+        ev = 'target'
+        band = 'theta'
         
         if strcmp(ev,'target'),win = [-1 1]; x_lim = [-0.5 0.5]; elseif strcmp(ev,'stop'), win = [-1.51 1.51]; x_lim = [-1 1]; else, win = [-1 1]; x_lim = [-1 1]; end
 
@@ -5068,6 +5101,9 @@ switch plot_type
         set(gca,'xlim',[x_lim(1) x_lim(2)],'Fontsize',20, 'TickDir', 'out'); axis square; box off
         xlabel ([ev ' time (s)']); ylabel('PLV'); title(ar);
         if strcmp(ev,'target'), vline([-0.3 0], 'k'); else vline(0,'k'); end
+        if ~strcmp(ev, 'reward'), save(['plv_across_area_' ar '_' band '_' ev '_plv_Z' ],'ts_align', 'plv_all_corr', 'plv_all_incorr'); ...
+        else  save(['plv_across_area_' ar '_' band '_' ev '_plv_Z' ], 'plv_all_corr'); end
+        
         
         figure; hold on
         area(ts_align, smooth(nanmean(plv_all_incorr),5),'FaceColor',[0 0 0],'EdgeColor','none'); alpha(0.3)

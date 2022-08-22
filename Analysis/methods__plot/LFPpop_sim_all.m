@@ -4,13 +4,13 @@ function LFPpop_sim_all(exp)
 % experiments.m
 % If running for the first time, you don't need (exp) just hit run
 %% Choose what to analyze and save
-extract_exp_out = false; % load experiments.m file and extract. If saved 'exp_out', make it false.
-save_exp_out = false; % save mat file without raw lfp signal
-save_pop = false; % if this is true it will only extract pop
+extract_exp_out = true; % load experiments.m file and extract. If saved 'exp_out', make it false.
+save_exp_out = true; % save mat file without raw lfp signal
+save_pop = true; % if this is true it will only extract pop
 
 extract_lfp_raw = false; % raw and per trial lfps
 save_lfp_raw = false; % raw and per trial lfps
-do_PSD = true;  % extract power spectral densities
+do_PSD = false;  % extract power spectral densities
 save_spectro = false;
 save_spectro_per_trial = false;
 save_spectro_per_trial_align_stop = false;
@@ -18,19 +18,19 @@ avg_monks = true; % average for all monkeys?
 do_cohero = false; % extract coherograms
 do_cohero_band_passed = false; % extract coherograms per band
 doCSD = false; % Perform CSD analysis for MST recordings?
-do_ERP = true; % extract ERPs (evoked LFPs)
+do_ERP = false; % extract ERPs (evoked LFPs)
 save_band_pass_analysis = false; % extract band passed lfp signal only (used only for plotting)
-do_band_passed_pop = false;  % needs pop
+do_band_passed_pop = true;  % needs pop
 do_phases = false; % needs pop
 
-name_output_exp_out_file = 'exp_out_psd_erp_all_2022_04_15';
-name_output_file = 'lfp_psd_erp_all_2022_04_15';
+name_output_exp_out_file = 'exp_out_band_passed_2022_07_27';
+name_output_file = 'lfp_out_band_passed_2022_07_27';
 
 %% Extract
 if extract_exp_out
     %      path = 'D:\Output';
     %      cd(path)
-    fprintf(['Time:  ' num2str(clock) '\n']); 
+    fprintf(['Time:  ' num2str(clock) '\n']);
     fnames = dir('experiments*.mat');
     cnt=1;
     for i = 1:length(fnames)
@@ -60,15 +60,29 @@ if extract_exp_out
                         end
                         for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.band_passed(ch) = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.band_passed;end
                     else
-                        
                         mst_ch = find(indx_MST); ppc_ch = find(indx_PPC); pfc_ch = find(indx_PFC);
+                        
                         if experiments.sessions(sess).monk_id == 44 || experiments.sessions(sess).monk_id == 53 ...
-                                for ch = 1:sum(indx_MST), exp(cnt).area.MST.lfps(ch).stats.trialtype.all = experiments.sessions(sess).lfps(mst_ch(ch)).stats.trialtype.all;end
-                        end % extract band passed signal
-                        if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 71 ...
-                                for ch = 1:sum(indx_PFC), exp(cnt).area.PFC.lfps(ch).stats.trialtype.all = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.trialtype.all;end
+                                for ch = 1:sum(indx_MST)
+                                exp(cnt).area.MST.lfps(ch).stats.trialtype = experiments.sessions(sess).lfps(mst_ch(ch)).stats.trialtype;
+                                %                                 exp(cnt).area.MST.lfps(ch).stats.trialtype.stationary = experiments.sessions(sess).lfps(mst_ch(ch)).stats.trialtype.stationary;
+                                %                                 exp(cnt).area.MST.lfps(ch).stats.trialtype.mobile = experiments.sessions(sess).lfps(mst_ch(ch)).stats.trialtype.mobile;
+                                end
                         end
-                        for ch = 1:sum(indx_PPC), exp(cnt).area.PPC.lfps(ch).stats.trialtype.all = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.trialtype.all;end
+                        
+                        if experiments.sessions(sess).monk_id == 53 || experiments.sessions(sess).monk_id == 71 ...
+                                for ch = 1:sum(indx_PFC)
+                                exp(cnt).area.PFC.lfps(ch).stats.trialtype = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.trialtype;
+                                %                                 exp(cnt).area.PFC.lfps(ch).stats.trialtype.stationary = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.trialtype.stationary;
+                                %                                 exp(cnt).area.PFC.lfps(ch).stats.trialtype.mobile = experiments.sessions(sess).lfps(pfc_ch(ch)).stats.trialtype.mobile;
+                                end
+                        end
+                        
+                        for ch = 1:sum(indx_PPC)
+                            exp(cnt).area.PPC.lfps(ch).stats.trialtype = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.trialtype;
+                            %                             exp(cnt).area.PPC.lfps(ch).stats.trialtype.stationary = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.trialtype.stationary;
+                            %                             exp(cnt).area.PPC.lfps(ch).stats.trialtype.mobile = experiments.sessions(sess).lfps(ppc_ch(ch)).stats.trialtype.mobile;
+                        end
                         
                         %
                         %                         if experiments.sessions(sess).monk_id == 44 || experiments.sessions(sess).monk_id == 53 ...
@@ -117,7 +131,7 @@ end
 %% PSD
 %% avg per session
 if do_PSD
-    trial_type = fieldnames(exp(1).area.PPC.lfps(1).stats.trialtype); events = fieldnames(exp(1).area.PPC.lfps(1).stats.trialtype.all.events);
+    trial_type = fieldnames(exp(1).area.PPC.lfps(1).stats.trialtype); events = fieldnames(exp(1).area.PPC.lfps(1).stats.trialtype.reward(2).events);
     for i = 1:length(exp) % num of sessions
         nareas = numel(fieldnames(exp(i).area)); areas = fieldnames(exp(i).area);
         for a = 1:length(areas) % num of areas
@@ -155,47 +169,47 @@ if do_PSD
     end
     
     %% normalize by max
-    % get max values
-    % cnt=1;
-    % for i = 1:length(exp) % num of sessions
-    %     nareas = numel(fieldnames(exp(i).area)); areas = fieldnames(exp(i).area);
-    %     for a = 1:length(areas) % num of areas
-    %         for type = 1:length(trialtype) % num of trial types
-    %             if ~isempty(exp(i).area.(areas{a}).lfps.stats)
-    %                 nconds = length(exp(i).area.(areas{a}).lfps.stats(1).trialtype.(trialtype{type})); clear cond
-    %                 for cond = 1:nconds
-    %                     if strcmp((trialtype{type}), 'eyesfree') | strcmp((trialtype{type}), 'eyesfixed')
-    %                         max_psd(cnt) = psden_eye(i).area.(areas{a}).(trialtype{type})(cond).max;
-    %                     else
-    %                         max_psd(cnt) = psden(i).area.(areas{a}).(trialtype{type})(cond).max;
+    %     get max values
+    %     cnt=1;
+    %     for i = 1:length(exp) % num of sessions
+    %         nareas = numel(fieldnames(exp(i).area)); areas = fieldnames(exp(i).area);
+    %         for a = 1:length(areas) % num of areas
+    %             for type = 1:length(trialtype) % num of trial types
+    %                 if ~isempty(exp(i).area.(areas{a}).lfps.stats)
+    %                     nconds = length(exp(i).area.(areas{a}).lfps.stats(1).trialtype.(trialtype{type})); clear cond
+    %                     for cond = 1:nconds
+    %                         if strcmp((trialtype{type}), 'eyesfree') | strcmp((trialtype{type}), 'eyesfixed')
+    %                             max_psd(cnt) = psden_eye(i).area.(areas{a}).(trialtype{type})(cond).max;
+    %                         else
+    %                             max_psd(cnt) = psden(i).area.(areas{a}).(trialtype{type})(cond).max;
+    %                         end
+    %                         cnt = cnt+1;
     %                     end
-    %                     cnt = cnt+1;
     %                 end
     %             end
     %         end
     %     end
-    % end
-    % %maxPSDval = max(max_psd(max_psd<1000));
-    % maxPSDval = 1; % take the max between 0 and 50 Hz
+    %     %maxPSDval = max(max_psd(max_psd<1000));
+    %     maxPSDval = 1; % take the max between 0 and 50 Hz
     %
-    % % normalize for max of max (between all conditions)
-    % for i = 1:length(exp) % num of sessions
-    %     nareas = numel(fieldnames(exp(i).area)); areas = fieldnames(exp(i).area);
-    %     for a = 1:length(areas) % num of areas
-    %         for type = 1:length(trialtype) % num of trial types
-    %             if ~isempty(exp(i).area.(areas{a}).lfps.stats)
-    %                 nconds = length(exp(i).area.(areas{a}).lfps.stats(1).trialtype.(trialtype{type})); clear cond
-    %                 for cond = 1:nconds
-    %                     if strcmp((trialtype{type}), 'eyesfree') | strcmp((trialtype{type}), 'eyesfixed')
-    %                         psden_eye(i).area.(areas{a}).(trialtype{type})(cond).mu_norm = psden_eye(i).area.(areas{a}).(trialtype{type})(cond).mu; %/maxPSDval;
-    %                     else
-    %                         psden(i).area.(areas{a}).(trialtype{type})(cond).mu_norm = psden(i).area.(areas{a}).(trialtype{type})(cond).mu; %/maxPSDval;
+    %     % normalize for max of max (between all conditions)
+    %     for i = 1:length(exp) % num of sessions
+    %         nareas = numel(fieldnames(exp(i).area)); areas = fieldnames(exp(i).area);
+    %         for a = 1:length(areas) % num of areas
+    %             for type = 1:length(trialtype) % num of trial types
+    %                 if ~isempty(exp(i).area.(areas{a}).lfps.stats)
+    %                     nconds = length(exp(i).area.(areas{a}).lfps.stats(1).trialtype.(trialtype{type})); clear cond
+    %                     for cond = 1:nconds
+    %                         if strcmp((trialtype{type}), 'eyesfree') | strcmp((trialtype{type}), 'eyesfixed')
+    %                             psden_eye(i).area.(areas{a}).(trialtype{type})(cond).mu_norm = psden_eye(i).area.(areas{a}).(trialtype{type})(cond).mu; %/maxPSDval;
+    %                         else
+    %                             psden(i).area.(areas{a}).(trialtype{type})(cond).mu_norm = psden(i).area.(areas{a}).(trialtype{type})(cond).mu; %/maxPSDval;
+    %                         end
     %                     end
     %                 end
     %             end
     %         end
     %     end
-    % end
     
     %% avg between sessions for each monkey
     monks = unique([psden.monk_id]);
@@ -235,7 +249,7 @@ if do_PSD
                 end
             end
         end
-        monk(i).pw.freq = exp(i).area.(areas{a}).lfps(1).stats.trialtype.all.spectrum.freq;
+        monk(i).pw.freq = exp(i).area.(areas{a}).lfps(1).stats.trialtype.reward(2).spectrum.freq;
         % monk(i).pw.freq_eye = exp(i).area.(areas{a}).lfps.stats(1).trialtype.eyesfree.spectrum.freq;
         monk(i).pw.monk_id = unique([psden(m).monk_id]);
     end
@@ -441,14 +455,18 @@ if save_spectro_per_trial
                 for cond = 1:length(monk(i).sess(sess).trialtype.(trialtype{type}))
                     for ev = 2:4 %1:length(events)
                         clear spectro_trl_freq monk_sess_mu monk_mu
+                        spectro_trl_freq = [];
                         if strcmp((areas{a}),'PFC')
                             for i = [3 4] % change if adding one more monkey
-                                for nsess = 1:length(monk(i).sess)  
+                                for nsess = 1:length(monk(i).sess)
                                     for trl = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl)
                                         ts = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).ts;
                                         for freq = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq)
                                             pw_trl =  monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(trl).spectro(ts>-1.51 & ts<1.514,freq)'; %extract 1.5s around event
                                             %if ev == 3; spectro_trl_freq(trl,freq,:) = pw_trl(1:62);end
+                                            if size(pw_trl,2) < size(spectro_trl_freq,3)
+                                                pw_trl(1,end+1) = NaN;
+                                            end
                                             spectro_trl_freq(trl,freq,:) = pw_trl;
                                         end
                                     end
@@ -458,33 +476,33 @@ if save_spectro_per_trial
                                 end
                                 monk_mu(i,:,:) = squeeze(nanmean(monk_sess_mu)); % store avg per monkey
                                 %% sanity plot per monkey
-%                                 if ~isnan(monk_mu(:,1,1))
-%                                      J = customcolormap_preset('black_teal_white');
-%                                     f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
-%                                     figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
-%                                     ts_plot = ts(ts>-1.51 & ts<1.514);
-%                                     if ev == 2, ts_plot = ts_plot-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
-%                                     imagesc(ts_plot,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
-%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
-%                                     xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
-%                                     title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
-%                                     % theta
-%                                     if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
-%                                     figure; hold on
-%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
-%                                         nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
-%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-%                                     title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-%                                     % beta
-%                                     figure; hold on
-%                                     %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
-%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
-%                                         nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
-%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-%                                     title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-%                                 end
+                                %                                 if ~isnan(monk_mu(:,1,1))
+                                %                                      J = customcolormap_preset('black_teal_white');
+                                %                                     f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
+                                %                                     figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
+                                %                                     ts_plot = ts(ts>-1.51 & ts<1.514);
+                                %                                     if ev == 2, ts_plot = ts_plot-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
+                                %                                     imagesc(ts_plot,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
+                                %                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
+                                %                                     xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
+                                %                                     title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
+                                %                                     % theta
+                                %                                     if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
+                                %                                     figure; hold on
+                                %                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
+                                %                                         nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
+                                %                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+                                %                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+                                %                                     title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+                                %                                     % beta
+                                %                                     figure; hold on
+                                %                                     %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+                                %                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
+                                %                                         nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
+                                %                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+                                %                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+                                %                                     title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+                                %                                 end
                             end
                             % average for all monkeys
                             monk_sess_mu(1,:,:) = []; monk_sess_mu(2,:,:) = []; % hardcoded because the first and second monks have no MST rec
@@ -498,7 +516,9 @@ if save_spectro_per_trial
                                     for trl = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl)
                                         for freq = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq)
                                             pw_trl =  monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(trl).spectro(ts>-1.51 & ts<1.514,freq)'; %extract 1.5s around event
-                                            %if ev == 3; spectro_trl_freq(trl,freq,:) = pw_trl(1:62);end
+                                            if size(pw_trl,2) < size(spectro_trl_freq,3)
+                                                pw_trl(1,end+1) = NaN;
+                                            end
                                             spectro_trl_freq(trl,freq,:) = pw_trl;
                                         end
                                     end
@@ -507,33 +527,33 @@ if save_spectro_per_trial
                                 end
                                 monk_mu(i,:,:) = squeeze(nanmean(monk_sess_mu)); % store avg per monkey
                                 %% sanity plot per monkey
-%                                 if ~isnan(monk_mu(:,1,1))
-%                                     J = customcolormap_preset('black_teal_white');
-%                                     f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
-%                                     figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
-%                                     ts_plot = ts(ts>-1.51 & ts<1.514);
-%                                     if ev == 2, ts_plot = ts_plot-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
-%                                     imagesc(ts_plot,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
-%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
-%                                     xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
-%                                     title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
-%                                     % theta
-%                                     if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
-%                                     figure; hold on
-%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
-%                                         nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
-%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-%                                     title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-%                                     % beta
-%                                     figure; hold on
-%                                     %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
-%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
-%                                         nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
-%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-%                                     title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-%                                 end
+                                %                                 if ~isnan(monk_mu(:,1,1))
+                                %                                     J = customcolormap_preset('black_teal_white');
+                                %                                     f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
+                                %                                     figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
+                                %                                     ts_plot = ts(ts>-1.51 & ts<1.514);
+                                %                                     if ev == 2, ts_plot = ts_plot-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
+                                %                                     imagesc(ts_plot,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
+                                %                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
+                                %                                     xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
+                                %                                     title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
+                                %                                     % theta
+                                %                                     if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
+                                %                                     figure; hold on
+                                %                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
+                                %                                         nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
+                                %                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+                                %                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+                                %                                     title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+                                %                                     % beta
+                                %                                     figure; hold on
+                                %                                     %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+                                %                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
+                                %                                         nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
+                                %                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+                                %                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+                                %                                     title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+                                %                                 end
                             end
                             % average for all monkeys
                             monk_sess_mu(2,:,:) = []; % hardcoded because the second monk has no MST rec
@@ -547,7 +567,9 @@ if save_spectro_per_trial
                                     for trl = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl)
                                         for freq = 1:length(monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq)
                                             pw_trl =  monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(trl).spectro(ts>-1.51 & ts<1.514,freq)'; %extract 1.5s around event
-                                            %if ev == 3; spectro_trl_freq(trl,freq,:) = pw_trl(1:62);end
+                                            if size(pw_trl,2) < size(spectro_trl_freq,3)
+                                                pw_trl(1,end+1) = NaN;
+                                            end
                                             spectro_trl_freq(trl,freq,:) = pw_trl;
                                         end
                                     end
@@ -556,33 +578,33 @@ if save_spectro_per_trial
                                 end
                                 monk_mu(i,:,:) = squeeze(nanmean(monk_sess_mu)); % store avg per monkey
                                 %% sanity plot per monkey
-%                                 if ~isnan(monk_mu(:,1,1))
-%                                    J = customcolormap_preset('black_teal_white');
-%                                     f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
-%                                     figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
-%                                     ts_plot = ts(ts>-1.51 & ts<1.514);
-%                                     if ev == 2, ts_plot = ts_plot-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
-%                                     imagesc(ts_plot,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
-%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
-%                                     xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
-%                                     title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
-%                                     % theta
-%                                     if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
-%                                     figure; hold on
-%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
-%                                         nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
-%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-%                                     title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-%                                     % beta
-%                                     figure; hold on
-%                                     %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
-%                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
-%                                         nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
-%                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
-%                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
-%                                     title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
-%                                 end
+                                %                                 if ~isnan(monk_mu(:,1,1))
+                                %                                    J = customcolormap_preset('black_teal_white');
+                                %                                     f = monk(i).sess(nsess).trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).pw_trl(1).freq;
+                                %                                     figure('Name',['monk ' num2str(i) ]'); hold on; colormap(J);
+                                %                                     ts_plot = ts(ts>-1.51 & ts<1.514);
+                                %                                     if ev == 2, ts_plot = ts_plot-0.3; x_lim = [-0.5 0.5]; elseif ev == 3,  x_lim = [-1.5 1.5]; else x_lim = [-1 1]; end
+                                %                                     imagesc(ts_plot,f,squeeze(monk_mu(i,:,:)), [-0.2 2.4]); axis xy; colorbar;
+                                %                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'ylim',[4 50], 'FontSize', 22)
+                                %                                     xlabel([(events{ev}) ' time (s)']); ylabel('frequency (Hz)'); axis square
+                                %                                     title(['cond ' num2str(cond)]); if ev == 2, vline([-0.3 0], 'w'); else vline(0, 'w'); end
+                                %                                     % theta
+                                %                                     if cond == 1, colorline = [0 0 0]; else colorline = [0 1 0]; end
+                                %                                     figure; hold on
+                                %                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))), ...
+                                %                                         nanstd(squeeze(monk_mu(i,f>=3.5 & f<12,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=3.5 & f<12,:))),1)),'lineprops',{'Color', colorline})
+                                %                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+                                %                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+                                %                                     title('PPC theta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+                                %                                     % beta
+                                %                                     figure; hold on
+                                %                                     %plot(ts_s,p_spectro_corr(freq>=11 & freq<=21,:)','Color',[0 0.5 0]); alpha(0.1)
+                                %                                     shadedErrorBar(ts_plot,nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))), ...
+                                %                                         nanstd(squeeze(monk_mu(i,f>=11 & f<21,:)))/sqrt(size(nanmean(squeeze(monk_mu(i,f>=11 & f<21,:))),1)),'lineprops',{'Color', colorline})
+                                %                                     set(gca,'xlim',[x_lim(1) x_lim(2)], 'FontSize', 22)
+                                %                                     xlabel([(events{ev}) ' time (s)']); ylabel('Normalized power'); axis square
+                                %                                     title('PPC beta'); if ev == 2, vline([-0.3 0], 'k'); else vline(0, '--k'); end
+                                %                                 end
                             end
                             % average for all monkeys
                             all_monks.trialtype.(trialtype{type})(cond).area.(areas{a}).events.(events{ev}).all_monks_mu = squeeze(nanmean(monk_sess_mu));
@@ -750,11 +772,12 @@ if do_ERP
     monks = unique([exp.monk_id]);
     for ii = [1 3]% 1:length(monks)
         m = [exp.monk_id] == monks(ii); p_monk = exp(m);
+        trialtype = fieldnames(p_monk(ii).area.MST.lfps(1).stats.trialtype);
         for j = 1:length(p_monk)
             for type = 1:length(trialtype)
-                nconds = length(p_monk(j).area.PPC.lfps(1).stats.trialtype.(trialtype{type})); clear cond
+                nconds = length(p_monk(j).area.MST.lfps(1).stats.trialtype.(trialtype{type})); clear cond
                 for cond = 1:nconds
-                    events = fieldnames(p_monk(j).area.MST.lfps(1).stats.trialtype.all.events);
+                    events = fieldnames(p_monk(j).area.MST.lfps(1).stats.trialtype.reward(2).events);
                     for ch = 1:length(p_monk(j).area.MST.lfps)
                         
                         % cont
@@ -820,7 +843,7 @@ if do_ERP
         end
     end
 end
-%% Gather erp's for PFC on Schro for now
+%% Gather erp's for PFC
 if do_ERP
     monks = unique([exp.monk_id]);
     for ii = [3 4] %3 Schro Vik  1:length(monks)
@@ -898,6 +921,28 @@ if do_phases
     for ii = 1:length(monks)
         m = [exp.monk_id] == monks(ii); p_monk = exp(m);
         for s = 1:length(p_monk)
+            if ii == 1
+                p_monk(s).pop.area.PPC_MST_PLV = [];
+                p_monk(s).pop.area.PPC_MST_PLI = [];
+                p_monk(s).pop.area.PPC.trialtype.reward(3:6) = [];
+                p_monk(s).pop.area.MST.trialtype.reward(3:6) = [];
+                monk(ii).sess(s).pop = p_monk(s).pop;
+            elseif ii == 2
+                p_monk(s).pop.area.PPC.trialtype.reward(3:6) = [];
+            elseif ii == 3
+                p_monk(s).pop.area.PPC.trialtype.reward(3:6) = [];
+                p_monk(s).pop.area.MST.trialtype.reward(3:6) = [];
+                p_monk(s).pop.area.PFC.trialtype.reward(3:6) = [];
+                p_monk(s).pop.area.PPC_MST_PLV = [];
+                p_monk(s).pop.area.PPC_MST_PLI = [];
+                p_monk(s).pop.area.PPC_PFC_PLV = [];
+                p_monk(s).pop.area.PPC_PFC_PLI = [];
+            elseif ii == 4
+                p_monk(s).pop.area.PPC.trialtype.reward(3:6) = [];
+                p_monk(s).pop.area.PFC.trialtype.reward(3:6) = [];
+                p_monk(s).pop.area.PPC_PFC_PLV = [];
+                p_monk(s).pop.area.PPC_PFC_PLI = [];
+            end
             monk(ii).sess(s).pop = p_monk(s).pop;
         end
     end

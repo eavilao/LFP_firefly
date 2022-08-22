@@ -102,7 +102,7 @@ prs.lfp_freqmax = 75; % max frequency (Hz)
 prs.spectrum_tapers = [1 1]; % [time-bandwidth-product number-of-tapers]
 prs.spectrum_trialave = 1; % 1 = trial-average
 prs.spectrum_movingwin = [1.5 1.5]; % [window-size step-size] to compute frequency spectrum (s)
-prs.spectrogram_movingwin = [0.5 0.05]; % [window-size step-size] to compute spectrogram (s)
+prs.spectrogram_movingwin = [0.5 0.025]; % [0.5 0.05]; % [window-size step-size] to compute spectrogram (s)
 prs.min_stationary = 0.5; % mimimum duration of stationary period for LFP analysis (s)
 prs.min_mobile = 0.5; % mimimum duration of mobile period for LFP analysis (s)
 prs.lfp_delta = [1 4]; prs.lfp_delta_peak = 2;
@@ -270,8 +270,8 @@ prs.readout_varname = {'v','w','d','phi','r_targ','theta_targ'}; %,'dv','dw','ey
 %% ****which analyses to do****
 %% behavioural
 prs.split_trials = true; % split trials into different stimulus conditions
-prs.regress_behv = false; % regress response against target position
-prs.regress_eye = false; % regress eye position against target position
+prs.regress_behv = true; % regress response against target position
+prs.regress_eye = true; % regress eye position against target position
 
 %% spikes
 % traditional methods
@@ -291,12 +291,12 @@ prs.corr_neuronbehverr = false;
 
 %% LFP
 prs.event_potential = true;
-prs.compute_spectrum = true;
-prs.extract_band_passed = false; % AnalyseLFP.m
-prs.analyse_band_passed = false; % AnalysePopulation.m
+prs.compute_spectrum = false;
+prs.extract_band_passed = true; % AnalyseLFP.m
+prs.analyse_band_passed = true; % AnalysePopulation.m
 prs.band_pass_acc_thresh_low_third = 21.6666; % distance in cm -- threshold for band pass vs accuracy
 prs.band_pass_acc_thresh_upper_third = 43.3332; % distance in cm -- threshold for band pass vs accuracy
-prs.compute_psd = true;
+prs.compute_psd = false;
 prs.lfp_eye = false; 
 prs.compute_spectrum_whole_trial = false; % AnalysePopulation.m
 prs.compute_spectrum_whole_trial_align_stop = false; % AnalysePopulation.m
@@ -310,7 +310,7 @@ prs.compute_coherogram = false;
 prs.compute_coherogram_band_passed = false;
 prs.analyse_phase = false;
 prs.analyse_phase_within_area = false; %to compute phase in all freq (heavy and slow)
-prs.analyse_move_before_after = true; %AnlyseBehaviour.m
+prs.analyse_move_before_after = false; %AnlyseBehaviour.m
 
 %% Spike-LFP
 prs.analyse_spikeLFPrelation = false;

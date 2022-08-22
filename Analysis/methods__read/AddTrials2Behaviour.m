@@ -3,45 +3,54 @@ function trials = AddTrials2Behaviour(prs)
 trials = []; % initialise
 
 %% list all files to read
-flist_log=dir('*.log');
-%% remove files starting with ._ in macosx
-% remove all folders
-isBadFile = cat(1,flist_log.isdir); %# all directories are bad
-% loop to identify hidden files
-for iFile = find(~isBadFile)' %'# loop only non-dirs
-    % on OSX, hidden files start with a dot
-    isBadFile(iFile) = strcmp(flist_log(iFile).name(1),'.');
-    if ~isBadFile(iFile) && ispc
-        % check for hidden Windows files - only works on Windows
-        [~,stats] = fileattrib(fullfile(folder,flist_log(iFile).name));
-        if stats.hidden
-            isBadFile(iFile) = true;
-        end
-    end
-end
-% remove bad files
-flist_log(isBadFile) = [];
-%%
+flist_log=dir('*.log'); 
 for i=1:length(flist_log), fnum_log(i) = str2num(flist_log(i).name(end-6:end-4)); end
 flist_smr=dir('*.smr');
+for i=1:length(flist_smr), fnum_smr(i) = str2num(flist_smr(i).name(end-6:end-4)); end
+% flist_mat=dir('*.mat');
+% for i=1:length(flist_mat), fnum_mat(i) = str2num(flist_mat(i).name(end-6:end-4)); end
+nfiles = length(flist_log);
+
+%% IF RUNNING ON MACOSX
+% flist_log=dir('*.log');
+% %% remove files starting with ._ in macosx
+% % remove all folders
+% isBadFile = cat(1,flist_log.isdir); %# all directories are bad
+% % loop to identify hidden files
+% for iFile = find(~isBadFile)' %'# loop only non-dirs
+%     % on OSX, hidden files start with a dot
+%     isBadFile(iFile) = strcmp(flist_log(iFile).name(1),'.');
+%     if ~isBadFile(iFile) && ispc
+%         % check for hidden Windows files - only works on Windows
+%         [~,stats] = fileattrib(fullfile(folder,flist_log(iFile).name));
+%         if stats.hidden
+%             isBadFile(iFile) = true;
+%         end
+%     end
+% end
+% % remove bad files
+% flist_log(isBadFile) = [];
+% %%
+% for i=1:length(flist_log), fnum_log(i) = str2num(flist_log(i).name(end-6:end-4)); end
+% flist_smr=dir('*.smr');
 %%
-%% remove files starting with ._ in macosx
-% remove all folders
-isBadFile = cat(1,flist_smr.isdir); %# all directories are bad
-% loop to identify hidden files
-for iFile = find(~isBadFile)' %'# loop only non-dirs
-    % on OSX, hidden files start with a dot
-    isBadFile(iFile) = strcmp(flist_smr(iFile).name(1),'.');
-    if ~isBadFile(iFile) && ispc
-        % check for hidden Windows files - only works on Windows
-        [~,stats] = fileattrib(fullfile(folder,flist_smr(iFile).name));
-        if stats.hidden
-            isBadFile(iFile) = true;
-        end
-    end
-end
-% remove bad files
-flist_smr(isBadFile) = [];
+% %% remove files starting with ._ in macosx
+% % remove all folders
+% isBadFile = cat(1,flist_smr.isdir); %# all directories are bad
+% % loop to identify hidden files
+% for iFile = find(~isBadFile)' %'# loop only non-dirs
+%     % on OSX, hidden files start with a dot
+%     isBadFile(iFile) = strcmp(flist_smr(iFile).name(1),'.');
+%     if ~isBadFile(iFile) && ispc
+%         % check for hidden Windows files - only works on Windows
+%         [~,stats] = fileattrib(fullfile(folder,flist_smr(iFile).name));
+%         if stats.hidden
+%             isBadFile(iFile) = true;
+%         end
+%     end
+% end
+% % remove bad files
+% flist_smr(isBadFile) = [];
 %%
 for i=1:length(flist_smr), fnum_smr(i) = str2num(flist_smr(i).name(end-6:end-4)); end
 % flist_mat=dir('*.mat');
