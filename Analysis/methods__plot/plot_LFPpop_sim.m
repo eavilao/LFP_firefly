@@ -13,8 +13,10 @@ function plot_LFPpop_sim(monk,all_monks,plot_type)
 % 'distance_vs_reward' need to load behv as behv.stats (needs update)
 % 'move_on_target_on_distribution'
 % 'erp_single_sess_all'
-% 'erp_single_sess_reward_densities'
+% 'erp_single_sess_reward_densities'0
 % 'erp_all_MST' (and max amp and time)
+% 'erp' <-----
+% 'erp_move_ba' <-----
 % 'erp_all_PPC' (and max amp and time)
 % 'erp_reward_densities_MST' (and max amp and time)
 % 'erp_before_after_move_MST'
@@ -441,7 +443,8 @@ switch plot_type
         
         % plot for all monkeys
         figure; hold on
-        histogram(move_t_all,30, 'DisplayStyle', 'stairs');
+        % histogram(move_t_all,30, 'DisplayStyle', 'stairs');
+        histogram(move_t_all,30,'BinMethod', 'scott', 'DisplayStyle', 'stairs');
         set(gca,'xlim',[-2 2],'TickDir', 'out', 'FontSize', 22); box off;
         vline(mean(move_t_all),'--r'); %vline(median(move_t_all), '--g')
         xlabel('Time from target onset'); axis square;
@@ -661,1250 +664,171 @@ switch plot_type
             end
         end
         
-        
-        
-    case 'erp_all_MST'
+
+    case 'erp'
+        ar = 'PPC'
         type = 'all'
-        ts_move = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type).events.move.erp_time; ts_move_win = ts_move(ts_move>=-0.5 & ts_move<=0.5);
-        ts_target = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type).events.target.erp_time; ts_target_win = ts_target(ts_target>=-0.5 & ts_target<=0.5);
-        ts_stop = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type).events.stop.erp_time; ts_stop_win = ts_stop(ts_stop>=-0.5 & ts_stop<=0.5);
-        ts_reward = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type).events.reward.erp_time; ts_reward_win = ts_reward(ts_reward>=-0.5 & ts_reward<=0.5);
+        ev = 'target'
         
-        % Mean all channels per session
-        for m = [1 3]; %1:length(monk)
-            for sess = 1:length(monk(m).pop)
-                for ncond = 1
-                    for ch = 1:length(monk(1).cont.MST.sess(sess).lfps)
-                        monk(m).sess(sess).erp_move(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type).events.move.erp_mu*1000; % move
-                        monk(m).sess(sess).erp_target(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type).events.target.erp_mu*1000; % move
-                        monk(m).sess(sess).erp_stop(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type).events.stop.erp_mu*1000; % move
-                        monk(m).sess(sess).erp_reward(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type).events.reward.erp_mu*1000; % move
+        if strcmp(ar,'MST'), monk_ids = [1 3]; elseif strcmp(ar,'PFC'), monk_ids = [3 4]; else monk_ids = 1:4; end
+        if strcmp(ev,'target'), win = [-1.3 1.3]; elseif strcmp(ev,'reward'), win = [-1 0.5]; else, win = [-1 1]; end
+        %% go through each monkey, extract and average all sessions and store
+        for m = monk_ids
+            ncond = length(monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type));
+            if strcmp(type, 'reward')
+                ts_ev_corr{m,:} = monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(2).events.(ev).erp_time; 
+                ts_ev_incorr{m,:} = monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(1).events.(ev).erp_time;
+                ts_win = monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(2).events.(ev).erp_time(monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(2).events.(ev).erp_time...
+                    >=win(1) & monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(2).events.(ev).erp_time<=win(2));
+            else
+                ts_ev = monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(1).events.(ev).erp_time; ts_win = ts_ev(ts_ev>=win(1) & ts_ev<=win(2));
+            end
+            % go through the sessions
+            for sess = 1:length(monk(m).erp.(ar).sess)
+                clear erp_ch
+                for cond = 1:ncond
+                    for ch = 1:length(monk(m).erp.(ar).sess(sess).lfps)
+                        erp_ch(ch,:) = monk(m).erp.(ar).sess(sess).lfps(ch).trialtype.(type)(cond).events.(ev).erp_mu;
                     end
+                    monk_erp(m).(type)(cond).erp_mu_ch(sess,:) = nanmean(erp_ch); % average across channels and store
                 end
             end
+            % average across sessions
+            for cond = 1:ncond, monk_erp(m).(type)(cond).erp = nanmean(monk_erp(m).(type)(cond).erp_mu_ch); end
         end
-        
-        % average across channels
-        for m = [1 3] % 1:length(monk)
-            for sess = 1:length(monk(m).sess)
-                monk(m).sess(sess).erp_move_mu_ch = nanmean(monk(m).sess(sess).erp_move);
-                monk(m).sess(sess).erp_target_mu_ch = nanmean(monk(m).sess(sess).erp_target);
-                monk(m).sess(sess).erp_stop_mu_ch = nanmean(monk(m).sess(sess).erp_stop);
-                monk(m).sess(sess).erp_reward_mu_ch = nanmean(monk(m).sess(sess).erp_reward);
+        %% averge all monkeys
+        for m = monk_ids
+            if strcmp(type, 'reward')
+                erp_monks_corr(m,:) = monk_erp(m).(type)(2).erp(ts_ev_corr{m,:}>=win(1) & ts_ev_corr{m,:}<=win(2)); max_erp = max(erp_monks_corr(m,:)); erp_monks_corr(m,:) = erp_monks_corr(m,:)./max_erp;
+                erp_monks_incorr(m,:) = monk_erp(m).(type)(1).erp(ts_ev_incorr{m,:}>=win(1) & ts_ev_incorr{m,:}<=win(2));
+            else
+                erp_monks(m,:) = monk_erp(m).(type)(cond).erp(ts_ev>=win(1) & ts_ev<=win(2)); max_erp = max(erp_monks(m,:));
+                erp_monks(m,:) = erp_monks(m,:)./max_erp;
             end
         end
         
-        % average across sessions
-        for m = [1 3] % 1:length(monk)
-            clear th_v th_w bet_v bet_w
-            for sess = 1:length(monk(m).sess)
-                erp_move_sess(sess,:) =  monk(m).sess(sess).erp_move_mu_ch; ...
-                    [max_move_sess(sess,:),indx_move] = max(abs(monk(m).sess(sess).erp_move_mu_ch(1,ts_move>=-0.5 & ts_move<=0.5))); max_move_time(sess,:) = ts_move_win(indx_move);
-                erp_target_sess(sess,:) = monk(m).sess(sess).erp_target_mu_ch; ...
-                    [max_target_sess(sess,:),indx_target] = max(abs(monk(m).sess(sess).erp_target_mu_ch(1,ts_target>=-0.5 & ts_target<=0.5))); max_target_time(sess,:) = ts_target_win(indx_target);
-                erp_stop_sess(sess,:) = monk(m).sess(sess).erp_stop_mu_ch; ...
-                    [max_stop_sess(sess,:),indx_stop] = max(abs(monk(m).sess(sess).erp_stop_mu_ch(1,ts_stop>=-0.5 & ts_stop<=0.5))); max_stop_time(sess,:) = ts_stop_win(indx_stop);
-                erp_reward_sess(sess,:) = monk(m).sess(sess).erp_reward_mu_ch; ...
-                    [max_reward_sess(sess,:),indx_reward] = max(abs(monk(m).sess(sess).erp_reward_mu_ch(1,ts_reward>=-0.5 & ts_reward<=0.5))); max_reward_time(sess,:) = ts_reward_win(indx_reward);
-            end
-            % mean
-            monk(m).erp.move = nanmean(erp_move_sess);     monk(m).erp.move_std = nanmean(nanstd(erp_move_sess));
-            monk(m).erp.target = nanmean(erp_target_sess); monk(m).erp.target_std = nanmean(nanstd(erp_target_sess));
-            monk(m).erp.stop = nanmean(erp_stop_sess);     monk(m).erp.stop_std = nanmean(nanstd(erp_stop_sess));
-            monk(m).erp.reward = nanmean(erp_reward_sess); monk(m).erp.reward_std = nanmean(nanstd(erp_reward_sess));
+        %% plot
+        if strcmp(type, 'reward')
+            if strcmp(ev,'target'), ts_win = ts_win+0.3; end
+            % plot each monkey
+            figure; hold on;
+            for m = monk_ids, plot(ts_win,smooth(erp_monks_corr(m,:)),'LineWidth', 2); end
+            % for m = monk_ids, plot(ts_win,smooth(erp_monks_incorr(m,:)),'LineWidth', 2); end
+            set(gca,'xlim',[-1 1],'ylim',[-2 2],'yTick', [0 1], 'TickDir', 'out', 'FontSize', 22); box off;
+            title(['ERP ' ev]); legend({'Monk Q','Monk B','Monk S','Monk V'});
+            if strcmp(ev,'target'), vline(-0.3,'-k'), else vline(0, '-k'); end
+            axis square
             
-            monk(m).erp.move_max = nanmean(max_move_sess); monk(m).erp.move_max_amp_std = nanstd(max_move_sess);
-            monk(m).erp.target_max = nanmean(max_target_sess);  monk(m).erp.target_max_amp_std = nanstd(max_target_sess);
-            monk(m).erp.stop_max = nanmean(max_stop_sess); monk(m).erp.stop_max_amp_std = nanstd(max_stop_sess);
-            monk(m).erp.reward_max = nanmean(max_reward_sess); monk(m).erp.reward_max_amp_std = nanstd(max_reward_sess);
+            % plot all monkeys
+            %figure; hold on;
+            plot(ts_win, smooth(nanmean(erp_monks_corr)), 'LineWidth', 2);
+            % plot(ts_win, smooth(nanmean(erp_monks_incorr)), 'LineWidth', 2);
+            set(gca,'xlim',[-1 1],'ylim',[-2 2],'yTick', [0 1], 'TickDir', 'out', 'FontSize', 22); box off;
+            if strcmp(ev,'target'), vline(-0.3,'-k'), else vline(0, '-k'); end
+            axis square
+            keyboard
             
-            monk(m).erp.move_max_time = nanmean(max_move_time); monk(m).erp.move_max_std = nanstd(max_move_time);
-            monk(m).erp.target_max_time = nanmean(max_target_time);  monk(m).erp.target_max_std = nanstd(max_target_time);
-            monk(m).erp.stop_max_time = nanmean(max_stop_time); monk(m).erp.stop_max_std = nanstd(max_stop_time);
-            monk(m).erp.reward_max_time = nanmean(max_reward_time); monk(m).erp.reward_max_std = nanstd(max_reward_time);
-        end
-        
-        
-        
-        %% plot
-        %  move
-        figure;
-        for m = [1 3]; %1:length(monk)
-            plot(ts_move, smooth(monk(m).erp.move),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-            set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-            title('ERP move'); legend({'Monk Q', 'Monk S'}, 'box', 'off');
-        end
-        %% target
-        figure;
-        for m = [1 3]; %1:length(monk)
-            plot(ts_target, smooth(monk(m).erp.target),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-            set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-            title('ERP target'); legend({'Monk Q', 'Monk S'}, 'box', 'off');
-        end
-        % avg for all monks
-        for m = [1 3];
-            erp_targ(m,:) = monk(m).erp.target; % erp_targ(m,:) = abs(monk(m).erp.target); %
-        end
-        erp_targ = erp_targ([1 3],:);
-        plot(ts_target-0.3, smooth(nanmean(erp_targ)),'r', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP target all');
-        
-        %% stop
-        figure;
-        for m = [1 3]; %1:length(monk)
-            plot(ts_stop, smooth(monk(m).erp.stop),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-            set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-            title('ERP stop'); legend({'Monk Q', 'Monk S'}, 'box', 'off');
-        end
-        % avg for all monks
-        for m = [1 3];
-            erp_stop(m,:) = monk(m).erp.stop; % erp_stop(m,:) = abs(monk(m).erp.stop); %
-        end
-        erp_stop = erp_stop([1 3],:);
-        plot(ts_stop, smooth(nanmean(erp_stop)),'r', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP stop all');
-        
-        %% reward
-        figure;
-        for m = [1 3]; %1:length(monk)
-            plot(ts_reward, smooth(monk(m).erp.reward),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-            set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-            title('ERP reward'); legend({'Monk Q', 'Monk S'}, 'box', 'off');
-        end
-        % avg for all monks
-        for m = [1 3];
-            erp_reward(m,:) = monk(m).erp.reward; % erp_reward(m,:) = abs(monk(m).erp.target); %
-        end
-        erp_reward = erp_reward([1 3],:);
-        plot(ts_reward, smooth(nanmean(erp_reward)),'r', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP reward all');
-        
-        % plot max amp
-        figure; hold on;
-        errorbar(1.2,monk(1).erp.move_max, monk(1).erp.move_max_amp_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2.2,monk(1).erp.target_max, monk(1).erp.target_max_amp_std,'ob', 'LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3.2,monk(1).erp.stop_max, monk(1).erp.stop_max_amp_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4.2,monk(1).erp.reward_max, monk(1).erp.reward_max_amp_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        
-        errorbar(1.2,monk(2).erp.move_max, monk(2).erp.move_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2.2,monk(2).erp.target_max, monk(2).erp.target_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3.2,monk(2).erp.stop_max, monk(2).erp.stop_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4.2,monk(2).erp.reward_max, monk(2).erp.reward_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        set(gca,'xlim',[0.5 4.5],'xTick',[1 2 3 4],'xTickLabel',[{'move' 'target' 'stop' 'reward'}],'yLim',[0 40], 'yTick',[0 20 40], 'TickDir', 'out', 'FontSize', 22); box off;
-        ylabel('Max ERP (µV)'); title('MST'); axis square;
-        
-        
-        % plot max time
-        figure; hold on;
-        errorbar(1,monk(1).erp.move_max_time, monk(1).erp.move_max_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2,monk(1).erp.target_max_time, monk(1).erp.target_max_std,'ob', 'LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3,monk(1).erp.stop_max_time, monk(1).erp.stop_max_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4,monk(1).erp.reward_max_time, monk(1).erp.reward_max_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        
-        errorbar(1,monk(2).erp.move_max_time, monk(2).erp.move_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2,monk(2).erp.target_max_time, monk(2).erp.target_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3,monk(2).erp.stop_max_time, monk(2).erp.stop_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4,monk(2).erp.reward_max_time, monk(2).erp.reward_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        set(gca,'xlim',[0.5 4.5],'xTick',[1 2 3 4],'xTickLabel',[{'move' 'target' 'stop' 'reward'}],'yLim',[-0.6 0.8], 'yTick',[-0.6 0 0.6], 'TickDir', 'out', 'FontSize', 22); box off;
-        ylabel('Time from event (s)'); hline(0, '--k'); title('MST'); axis square;
-        
-    case 'erp_reward_densities_MST'
-        type = 'reward'
-        ncond = length(monk(1).erp.MST.sess(1).lfps(1).trialtype.(type));
-        ts_move = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type)(ncond).events.move.erp_time; ts_move_win = ts_move(ts_move>=-0.5 & ts_move<=0.5);
-        ts_target = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type)(ncond).events.target.erp_time; ts_target_win = ts_target(ts_target>=-0.5 & ts_target<=0.5);
-        ts_stop = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type)(ncond).events.stop.erp_time; ts_stop_win = ts_stop(ts_stop>=-0.5 & ts_stop<=0.5);
-        ts_reward = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type)(ncond).events.reward.erp_time; ts_reward_win = ts_reward(ts_reward>=-0.5 & ts_reward<=0.5);
-        
-        % Mean all channels per session
-        for m = [1 3] % 1:length(monk)
-            for sess = 1:length(monk(m).pop)
-                for cond = 1:ncond
-                    for ch = 1:length(monk(1).cont.MST.sess(sess).lfps)
-                        monk(m).sess(sess).(type)(cond).erp_move(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type)(cond).events.move.erp_mu*1000; % move
-                        monk(m).sess(sess).(type)(cond).erp_target(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type)(cond).events.target.erp_mu*1000; % move
-                        monk(m).sess(sess).(type)(cond).erp_stop(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type)(cond).events.stop.erp_mu*1000; % move
-                        monk(m).sess(sess).(type)(cond).erp_reward(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type)(cond).events.reward.erp_mu*1000; % move
-                    end
-                end
-            end
-        end
-        
-        % average across channels
-        for m = [1 3] %1:length(monk)
-            for sess = 1:length(monk(m).sess)
-                for cond = 1:ncond
-                    monk(m).sess(sess).(type)(cond).erp_move_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_move);
-                    monk(m).sess(sess).(type)(cond).erp_target_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_target);
-                    monk(m).sess(sess).(type)(cond).erp_stop_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_stop);
-                    monk(m).sess(sess).(type)(cond).erp_reward_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_reward);
-                end
-            end
-        end
-        
-        % average across sessions
-        for m = [1 3] %1:length(monk)
-            clear th_v th_w bet_v bet_w
-            for cond = 1:ncond
-                for sess = 1:length(monk(m).sess)
-                    
-                    erp_move_sess(sess,:) =  monk(m).sess(sess).(type)(cond).erp_move_mu_ch; ...
-                        [max_move_sess(sess,:),indx_move] = max(abs(monk(m).sess(sess).(type)(cond).erp_move_mu_ch(1,ts_move>=-0.5 & ts_move<=0.5))); max_move_time(sess,:) = ts_move_win(indx_move);
-                    erp_target_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_target_mu_ch; ...
-                        [max_target_sess(sess,:),indx_target] = max(abs(monk(m).sess(sess).(type)(cond).erp_target_mu_ch(1,ts_target>=-0.5 & ts_target<=0.5))); max_target_time(sess,:) = ts_target_win(indx_target);
-                    erp_stop_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_stop_mu_ch; ...
-                        [max_stop_sess(sess,:),indx_stop] = max(abs(monk(m).sess(sess).(type)(cond).erp_stop_mu_ch(1,ts_stop>=-0.5 & ts_stop<=0.5))); max_stop_time(sess,:) = ts_stop_win(indx_stop);
-                    erp_reward_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_reward_mu_ch; ...
-                        [max_reward_sess(sess,:),indx_reward] = max(abs(monk(m).sess(sess).(type)(cond).erp_reward_mu_ch(1,ts_reward>=-0.5 & ts_reward<=0.5))); max_reward_time(sess,:) = ts_reward_win(indx_reward);
-                    
-                end
-                
-                % mean
-                monk(m).erp.(type)(cond).move = nanmean(erp_move_sess);     monk(m).erp.(type)(cond).move_std = nanmean(nanstd(erp_move_sess));
-                monk(m).erp.(type)(cond).target = nanmean(erp_target_sess); monk(m).erp.(type)(cond).target_std = nanmean(nanstd(erp_target_sess));
-                monk(m).erp.(type)(cond).stop = nanmean(erp_stop_sess);     monk(m).erp.(type)(cond).stop_std = nanmean(nanstd(erp_stop_sess));
-                monk(m).erp.(type)(cond).reward = nanmean(erp_reward_sess); monk(m).erp.(type)(cond).reward_std = nanmean(nanstd(erp_reward_sess));
-                
-                monk(m).erp.(type)(cond).move_max = nanmean(max_move_sess);      monk(m).erp.(type)(cond).move_max_amp_std = nanstd(max_move_sess);
-                monk(m).erp.(type)(cond).target_max = nanmean(max_target_sess);  monk(m).erp.(type)(cond).target_max_amp_std = nanstd(max_target_sess);
-                monk(m).erp.(type)(cond).stop_max = nanmean(max_stop_sess);      monk(m).erp.(type)(cond).stop_max_amp_std = nanstd(max_stop_sess);
-                monk(m).erp.(type)(cond).reward_max = nanmean(max_reward_sess);  monk(m).erp.(type)(cond).reward_max_amp_std = nanstd(max_reward_sess);
-                
-                monk(m).erp.(type)(cond).move_max_time = nanmean(max_move_time);      monk(m).erp.(type)(cond).move_max_std = nanstd(max_move_time);
-                monk(m).erp.(type)(cond).target_max_time = nanmean(max_target_time);  monk(m).erp.(type)(cond).target_max_std = nanstd(max_target_time);
-                monk(m).erp.(type)(cond).stop_max_time = nanmean(max_stop_time);      monk(m).erp.(type)(cond).stop_max_std = nanstd(max_stop_time);
-                monk(m).erp.(type)(cond).reward_max_time = nanmean(max_reward_time);  monk(m).erp.(type)(cond).reward_max_std = nanstd(max_reward_time);
-            end
-        end
-        
-        
-        %% plot
-        %  move
-        figure;
-        for m = [1 3] %1:length(monk)
-            for cond = 1:ncond
-                plot(ts_move, smooth(monk(m).erp.(type)(cond).move),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP move'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = [1 3];
-            erp_move(m,:) = smooth(monk(m).erp.(type)(2).move); % erp_stop(m,:) = abs(monk(m).erp.stop); %
-        end
-        erp_move = erp_move([1 3],:);
-        figure; hold on;
-        plot(ts_move,erp_move,'Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_move, smooth(nanmean(erp_move)),'k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP move all'); axis square;
-        %% target
-        figure;
-        for m = [1 3] %1:length(monk)
-            for cond = 1:ncond
-                plot(ts_target, smooth(monk(m).erp.(type)(cond).target),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP target'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = [1 3];
-            erp_targ(m,:) = monk(m).erp.(type)(2).target; % erp_targ(m,:) = abs(monk(m).erp.target); %
-        end
-        erp_targ = erp_targ([1 3],:);
-        figure; hold on;
-        plot(ts_target-0.3,erp_targ,'Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_target-0.3, smooth(nanmean(erp_targ)),'k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP target all'); axis square;
-        %% stop
-        figure;
-        for m = [1 3] %1:length(monk)
-            for cond = 1:ncond
-                plot(ts_stop, smooth(monk(m).erp.(type)(cond).stop),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP stop'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = [1 3];
-            erp_stop(m,:) = monk(m).erp.(type)(2).stop; % erp_stop(m,:) = abs(monk(m).erp.stop); %
-        end
-        erp_stop = erp_stop([1 3],:);
-        figure; hold on;
-        plot(ts_stop,erp_stop,'Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_stop, smooth(nanmean(erp_stop)),'k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP stop all'); axis square;
-        %% reward
-        figure;
-        for m = [1 3] %1:length(monk)
-            for cond = 1:ncond
-                plot(ts_reward, smooth(monk(m).erp.(type)(cond).reward),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP reward'); legend({'Monk Q rew', 'Monk S rew'}, 'box', 'off');
-            end
-        end
-        
-        % avg for all monks
-        for m = [1 3];
-            erp_reward(m,:) = monk(m).erp.(type)(2).reward; % erp_reward(m,:) = abs(monk(m).erp.target); %
-        end
-        erp_reward = erp_reward([1 3],:);
-        figure; hold on;
-        plot(ts_reward,erp_reward,'Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_reward, smooth(nanmean(erp_reward)),'k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP reward all'); axis square;
-        
-        %% plot max amp
-        cond = 2;
-        figure; hold on;
-        errorbar(1.2,monk(1).erp.(type)(cond).move_max, monk(1).erp.(type)(cond).move_max_amp_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2.2,monk(1).erp.(type)(cond).target_max, monk(1).erp.(type)(cond).target_max_amp_std,'ob', 'LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3.2,monk(1).erp.(type)(cond).stop_max, monk(1).erp.(type)(cond).stop_max_amp_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4.2,monk(1).erp.(type)(cond).reward_max, monk(1).erp.(type)(cond).reward_max_amp_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        
-        errorbar(1.2,monk(2).erp.(type)(cond).move_max, monk(2).erp.(type)(cond).move_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2.2,monk(2).erp.(type)(cond).target_max, monk(2).erp.(type)(cond).target_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3.2,monk(2).erp.(type)(cond).stop_max, monk(2).erp.(type)(cond).stop_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4.2,monk(2).erp.(type)(cond).reward_max, monk(2).erp.(type)(cond).reward_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        set(gca,'xlim',[0.5 4.5],'xTick',[1 2 3 4],'xTickLabel',[{'move' 'target' 'stop' 'reward'}],'yLim',[0 40], 'yTick',[0 20 40], 'TickDir', 'out', 'FontSize', 22); box off;
-        ylabel('Max ERP (µV)'); title('MST'); axis square;
-        
-        
-        % plot max time
-        figure; hold on;
-        errorbar(1,monk(1).erp.(type)(cond).move_max_time, monk(1).erp.(type)(cond).move_max_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2,monk(1).erp.(type)(cond).target_max_time, monk(1).erp.(type)(cond).target_max_std,'ob', 'LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3,monk(1).erp.(type)(cond).stop_max_time, monk(1).erp.(type)(cond).stop_max_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4,monk(1).erp.(type)(cond).reward_max_time, monk(1).erp.(type)(cond).reward_max_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        
-        errorbar(1,monk(2).erp.(type)(cond).move_max_time, monk(2).erp.(type)(cond).move_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2,monk(2).erp.(type)(cond).target_max_time, monk(2).erp.(type)(cond).target_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3,monk(2).erp.(type)(cond).stop_max_time, monk(2).erp.(type)(cond).stop_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4,monk(2).erp.(type)(cond).reward_max_time, monk(2).erp.(type)(cond).reward_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        set(gca,'xlim',[0.5 4.5],'xTick',[1 2 3 4],'xTickLabel',[{'move' 'target' 'stop' 'reward'}],'yLim',[-0.6 0.8], 'yTick',[-0.6 0 0.6], 'TickDir', 'out', 'FontSize', 22); box off;
-        ylabel('Time from event (s)'); hline(0, '--k'); title('MST'); axis square;
-        
-    case 'erp_before_after_move_MST'
-        
-        type = 'reward'
-        
-        ncond = length(monk(1).erp.MST.sess(1).lfps(1).trialtype.(type));
-        ts_move = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type)(ncond).events.move.erp_time; ts_move_win = ts_move(ts_move>=-0.5 & ts_move<=0.5);
-        ts_target = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type)(ncond).events.target.erp_time; ts_target_win = ts_target(ts_target>=-0.5 & ts_target<=0.5);
-        ts_stop = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type)(ncond).events.stop.erp_time; ts_stop_win = ts_stop(ts_stop>=-0.5 & ts_stop<=0.5);
-        ts_reward = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type)(ncond).events.reward.erp_time; ts_reward_win = ts_reward(ts_reward>=-0.5 & ts_reward<=0.5);
-        
-        % Mean all channels per session
-        for m = [1 3] % 1:length(monk)
-            for sess = 1:length(monk(m).erp.MST.sess)
-                for cond = [3 4]
-                    for ch = 1:length(monk(m).erp.MST.sess(sess).lfps)
-                        monk(m).sess(sess).(type)(cond).erp_move(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type)(cond).events.move.erp_mu*1000; % move
-                        monk(m).sess(sess).(type)(cond).erp_target(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type)(cond).events.target.erp_mu*1000; % move
-                        monk(m).sess(sess).(type)(cond).erp_stop(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type)(cond).events.stop.erp_mu*1000; % move
-                        monk(m).sess(sess).(type)(cond).erp_reward(ch,:) = monk(m).erp.MST.sess(sess).lfps(ch).trialtype.(type)(cond).events.reward.erp_mu*1000; % move
-                    end
-                end
-            end
-        end
-        
-        % average across channels
-        for m = [1 3] %1:length(monk)
-            for sess = 1:length(monk(m).erp.MST.sess)
-                for cond = [3 4]
-                    monk(m).sess(sess).(type)(cond).erp_move_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_move);
-                    monk(m).sess(sess).(type)(cond).erp_target_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_target);
-                    monk(m).sess(sess).(type)(cond).erp_stop_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_stop);
-                    monk(m).sess(sess).(type)(cond).erp_reward_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_reward);
-                end
-            end
-        end
-        
-        % average across sessions
-        for m = [1 3] %1:length(monk)
-            clear th_v th_w bet_v bet_w
-            for cond = [3 4]
-                for sess = 1:length(monk(m).erp.MST.sess)
-                    
-                    erp_move_sess(sess,:) =  monk(m).sess(sess).(type)(cond).erp_move_mu_ch; ...
-                        [max_move_sess(sess,:),indx_move] = max(abs(monk(m).sess(sess).(type)(cond).erp_move_mu_ch(1,ts_move>=-0.5 & ts_move<=0.5))); max_move_time(sess,:) = ts_move_win(indx_move);
-                    erp_target_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_target_mu_ch; ...
-                        [max_target_sess(sess,:),indx_target] = max(abs(monk(m).sess(sess).(type)(cond).erp_target_mu_ch(1,ts_target>=-0.5 & ts_target<=0.5))); max_target_time(sess,:) = ts_target_win(indx_target);
-                    erp_stop_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_stop_mu_ch; ...
-                        [max_stop_sess(sess,:),indx_stop] = max(abs(monk(m).sess(sess).(type)(cond).erp_stop_mu_ch(1,ts_stop>=-0.5 & ts_stop<=0.5))); max_stop_time(sess,:) = ts_stop_win(indx_stop);
-                    erp_reward_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_reward_mu_ch; ...
-                        [max_reward_sess(sess,:),indx_reward] = max(abs(monk(m).sess(sess).(type)(cond).erp_reward_mu_ch(1,ts_reward>=-0.5 & ts_reward<=0.5))); max_reward_time(sess,:) = ts_reward_win(indx_reward);
-                    
-                end
-                
-                % mean
-                monk(m).erp.(type)(cond).move = nanmean(erp_move_sess);     monk(m).erp.(type)(cond).move_std = nanmean(nanstd(erp_move_sess));
-                monk(m).erp.(type)(cond).target = nanmean(erp_target_sess); monk(m).erp.(type)(cond).target_std = nanmean(nanstd(erp_target_sess));
-                monk(m).erp.(type)(cond).stop = nanmean(erp_stop_sess);     monk(m).erp.(type)(cond).stop_std = nanmean(nanstd(erp_stop_sess));
-                monk(m).erp.(type)(cond).reward = nanmean(erp_reward_sess); monk(m).erp.(type)(cond).reward_std = nanmean(nanstd(erp_reward_sess));
-                
-                monk(m).erp.(type)(cond).move_max = nanmean(max_move_sess);      monk(m).erp.(type)(cond).move_max_amp_std = nanstd(max_move_sess);
-                monk(m).erp.(type)(cond).target_max = nanmean(max_target_sess);  monk(m).erp.(type)(cond).target_max_amp_std = nanstd(max_target_sess);
-                monk(m).erp.(type)(cond).stop_max = nanmean(max_stop_sess);      monk(m).erp.(type)(cond).stop_max_amp_std = nanstd(max_stop_sess);
-                monk(m).erp.(type)(cond).reward_max = nanmean(max_reward_sess);  monk(m).erp.(type)(cond).reward_max_amp_std = nanstd(max_reward_sess);
-                
-                monk(m).erp.(type)(cond).move_max_time = nanmean(max_move_time);      monk(m).erp.(type)(cond).move_max_std = nanstd(max_move_time);
-                monk(m).erp.(type)(cond).target_max_time = nanmean(max_target_time);  monk(m).erp.(type)(cond).target_max_std = nanstd(max_target_time);
-                monk(m).erp.(type)(cond).stop_max_time = nanmean(max_stop_time);      monk(m).erp.(type)(cond).stop_max_std = nanstd(max_stop_time);
-                monk(m).erp.(type)(cond).reward_max_time = nanmean(max_reward_time);  monk(m).erp.(type)(cond).reward_max_std = nanstd(max_reward_time);
-            end
-        end
-        
-        
-        %% plot
-        %  move
-        %         figure;
-        %         for m = [1 3] %1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_move, smooth(monk(m).erp.(type)(cond).move),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP move'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        % avg for all monks
-        for m = [1 3];
-            erp_move_before(m,:) = smooth(monk(m).erp.(type)(3).move);
-            erp_move_after(m,:) = smooth(monk(m).erp.(type)(4).move);
-        end
-        erp_move_before = erp_move_before([1 3],:); erp_move_after = erp_move_after([1 3],:);
-        figure; hold on;
-        plot(ts_move,erp_move_before,'Color',[0.5 0.5 0.5], 'LineWidth', 2); plot(ts_move,erp_move_after,'--','Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_move, smooth(nanmean(erp_move_before)),'k', 'LineWidth', 2); hold on; plot(ts_move, smooth(nanmean(erp_move_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP move before/after'); axis square;
-        %% target
-        %         figure;
-        %         for m = [1 3] %1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_target, smooth(monk(m).erp.(type)(cond).target),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP target'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        % avg for all monks
-        for m = [1 3];
-            erp_targ_before(m,:) = monk(m).erp.(type)(3).target;
-            erp_targ_after(m,:) = monk(m).erp.(type)(4).target;
-        end
-        erp_targ_before = erp_targ_before([1 3],:); erp_targ_after = erp_targ_after([1 3],:);
-        figure; hold on;
-        plot(ts_target-0.3,erp_targ_before,'Color',[0.5 0.5 0.5], 'LineWidth', 2); plot(ts_target-0.3,erp_targ_after,'--','Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_target-0.3, smooth(nanmean(erp_targ_before)),'k', 'LineWidth', 2); hold on; plot(ts_target-0.3, smooth(nanmean(erp_targ_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off; vline(-0.3,'k');
-        title('ERP target before/after'); axis square;
-        %% stop
-        %         figure;
-        %         for m = [1 3] %1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_stop, smooth(monk(m).erp.(type)(cond).stop),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP stop'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        % avg for all monks
-        for m = [1 3];
-            erp_stop_before(m,:) = smooth(monk(m).erp.(type)(3).stop);
-            erp_stop_after(m,:) = smooth(monk(m).erp.(type)(4).stop);
-        end
-        erp_stop_before = erp_stop_before([1 3],:); erp_stop_after = erp_stop_after([1 3],:);
-        figure; hold on;
-        plot(ts_stop,erp_stop_before,'Color',[0.5 0.5 0.5], 'LineWidth', 2); plot(ts_stop,erp_stop_after,'--','Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_stop, smooth(nanmean(erp_stop_before)),'k', 'LineWidth', 2); hold on; plot(ts_stop, smooth(nanmean(erp_stop_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP stop before/after'); axis square;
-        %% reward
-        %         figure;
-        %         for m = [1 3] %1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_reward, smooth(monk(m).erp.(type)(cond).reward),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP reward'); legend({'Monk Q rew', 'Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        
-        % avg for all monks
-        for m = [1 3];
-            erp_reward_before(m,:) = smooth(monk(m).erp.(type)(3).reward);
-            erp_reward_after(m,:) = smooth(monk(m).erp.(type)(4).reward);
-        end
-        erp_reward_before = erp_reward_before([1 3],:); erp_reward_after = erp_reward_after([1 3],:);
-        figure; hold on;
-        plot(ts_reward,erp_reward_before,'Color',[0.5 0.5 0.5], 'LineWidth', 2); plot(ts_reward,erp_reward_after,'--','Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_reward, smooth(nanmean(erp_reward_before)),'k', 'LineWidth', 2); hold on; plot(ts_reward, smooth(nanmean(erp_reward_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP reward before/after'); axis square;
-        
-        
-    case 'erp_all_PPC'
-        type = 'all'
-        ts_move = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type).events.move.erp_time; ts_move_win = ts_move(ts_move>=-0.5 & ts_move<=0.5);
-        ts_target = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type).events.target.erp_time; ts_target_win = ts_target(ts_target>=-0.5 & ts_target<=0.5);
-        ts_stop = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type).events.stop.erp_time; ts_stop_win = ts_stop(ts_stop>=-0.5 & ts_stop<=0.5);
-        ts_reward = monk(1).erp.MST.sess(1).lfps(1).trialtype.(type).events.reward.erp_time; ts_reward_win = ts_reward(ts_reward>=-0.5 & ts_reward<=0.5);
-        % Mean all channels per session
-        for m = 1:length(monk)
-            for sess = 1:length(monk(m).pop)
-                for ch = 1:length(monk(1).cont.PPC.sess(sess).lfps)
-                    monk(m).sess(sess).erp_move(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type).events.move.erp_mu; % move
-                    monk(m).sess(sess).erp_target(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type).events.target.erp_mu; % move
-                    monk(m).sess(sess).erp_stop(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type).events.stop.erp_mu; % move
-                    monk(m).sess(sess).erp_reward(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type).events.reward.erp_mu; % move
-                end
-            end
-        end
-        
-        
-        % average across channels
-        for m = 1:length(monk)
-            for sess = 1:length(monk(m).sess)
-                monk(m).sess(sess).erp_move_mu_ch = nanmean(monk(m).sess(sess).erp_move);
-                monk(m).sess(sess).erp_target_mu_ch = nanmean(monk(m).sess(sess).erp_target);
-                monk(m).sess(sess).erp_stop_mu_ch = nanmean(monk(m).sess(sess).erp_stop);
-                monk(m).sess(sess).erp_reward_mu_ch = nanmean(monk(m).sess(sess).erp_reward);
-            end
-        end
-        
-        % average across sessions
-        for m = 1:length(monk)
-            clear th_v th_w bet_v bet_w
-            for sess = 1:length(monk(m).sess)
-                erp_move_sess(sess,:) =  monk(m).sess(sess).erp_move_mu_ch; ...
-                    [max_move_sess(sess,:),indx_move] = max(abs(monk(m).sess(sess).erp_move_mu_ch(1,ts_move>=-0.5 & ts_move<=0.5))); max_move_time(sess,:) = ts_move_win(indx_move);
-                erp_target_sess(sess,:) = monk(m).sess(sess).erp_target_mu_ch; ...
-                    [max_target_sess(sess,:),indx_target] = max(abs(monk(m).sess(sess).erp_target_mu_ch(1,ts_target>=-0.5 & ts_target<=0.5))); max_target_time(sess,:) = ts_target_win(indx_target);
-                erp_stop_sess(sess,:) = monk(m).sess(sess).erp_stop_mu_ch; ...
-                    [max_stop_sess(sess,:),indx_stop] = max(abs(monk(m).sess(sess).erp_stop_mu_ch(1,ts_stop>=-0.5 & ts_stop<=0.5))); max_stop_time(sess,:) = ts_stop_win(indx_stop);
-                erp_reward_sess(sess,:) = monk(m).sess(sess).erp_reward_mu_ch; ...
-                    [max_reward_sess(sess,:),indx_reward] = max(abs(monk(m).sess(sess).erp_reward_mu_ch(1,ts_reward>=-0.5 & ts_reward<=0.5))); max_reward_time(sess,:) = ts_reward_win(indx_reward);
-            end
-            % mean
-            monk(m).erp.move = nanmean(erp_move_sess);     monk(m).erp.move_std = nanmean(nanstd(erp_move_sess));
-            monk(m).erp.target = nanmean(erp_target_sess); monk(m).erp.target_std = nanmean(nanstd(erp_target_sess));
-            monk(m).erp.stop = nanmean(erp_stop_sess);     monk(m).erp.stop_std = nanmean(nanstd(erp_stop_sess));
-            monk(m).erp.reward = nanmean(erp_reward_sess); monk(m).erp.reward_std = nanmean(nanstd(erp_reward_sess));
+        else
+            if strcmp(ev,'target'), ts_win = ts_win+0.3; end
+            % plot each monkey
+            figure; hold on;
+            for m = monk_ids, plot(ts_win,smooth(erp_monks(m,:))); end; 
+            set(gca,'xlim',[-1 1],'ylim',[-2 2], 'yTick', [0 1], 'TickDir', 'out', 'FontSize', 22); box off;
+            title(['ERP ' ev]); legend({'Monk Q','Monk B','Monk S','Monk V'});
+            if strcmp(ev,'target'), vline(-0.3,'-k'), else vline(0, '-k'); end
+            axis square
             
-            monk(m).erp.move_max = nanmean(max_move_sess); monk(m).erp.move_max_amp_std = nanstd(max_move_sess);
-            monk(m).erp.target_max = nanmean(max_target_sess);  monk(m).erp.target_max_amp_std = nanstd(max_target_sess);
-            monk(m).erp.stop_max = nanmean(max_stop_sess); monk(m).erp.stop_max_amp_std = nanstd(max_stop_sess);
-            monk(m).erp.reward_max = nanmean(max_reward_sess); monk(m).erp.reward_max_amp_std = nanstd(max_reward_sess);
+            % plot all monkeys
+            % figure; hold on;
+            plot(ts_win, smooth(nanmean(erp_monks)));
+            set(gca,'xlim',[-1 1],'ylim',[-2 2],'yTick', [0 1], 'TickDir', 'out', 'FontSize', 22); box off;
+            if strcmp(ev,'target'), vline(-0.3,'-k'), else vline(0, '-k'); end
+            axis square
+            keyboard
+        end
+    case 'erp_move_ba'
+        ar = 'PPC'
+        type = 'reward'
+        ev = 'stop'
+        n_cond_1 = 5; % correct or move before
+        n_cond_2 = 6; % incorrec or move after
+        
+        if strcmp(ar,'MST'), monk_ids = [1 3]; elseif strcmp(ar,'PFC'), monk_ids = [3 4]; else monk_ids = 1:4; end
+        if strcmp(ev,'target'), win = [-1.3 1.3]; elseif strcmp(ev,'reward'), win = [-1 0.5]; else, win = [-1 1]; end
+        %% go through each monkey, extract and average all sessions and store
+        for m = monk_ids
+            ncond = length(monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type));
+            if strcmp(type, 'reward')
+                ts_ev_corr{m,:} = monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(n_cond_1).events.(ev).erp_time; 
+                ts_ev_incorr{m,:} = monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(n_cond_2).events.(ev).erp_time;
+                ts_win = monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(2).events.(ev).erp_time(monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(5).events.(ev).erp_time...
+                    >=win(1) & monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(5).events.(ev).erp_time<=win(2));
+            else
+                ts_ev = monk(m).erp.(ar).sess(1).lfps(1).trialtype.(type)(1).events.(ev).erp_time; ts_win = ts_ev(ts_ev>=win(1) & ts_ev<=win(2));
+            end
+            % go through the sessions
+            for sess = 1:length(monk(m).erp.(ar).sess)
+                clear erp_ch
+                for cond = 1:ncond
+                    for ch = 1:length(monk(m).erp.(ar).sess(sess).lfps)
+                        erp_ch(ch,:) = monk(m).erp.(ar).sess(sess).lfps(ch).trialtype.(type)(cond).events.(ev).erp_mu;
+                    end
+                    monk_erp(m).(type)(cond).erp_mu_ch(sess,:) = nanmean(erp_ch); % average across channels and store
+                end
+            end
+            % average across sessions
+            for cond = 1:ncond, monk_erp(m).(type)(cond).erp = nanmean(monk_erp(m).(type)(cond).erp_mu_ch); end
+        end
+        %% averge all monkeys
+        for m = monk_ids
+            if strcmp(type, 'reward')
+                erp_monks_corr(m,:) = monk_erp(m).(type)(n_cond_1).erp(ts_ev_corr{m,:}>=win(1) & ts_ev_corr{m,:}<=win(2)); max_erp = max(erp_monks_corr(m,:)); erp_monks_corr(m,:) = erp_monks_corr(m,:)./max_erp;
+                erp_monks_incorr(m,:) = monk_erp(m).(type)(n_cond_2).erp(ts_ev_incorr{m,:}>=win(1) & ts_ev_incorr{m,:}<=win(2)); max_erp_incorr = max(erp_monks_incorr(m,:)); erp_monks_incorr(m,:) = erp_monks_incorr(m,:)./max_erp_incorr;
+            else
+                erp_monks(m,:) = monk_erp(m).(type)(cond).erp(ts_ev>=win(1) & ts_ev<=win(2)); max_erp = max(erp_monks(m,:));
+                erp_monks(m,:) = erp_monks(m,:)./max_erp;
+            end
+        end
+        
+        %% plot
+        if strcmp(type, 'reward')
+            if strcmp(ev,'target'), ts_win = ts_win-0.3; end
+            % plot each monkey
+            figure; hold on;
+            for m = monk_ids, plot(ts_win,smooth(erp_monks_corr(m,:)),'LineWidth', 2); end
+            for m = monk_ids, plot(ts_win,smooth(erp_monks_incorr(m,:)),'LineWidth', 2); end
+            set(gca,'xlim',[-1 1],'ylim',[-2 2],'yTick', [0 1], 'TickDir', 'out', 'FontSize', 22); box off;
+            title(['ERP ' ev]); legend({'Monk Q','Monk B','Monk S','Monk V'});
+            if strcmp(ev,'target'), vline(-0.3,'-k'), else vline(0, '-k'); end
+            axis square
             
-            monk(m).erp.move_max_time = nanmean(max_move_time); monk(m).erp.move_max_std = nanstd(max_move_time);
-            monk(m).erp.target_max_time = nanmean(max_target_time);  monk(m).erp.target_max_std = nanstd(max_target_time);
-            monk(m).erp.stop_max_time = nanmean(max_stop_time); monk(m).erp.stop_max_std = nanstd(max_stop_time);
-            monk(m).erp.reward_max_time = nanmean(max_reward_time); monk(m).erp.reward_max_std = nanstd(max_reward_time);
+            % plot all monkeys
+            %figure; hold on;
+            plot(ts_win, smooth(nanmean(erp_monks_corr)), 'LineWidth', 2);
+            plot(ts_win, smooth(nanmean(erp_monks_incorr)),'--', 'LineWidth', 2);
+            set(gca,'xlim',[-1 1],'ylim',[-2 2],'yTick', [0 1], 'TickDir', 'out', 'FontSize', 22); box off;
+            if strcmp(ev,'target'), vline(-0.3,'-k'), else vline(0, '-k'); end
+            axis square
+            keyboard
+            
+        else
+            if strcmp(ev,'target'), ts_win = ts_win+0.3; end
+            % plot each monkey
+            figure; hold on;
+            for m = monk_ids, plot(ts_win,smooth(erp_monks(m,:))); end; 
+            set(gca,'xlim',[-1 1],'ylim',[-2 2], 'yTick', [0 1], 'TickDir', 'out', 'FontSize', 22); box off;
+            title(['ERP ' ev]); legend({'Monk Q','Monk B','Monk S','Monk V'});
+            if strcmp(ev,'target'), vline(-0.3,'-k'), else vline(0, '-k'); end
+            axis square
+            
+            % plot all monkeys
+            % figure; hold on;
+            plot(ts_win, smooth(nanmean(erp_monks)));
+            set(gca,'xlim',[-1 1],'ylim',[-2 2],'yTick', [0 1], 'TickDir', 'out', 'FontSize', 22); box off;
+            if strcmp(ev,'target'), vline(-0.3,'-k'), else vline(0, '-k'); end
+            axis square
+            keyboard
         end
-        
-        
-        %  move
-        figure;
-        for m = 1:length(monk)
-            plot(ts_move, smooth(monk(m).erp.move),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-            set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-            title('ERP move'); legend({'Monk Q', 'Monk S'}, 'box', 'off');
-        end
-        %% target
-        figure;
-        for m = 1:length(monk)
-            plot(ts_target, smooth(monk(m).erp.target),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-            set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-            title('ERP target'); legend({'Monk Q', 'Monk S'}, 'box', 'off');
-        end
-        % avg for all monks
-        for m = [1 3];
-            erp_targ(m,:) = monk(m).erp.target; % erp_targ(m,:) = abs(monk(m).erp.target); %
-        end
-        erp_targ = erp_targ([1 3],:);
-        plot(ts_target-0.3, smooth(nanmean(erp_targ)),'r', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP target all');
-        %% stop
-        figure;
-        for m = 1:length(monk)
-            plot(ts_stop, smooth(monk(m).erp.stop),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-            set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-            title('ERP stop'); legend({'Monk Q', 'Monk S'}, 'box', 'off');
-        end
-        % avg for all monks
-        for m = [1 3];
-            erp_stop(m,:) = monk(m).erp.stop; % erp_stop(m,:) = abs(monk(m).erp.stop); %
-        end
-        erp_stop = erp_stop([1 3],:);
-        plot(ts_stop, smooth(nanmean(erp_stop)),'r', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP stop all');
-        %% reward
-        figure;
-        for m = 1:length(monk)
-            plot(ts_reward, smooth(monk(m).erp.reward),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-            set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-            title('ERP reward'); legend({'Monk Q', 'Monk S'}, 'box', 'off');
-        end
-        % avg for all monks
-        for m = [1 3];
-            erp_reward(m,:) = monk(m).erp.reward; % erp_reward(m,:) = abs(monk(m).erp.target); %
-        end
-        erp_reward = erp_reward([1 3],:);
-        plot(ts_reward, smooth(nanmean(erp_reward)),'r', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP reward all');
-        %% plot max amp
-        figure; hold on;
-        errorbar(1.2,monk(1).erp.move_max, monk(1).erp.move_max_amp_std, 'oc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2.2,monk(1).erp.target_max, monk(1).erp.target_max_amp_std,'oc', 'LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3.2,monk(1).erp.stop_max, monk(1).erp.stop_max_amp_std, 'oc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4.2,monk(1).erp.reward_max, monk(1).erp.reward_max_amp_std, 'oc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        
-        errorbar(1.2,monk(2).erp.move_max, monk(2).erp.move_max_amp_std, 'sc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2.2,monk(2).erp.target_max, monk(2).erp.target_max_amp_std, 'sc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3.2,monk(2).erp.stop_max, monk(2).erp.stop_max_amp_std, 'sc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4.2,monk(2).erp.reward_max, monk(2).erp.reward_max_amp_std, 'sc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        set(gca,'xlim',[0.5 4.5],'xTick',[1 2 3 4],'xTickLabel',[{'move' 'target' 'stop' 'reward'}],'yLim',[0 40], 'yTick',[0 20 40], 'TickDir', 'out', 'FontSize', 22); box off;
-        ylabel('Max ERP (µV)'); title('PPC'); axis square;
-        
-        % plot max time
-        figure; hold on;
-        errorbar(1.2,monk(1).erp.move_max_time, monk(1).erp.move_max_std, 'oc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2.2,monk(1).erp.target_max_time, monk(1).erp.target_max_std,'oc', 'LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3.2,monk(1).erp.stop_max_time, monk(1).erp.stop_max_std, 'oc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4.2,monk(1).erp.reward_max_time, monk(1).erp.reward_max_std, 'oc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        
-        errorbar(1.2,monk(2).erp.move_max_time, monk(2).erp.move_max_std, 'sc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2.2,monk(2).erp.target_max_time, monk(2).erp.target_max_std, 'sc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3.2,monk(2).erp.stop_max_time, monk(2).erp.stop_max_std, 'sc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4.2,monk(2).erp.reward_max_time, monk(2).erp.reward_max_std, 'sc','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        set(gca,'xlim',[0.5 4.5],'xTick',[1 2 3 4],'xTickLabel',[{'move' 'target' 'stop' 'reward'}],'yLim',[-0.6 0.8], 'yTick',[-0.6 0 0.6], 'TickDir', 'out', 'FontSize', 22); box off;
-        ylabel('Time from event (s)'); hline(0,'--k'); title('PPC'); axis square;
-        
-    case 'erp_reward_densities_PPC'
-        type = 'reward'
-        ncond = length(monk(1).erp.PPC.sess(1).lfps(1).trialtype.(type));
-        ts_move = monk(1).erp.PPC.sess(1).lfps(1).trialtype.(type)(ncond).events.move.erp_time; ts_move_win = ts_move(ts_move>=-0.5 & ts_move<=0.5);
-        ts_target = monk(1).erp.PPC.sess(1).lfps(1).trialtype.(type)(ncond).events.target.erp_time; ts_target_win = ts_target(ts_target>=-0.5 & ts_target<=0.5);
-        ts_stop = monk(1).erp.PPC.sess(1).lfps(1).trialtype.(type)(ncond).events.stop.erp_time; ts_stop_win = ts_stop(ts_stop>=-0.5 & ts_stop<=0.5);
-        ts_reward = monk(1).erp.PPC.sess(1).lfps(1).trialtype.(type)(ncond).events.reward.erp_time; ts_reward_win = ts_reward(ts_reward>=-0.5 & ts_reward<=0.5);
-        
-        % Mean all channels per session
-        for m = 1:length(monk)
-            for sess = 1:length(monk(m).erp.PPC.sess)
-                for cond = 1:ncond
-                    for ch = 1:length(monk(m).erp.PPC.sess(sess).lfps)
-                        monk(m).sess(sess).(type)(cond).erp_move(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.move.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_target(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.target.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_stop(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.stop.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_reward(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.reward.erp_mu; % move
-                    end
-                end
-            end
-        end
-        
-        % average across channels
-        for m = 1:length(monk)
-            for sess = 1:length(monk(m).erp.PPC.sess)
-                for cond = 1:ncond
-                    monk(m).sess(sess).(type)(cond).erp_move_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_move);
-                    monk(m).sess(sess).(type)(cond).erp_target_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_target);
-                    monk(m).sess(sess).(type)(cond).erp_stop_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_stop);
-                    monk(m).sess(sess).(type)(cond).erp_reward_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_reward);
-                end
-            end
-        end
-        
-        % average across sessions
-        for m = 1:length(monk)
-            clear th_v th_w bet_v bet_w
-            for cond = 1:ncond
-                clear erp_move_sess erp_target_sess erp_stop_sess erp_reward_sess
-                for sess = 1:length(monk(m).erp.PPC.sess)
-                    erp_move_sess(sess,:) =  monk(m).sess(sess).(type)(cond).erp_move_mu_ch; ...
-                        [max_move_sess(sess,:),indx_move] = max(abs(monk(m).sess(sess).(type)(cond).erp_move_mu_ch(1,ts_move>=-0.5 & ts_move<=0.5))); max_move_time(sess,:) = ts_move_win(indx_move);
-                    erp_target_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_target_mu_ch; ...
-                        [max_target_sess(sess,:),indx_target] = max(abs(monk(m).sess(sess).(type)(cond).erp_target_mu_ch(1,ts_target>=-0.5 & ts_target<=0.5))); max_target_time(sess,:) = ts_target_win(indx_target);
-                    erp_stop_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_stop_mu_ch; ...
-                        [max_stop_sess(sess,:),indx_stop] = max(abs(monk(m).sess(sess).(type)(cond).erp_stop_mu_ch(1,ts_stop>=-0.5 & ts_stop<=0.5))); max_stop_time(sess,:) = ts_stop_win(indx_stop);
-                    erp_reward_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_reward_mu_ch; ...
-                        [max_reward_sess(sess,:),indx_reward] = max(abs(monk(m).sess(sess).(type)(cond).erp_reward_mu_ch(1,ts_reward>=-0.5 & ts_reward<=0.5))); max_reward_time(sess,:) = ts_reward_win(indx_reward);
-                end
-                
-                % mean
-                monk(m).erp.(type)(cond).move = nanmean(erp_move_sess);     monk(m).erp.(type)(cond).move_std = nanmean(nanstd(erp_move_sess));
-                monk(m).erp.(type)(cond).target = nanmean(erp_target_sess); monk(m).erp.(type)(cond).target_std = nanmean(nanstd(erp_target_sess));
-                monk(m).erp.(type)(cond).stop = nanmean(erp_stop_sess);     monk(m).erp.(type)(cond).stop_std = nanmean(nanstd(erp_stop_sess));
-                monk(m).erp.(type)(cond).reward = nanmean(erp_reward_sess); monk(m).erp.(type)(cond).reward_std = nanmean(nanstd(erp_reward_sess));
-                
-                monk(m).erp.(type)(cond).move_max = nanmean(max_move_sess);      monk(m).erp.(type)(cond).move_max_amp_std = nanstd(max_move_sess);
-                monk(m).erp.(type)(cond).target_max = nanmean(max_target_sess);  monk(m).erp.(type)(cond).target_max_amp_std = nanstd(max_target_sess);
-                monk(m).erp.(type)(cond).stop_max = nanmean(max_stop_sess);      monk(m).erp.(type)(cond).stop_max_amp_std = nanstd(max_stop_sess);
-                monk(m).erp.(type)(cond).reward_max = nanmean(max_reward_sess);  monk(m).erp.(type)(cond).reward_max_amp_std = nanstd(max_reward_sess);
-                
-                monk(m).erp.(type)(cond).move_max_time = nanmean(max_move_time);      monk(m).erp.(type)(cond).move_max_std = nanstd(max_move_time);
-                monk(m).erp.(type)(cond).target_max_time = nanmean(max_target_time);  monk(m).erp.(type)(cond).target_max_std = nanstd(max_target_time);
-                monk(m).erp.(type)(cond).stop_max_time = nanmean(max_stop_time);      monk(m).erp.(type)(cond).stop_max_std = nanstd(max_stop_time);
-                monk(m).erp.(type)(cond).reward_max_time = nanmean(max_reward_time);  monk(m).erp.(type)(cond).reward_max_std = nanstd(max_reward_time);
-            end
-        end
-        
-        
-        %% plot
-        %  move
-        figure;
-        for m = 1:length(monk)
-            for cond = 1:ncond
-                plot(ts_move, smooth(monk(m).erp.(type)(cond).move),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP move'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = 1:length(monk)
-            erp_move(m,:) = smooth(monk(m).erp.(type)(2).move); % erp_stop(m,:) = abs(monk(m).erp.stop); %
-        end
-        figure; hold on;
-        plot(ts_move,erp_move,'Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_move, smooth(nanmean(erp_move)),'k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP move all'); axis square;
-        %% target
-        figure;
-        for m = 1:length(monk)
-            for cond = 1:ncond
-                plot(ts_target, smooth(monk(m).erp.(type)(cond).target),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP target'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = 1:length(monk)
-            erp_targ(m,:) = monk(m).erp.(type)(2).target; % erp_targ(m,:) = abs(monk(m).erp.target); %
-        end
-        figure; hold on;
-        plot(ts_target-0.3,erp_targ,'Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_target-0.3, smooth(nanmean(erp_targ)),'k', 'LineWidth', 2);
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP target all'); axis square;
-        %% stop
-        figure;
-        for m = 1:length(monk)
-            for cond = 1:ncond
-                plot(ts_stop, smooth(monk(m).erp.(type)(cond).stop),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP stop'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = 1:length(monk)
-            erp_stop(m,:) = monk(m).erp.(type)(2).stop; % erp_stop(m,:) = abs(monk(m).erp.stop); %
-        end
-        figure; hold on;
-        plot(ts_stop,erp_stop,'Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_stop, smooth(nanmean(erp_stop)),'k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off; set(gca,'YTick', [0 10]);
-        title('ERP stop all'); axis square;
-        %% reward
-        figure;
-        for m = 1:length(monk)
-            for cond = 1:ncond
-                plot(ts_reward, smooth(monk(m).erp.(type)(cond).reward),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP reward'); legend({'Monk Q rew', 'Monk S rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = 1:length(monk)
-            erp_reward(m,:) = monk(m).erp.(type)(2).reward; % erp_reward(m,:) = abs(monk(m).erp.target); %
-        end
-        figure; hold on;
-        plot(ts_reward,erp_reward,'Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_reward, smooth(nanmean(erp_reward)),'k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP reward all'); axis square;
-        %% plot max amp
-        cond = 2;
-        figure; hold on;
-        errorbar(1.2,monk(1).erp.(type)(cond).move_max, monk(1).erp.(type)(cond).move_max_amp_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2.2,monk(1).erp.(type)(cond).target_max, monk(1).erp.(type)(cond).target_max_amp_std,'ob', 'LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3.2,monk(1).erp.(type)(cond).stop_max, monk(1).erp.(type)(cond).stop_max_amp_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4.2,monk(1).erp.(type)(cond).reward_max, monk(1).erp.(type)(cond).reward_max_amp_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        
-        errorbar(1.2,monk(2).erp.(type)(cond).move_max, monk(2).erp.(type)(cond).move_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2.2,monk(2).erp.(type)(cond).target_max, monk(2).erp.(type)(cond).target_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3.2,monk(2).erp.(type)(cond).stop_max, monk(2).erp.(type)(cond).stop_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4.2,monk(2).erp.(type)(cond).reward_max, monk(2).erp.(type)(cond).reward_max_amp_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        set(gca,'xlim',[0.5 4.5],'xTick',[1 2 3 4],'xTickLabel',[{'move' 'target' 'stop' 'reward'}],'yLim',[0 40], 'yTick',[0 20 40], 'TickDir', 'out', 'FontSize', 22); box off;
-        ylabel('Max ERP (µV)'); title('MST'); axis square;
-        
-        
-        % plot max time
-        figure; hold on;
-        errorbar(1,monk(1).erp.(type)(cond).move_max_time, monk(1).erp.(type)(cond).move_max_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2,monk(1).erp.(type)(cond).target_max_time, monk(1).erp.(type)(cond).target_max_std,'ob', 'LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3,monk(1).erp.(type)(cond).stop_max_time, monk(1).erp.(type)(cond).stop_max_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4,monk(1).erp.(type)(cond).reward_max_time, monk(1).erp.(type)(cond).reward_max_std, 'ob','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        
-        errorbar(1,monk(2).erp.(type)(cond).move_max_time, monk(2).erp.(type)(cond).move_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(2,monk(2).erp.(type)(cond).target_max_time, monk(2).erp.(type)(cond).target_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(3,monk(2).erp.(type)(cond).stop_max_time, monk(2).erp.(type)(cond).stop_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        errorbar(4,monk(2).erp.(type)(cond).reward_max_time, monk(2).erp.(type)(cond).reward_max_std, 'sb','LineWidth',1,'MarkerSize',14, 'Capsize',0);
-        set(gca,'xlim',[0.5 4.5],'xTick',[1 2 3 4],'xTickLabel',[{'move' 'target' 'stop' 'reward'}],'yLim',[-0.6 0.8], 'yTick',[-0.6 0 0.6], 'TickDir', 'out', 'FontSize', 22); box off;
-        ylabel('Time from event (s)'); hline(0, '--k'); title('MST'); axis square;
-        
-        
-    case 'erp_before_after_move_PPC'
-        
-        type = 'reward'
-        
-        ncond = length(monk(1).erp.PPC.sess(1).lfps(1).trialtype.(type));
-        ts_move = monk(1).erp.PPC.sess(1).lfps(1).trialtype.(type)(ncond).events.move.erp_time; ts_move_win = ts_move(ts_move>=-0.5 & ts_move<=0.5);
-        ts_target = monk(1).erp.PPC.sess(1).lfps(1).trialtype.(type)(ncond).events.target.erp_time; ts_target_win = ts_target(ts_target>=-0.5 & ts_target<=0.5);
-        ts_stop = monk(1).erp.PPC.sess(1).lfps(1).trialtype.(type)(ncond).events.stop.erp_time; ts_stop_win = ts_stop(ts_stop>=-0.5 & ts_stop<=0.5);
-        ts_reward = monk(1).erp.PPC.sess(1).lfps(1).trialtype.(type)(ncond).events.reward.erp_time; ts_reward_win = ts_reward(ts_reward>=-0.5 & ts_reward<=0.5);
-        
-        % Mean all channels per session
-        for m = 1:length(monk)
-            for sess = 1:length(monk(m).erp.PPC.sess)
-                for cond = [3 4]
-                    for ch = 1:length(monk(m).erp.PPC.sess(sess).lfps)
-                        monk(m).sess(sess).(type)(cond).erp_move(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.move.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_target(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.target.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_stop(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.stop.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_reward(ch,:) = monk(m).erp.PPC.sess(sess).lfps(ch).trialtype.(type)(cond).events.reward.erp_mu; % move
-                    end
-                end
-            end
-        end
-        
-        % average across channels
-        for m = 1:length(monk)
-            for sess = 1:length(monk(m).erp.PPC.sess)
-                for cond = [3 4]
-                    monk(m).sess(sess).(type)(cond).erp_move_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_move);
-                    monk(m).sess(sess).(type)(cond).erp_target_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_target);
-                    monk(m).sess(sess).(type)(cond).erp_stop_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_stop);
-                    monk(m).sess(sess).(type)(cond).erp_reward_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_reward);
-                end
-            end
-        end
-        
-        % average across sessions
-        for m = 1:length(monk)
-            clear th_v th_w bet_v bet_w
-            for cond = [3 4]
-                for sess = 1:length(monk(m).erp.PPC.sess)
-                    
-                    erp_move_sess(sess,:) =  monk(m).sess(sess).(type)(cond).erp_move_mu_ch; ...
-                        [max_move_sess(sess,:),indx_move] = max(abs(monk(m).sess(sess).(type)(cond).erp_move_mu_ch(1,ts_move>=-0.5 & ts_move<=0.5))); max_move_time(sess,:) = ts_move_win(indx_move);
-                    erp_target_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_target_mu_ch; ...
-                        [max_target_sess(sess,:),indx_target] = max(abs(monk(m).sess(sess).(type)(cond).erp_target_mu_ch(1,ts_target>=-0.5 & ts_target<=0.5))); max_target_time(sess,:) = ts_target_win(indx_target);
-                    erp_stop_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_stop_mu_ch; ...
-                        [max_stop_sess(sess,:),indx_stop] = max(abs(monk(m).sess(sess).(type)(cond).erp_stop_mu_ch(1,ts_stop>=-0.5 & ts_stop<=0.5))); max_stop_time(sess,:) = ts_stop_win(indx_stop);
-                    erp_reward_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_reward_mu_ch; ...
-                        [max_reward_sess(sess,:),indx_reward] = max(abs(monk(m).sess(sess).(type)(cond).erp_reward_mu_ch(1,ts_reward>=-0.5 & ts_reward<=0.5))); max_reward_time(sess,:) = ts_reward_win(indx_reward);
-                    
-                end
-                
-                % mean
-                monk(m).erp.(type)(cond).move = nanmean(erp_move_sess);     monk(m).erp.(type)(cond).move_std = nanmean(nanstd(erp_move_sess));
-                monk(m).erp.(type)(cond).target = nanmean(erp_target_sess); monk(m).erp.(type)(cond).target_std = nanmean(nanstd(erp_target_sess));
-                monk(m).erp.(type)(cond).stop = nanmean(erp_stop_sess);     monk(m).erp.(type)(cond).stop_std = nanmean(nanstd(erp_stop_sess));
-                monk(m).erp.(type)(cond).reward = nanmean(erp_reward_sess); monk(m).erp.(type)(cond).reward_std = nanmean(nanstd(erp_reward_sess));
-                
-                monk(m).erp.(type)(cond).move_max = nanmean(max_move_sess);      monk(m).erp.(type)(cond).move_max_amp_std = nanstd(max_move_sess);
-                monk(m).erp.(type)(cond).target_max = nanmean(max_target_sess);  monk(m).erp.(type)(cond).target_max_amp_std = nanstd(max_target_sess);
-                monk(m).erp.(type)(cond).stop_max = nanmean(max_stop_sess);      monk(m).erp.(type)(cond).stop_max_amp_std = nanstd(max_stop_sess);
-                monk(m).erp.(type)(cond).reward_max = nanmean(max_reward_sess);  monk(m).erp.(type)(cond).reward_max_amp_std = nanstd(max_reward_sess);
-                
-                monk(m).erp.(type)(cond).move_max_time = nanmean(max_move_time);      monk(m).erp.(type)(cond).move_max_std = nanstd(max_move_time);
-                monk(m).erp.(type)(cond).target_max_time = nanmean(max_target_time);  monk(m).erp.(type)(cond).target_max_std = nanstd(max_target_time);
-                monk(m).erp.(type)(cond).stop_max_time = nanmean(max_stop_time);      monk(m).erp.(type)(cond).stop_max_std = nanstd(max_stop_time);
-                monk(m).erp.(type)(cond).reward_max_time = nanmean(max_reward_time);  monk(m).erp.(type)(cond).reward_max_std = nanstd(max_reward_time);
-            end
-        end
-        
-        
-        %% plot
-        %  move
-        %         figure;
-        %         for m = [1 3] %1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_move, smooth(monk(m).erp.(type)(cond).move),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP move'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        % avg for all monks
-        for m = 1:length(monk)
-            erp_move_before(m,:) = smooth(monk(m).erp.(type)(3).move);
-            erp_move_after(m,:) = smooth(monk(m).erp.(type)(4).move);
-        end
-        figure; hold on;
-        plot(ts_move,erp_move_before,'Color',[0.5 0.5 0.5], 'LineWidth', 2); plot(ts_move,erp_move_after,'--','Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_move, smooth(nanmean(erp_move_before)),'k', 'LineWidth', 2); hold on; plot(ts_move, smooth(nanmean(erp_move_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP move before/after'); axis square;
-        %% target
-        %         figure;
-        %         for m = [1 3] % 1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_target, smooth(monk(m).erp.(type)(cond).target),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP target'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        % avg for all monks
-        for m = 1:length(monk)
-            erp_targ_before(m,:) = monk(m).erp.(type)(3).target;
-            erp_targ_after(m,:) = monk(m).erp.(type)(4).target;
-        end
-        figure; hold on;
-        plot(ts_target-0.3,erp_targ_before,'Color',[0.5 0.5 0.5], 'LineWidth', 2); plot(ts_target-0.3,erp_targ_after,'--','Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_target-0.3, smooth(nanmean(erp_targ_before)),'k', 'LineWidth', 2); hold on; plot(ts_target-0.3, smooth(nanmean(erp_targ_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off; vline(-0.3,'k');
-        title('ERP target before/after'); axis square;
-        %% stop
-        %         figure;
-        %         for m = [1 3] %1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_stop, smooth(monk(m).erp.(type)(cond).stop),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP stop'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        % avg for all monks
-        for m = 1:length(monk)
-            erp_stop_before(m,:) = smooth(monk(m).erp.(type)(3).stop);
-            erp_stop_after(m,:) = smooth(monk(m).erp.(type)(4).stop);
-        end
-        figure; hold on;
-        plot(ts_stop,erp_stop_before,'Color',[0.5 0.5 0.5], 'LineWidth', 2); plot(ts_stop,erp_stop_after,'--','Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_stop, smooth(nanmean(erp_stop_before)),'k', 'LineWidth', 2); hold on; plot(ts_stop, smooth(nanmean(erp_stop_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP stop before/after'); axis square;
-        %% reward
-        %         figure;
-        %         for m = [1 3] %1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_reward, smooth(monk(m).erp.(type)(cond).reward),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP reward'); legend({'Monk Q rew', 'Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        
-        % avg for all monks
-        for m = 1:length(monk)
-            erp_reward_before(m,:) = smooth(monk(m).erp.(type)(3).reward);
-            erp_reward_after(m,:) = smooth(monk(m).erp.(type)(4).reward);
-        end
-        figure; hold on;
-        plot(ts_reward,erp_reward_before,'Color',[0.5 0.5 0.5], 'LineWidth', 2); plot(ts_reward,erp_reward_after,'--','Color',[0.5 0.5 0.5], 'LineWidth', 2);
-        plot(ts_reward, smooth(nanmean(erp_reward_before)),'k', 'LineWidth', 2); hold on; plot(ts_reward, smooth(nanmean(erp_reward_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP reward before/after'); axis square;
-        
-    case 'erp_reward_densities_PFC'
-        type = 'reward' % Only Schro has recordings in PFC for now (Apr 2020)
-        ncond = length(monk(3).erp.PFC.sess(1).lfps(1).trialtype.(type));
-        ts_move = monk(3).erp.PFC.sess(1).lfps(1).trialtype.(type)(ncond).events.move.erp_time; ts_move_win = ts_move(ts_move>=-0.5 & ts_move<=0.5);
-        ts_target = monk(3).erp.PFC.sess(1).lfps(1).trialtype.(type)(ncond).events.target.erp_time; ts_target_win = ts_target(ts_target>=-0.5 & ts_target<=0.5);
-        ts_stop = monk(3).erp.PFC.sess(1).lfps(1).trialtype.(type)(ncond).events.stop.erp_time; ts_stop_win = ts_stop(ts_stop>=-0.5 & ts_stop<=0.5);
-        ts_reward = monk(3).erp.PFC.sess(1).lfps(1).trialtype.(type)(ncond).events.reward.erp_time; ts_reward_win = ts_reward(ts_reward>=-0.5 & ts_reward<=0.5);
-        
-        % Mean all channels per session
-        for m = 3 % 1:length(monk)
-            for sess = 1:length(monk(m).pop)
-                for cond = 1:ncond
-                    for ch = 1:length(monk(m).cont.PPC.sess(sess).lfps)
-                        monk(m).sess(sess).(type)(cond).erp_move(ch,:) = monk(m).erp.PFC.sess(sess).lfps(ch).trialtype.(type)(cond).events.move.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_target(ch,:) = monk(m).erp.PFC.sess(sess).lfps(ch).trialtype.(type)(cond).events.target.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_stop(ch,:) = monk(m).erp.PFC.sess(sess).lfps(ch).trialtype.(type)(cond).events.stop.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_reward(ch,:) = monk(m).erp.PFC.sess(sess).lfps(ch).trialtype.(type)(cond).events.reward.erp_mu; % move
-                    end
-                end
-            end
-        end
-        
-        % average across channels
-        for m = 3 % 1:length(monk)
-            for sess = 1:length(monk(m).sess)
-                for cond = 1:ncond
-                    monk(m).sess(sess).(type)(cond).erp_move_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_move);
-                    monk(m).sess(sess).(type)(cond).erp_target_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_target);
-                    monk(m).sess(sess).(type)(cond).erp_stop_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_stop);
-                    monk(m).sess(sess).(type)(cond).erp_reward_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_reward);
-                end
-            end
-        end
-        
-        % average across sessions
-        for m = 3 %1:length(monk)
-            clear th_v th_w bet_v bet_w
-            for cond = 1:ncond
-                for sess = 1:length(monk(m).sess)
-                    
-                    erp_move_sess(sess,:) =  monk(m).sess(sess).(type)(cond).erp_move_mu_ch; ...
-                        [max_move_sess(sess,:),indx_move] = max(abs(monk(m).sess(sess).(type)(cond).erp_move_mu_ch(1,ts_move>=-0.5 & ts_move<=0.5))); max_move_time(sess,:) = ts_move_win(indx_move);
-                    erp_target_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_target_mu_ch; ...
-                        [max_target_sess(sess,:),indx_target] = max(abs(monk(m).sess(sess).(type)(cond).erp_target_mu_ch(1,ts_target>=-0.5 & ts_target<=0.5))); max_target_time(sess,:) = ts_target_win(indx_target);
-                    erp_stop_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_stop_mu_ch; ...
-                        [max_stop_sess(sess,:),indx_stop] = max(abs(monk(m).sess(sess).(type)(cond).erp_stop_mu_ch(1,ts_stop>=-0.5 & ts_stop<=0.5))); max_stop_time(sess,:) = ts_stop_win(indx_stop);
-                    erp_reward_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_reward_mu_ch; ...
-                        [max_reward_sess(sess,:),indx_reward] = max(abs(monk(m).sess(sess).(type)(cond).erp_reward_mu_ch(1,ts_reward>=-0.5 & ts_reward<=0.5))); max_reward_time(sess,:) = ts_reward_win(indx_reward);
-                    
-                end
-                
-                % mean
-                monk(m).erp.(type)(cond).move = nanmean(erp_move_sess);     monk(m).erp.(type)(cond).move_std = nanmean(nanstd(erp_move_sess));
-                monk(m).erp.(type)(cond).target = nanmean(erp_target_sess); monk(m).erp.(type)(cond).target_std = nanmean(nanstd(erp_target_sess));
-                monk(m).erp.(type)(cond).stop = nanmean(erp_stop_sess);     monk(m).erp.(type)(cond).stop_std = nanmean(nanstd(erp_stop_sess));
-                monk(m).erp.(type)(cond).reward = nanmean(erp_reward_sess); monk(m).erp.(type)(cond).reward_std = nanmean(nanstd(erp_reward_sess));
-                
-                monk(m).erp.(type)(cond).move_max = nanmean(max_move_sess);      monk(m).erp.(type)(cond).move_max_amp_std = nanstd(max_move_sess);
-                monk(m).erp.(type)(cond).target_max = nanmean(max_target_sess);  monk(m).erp.(type)(cond).target_max_amp_std = nanstd(max_target_sess);
-                monk(m).erp.(type)(cond).stop_max = nanmean(max_stop_sess);      monk(m).erp.(type)(cond).stop_max_amp_std = nanstd(max_stop_sess);
-                monk(m).erp.(type)(cond).reward_max = nanmean(max_reward_sess);  monk(m).erp.(type)(cond).reward_max_amp_std = nanstd(max_reward_sess);
-                
-                monk(m).erp.(type)(cond).move_max_time = nanmean(max_move_time);      monk(m).erp.(type)(cond).move_max_std = nanstd(max_move_time);
-                monk(m).erp.(type)(cond).target_max_time = nanmean(max_target_time);  monk(m).erp.(type)(cond).target_max_std = nanstd(max_target_time);
-                monk(m).erp.(type)(cond).stop_max_time = nanmean(max_stop_time);      monk(m).erp.(type)(cond).stop_max_std = nanstd(max_stop_time);
-                monk(m).erp.(type)(cond).reward_max_time = nanmean(max_reward_time);  monk(m).erp.(type)(cond).reward_max_std = nanstd(max_reward_time);
-            end
-        end
-        
-        
-        %% plot
-        %  move
-        figure;
-        for m = 3 %1:length(monk)
-            for cond = 1:ncond
-                plot(ts_move, smooth(monk(m).erp.(type)(cond).move),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP move'); legend({'Monk unrew', 'Monk  rew', 'Monk  unrew','Monk  rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = 3;
-            erp_move(m,:) = smooth(monk(m).erp.(type)(2).move); % erp_stop(m,:) = abs(monk(m).erp.stop); %
-        end
-        % avg for all monks
-        for m = 3 %1:length(monk)
-            erp_move(m,:) = monk(m).erp.(type)(2).move; % erp_stop(m,:) = abs(monk(m).erp.stop); %
-        end
-        figure; hold on;
-        for ii = 1:length(erp_move_sess(:,1)),plot(ts_move,smooth(erp_move_sess(ii,:)),'Color',[0.5 0.5 0.5], 'LineWidth', 2);end
-        plot(ts_move, smooth(nanmean(erp_move)),'k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off; set(gca,'YTick', [0 10]);
-        title('ERP move all'); axis square;
-        %% target
-        figure;
-        for m = 3 %1:length(monk)
-            for cond = 1:ncond
-                plot(ts_target, smooth(monk(m).erp.(type)(cond).target),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP target'); legend({'Monk unrew', 'Monk rew', 'Monk unrew','Monk rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = 3 %1:length(monk)
-            erp_targ(m,:) = monk(m).erp.(type)(2).target; % erp_targ(m,:) = abs(monk(m).erp.target); %
-        end
-        erp_targ = erp_targ(3,:);
-        figure; hold on;
-        for ii = 1:length(erp_target_sess(:,1)),plot(ts_target-0.3,smooth(erp_target_sess(ii,:)),'Color',[0.5 0.5 0.5], 'LineWidth', 2);end
-        plot(ts_target-0.3, smooth(erp_targ),'k', 'LineWidth', 2);
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP target all'); axis square;
-        %% stop
-        figure;
-        for m = 3 %1:length(monk)
-            for cond = 1:ncond
-                plot(ts_stop, smooth(monk(m).erp.(type)(cond).stop),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP stop'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = 3 %1:length(monk)
-            erp_stop(m,:) = monk(m).erp.(type)(2).stop; % erp_stop(m,:) = abs(monk(m).erp.stop); %
-        end
-        figure; hold on;
-        for ii = 1:length(erp_stop_sess(:,1)),plot(ts_stop,smooth(erp_stop_sess(ii,:)),'Color',[0.5 0.5 0.5], 'LineWidth', 2);end
-        plot(ts_stop, smooth(nanmean(erp_stop)),'k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off; set(gca,'YTick', [0 10]);
-        title('ERP stop all'); axis square;
-        %% reward
-        figure;
-        for m = 3 %1:length(monk)
-            for cond = 1:ncond
-                plot(ts_reward, smooth(monk(m).erp.(type)(cond).reward),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-                set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-                title('ERP reward'); legend({'Monk Q rew', 'Monk S rew'}, 'box', 'off');
-            end
-        end
-        % avg for all monks
-        for m = 3 %1:length(monk)
-            erp_reward(m,:) = monk(m).erp.(type)(2).reward; % erp_reward(m,:) = abs(monk(m).erp.target); %
-        end
-        figure; hold on;
-        for ii = 1:length(erp_reward_sess(:,1)),plot(ts_reward,smooth(erp_reward_sess(ii,:)),'Color',[0.5 0.5 0.5], 'LineWidth', 2);end
-        plot(ts_reward, smooth(nanmean(erp_reward)),'k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP reward all'); axis square;
-        
-    case 'erp_before_after_move_PFC'
-        
-        type = 'reward'
-        
-        ncond = length(monk(3).erp.PFC.sess(1).lfps(1).trialtype.(type));
-        ts_move = monk(3).erp.PFC.sess(1).lfps(1).trialtype.(type)(ncond).events.move.erp_time; ts_move_win = ts_move(ts_move>=-0.5 & ts_move<=0.5);
-        ts_target = monk(3).erp.PFC.sess(1).lfps(1).trialtype.(type)(ncond).events.target.erp_time; ts_target_win = ts_target(ts_target>=-0.5 & ts_target<=0.5);
-        ts_stop = monk(3).erp.PFC.sess(1).lfps(1).trialtype.(type)(ncond).events.stop.erp_time; ts_stop_win = ts_stop(ts_stop>=-0.5 & ts_stop<=0.5);
-        ts_reward = monk(3).erp.PFC.sess(1).lfps(1).trialtype.(type)(ncond).events.reward.erp_time; ts_reward_win = ts_reward(ts_reward>=-0.5 & ts_reward<=0.5);
-        
-        % Mean all channels per session
-        for m = 3 % 1:length(monk)
-            for sess = 1:length(monk(m).erp.PPC.sess)
-                for cond = [3 4]
-                    for ch = 1:length(monk(m).erp.PPC.sess(sess).lfps)
-                        monk(m).sess(sess).(type)(cond).erp_move(ch,:) = monk(m).erp.PFC.sess(sess).lfps(ch).trialtype.(type)(cond).events.move.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_target(ch,:) = monk(m).erp.PFC.sess(sess).lfps(ch).trialtype.(type)(cond).events.target.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_stop(ch,:) = monk(m).erp.PFC.sess(sess).lfps(ch).trialtype.(type)(cond).events.stop.erp_mu; % move
-                        monk(m).sess(sess).(type)(cond).erp_reward(ch,:) = monk(m).erp.PFC.sess(sess).lfps(ch).trialtype.(type)(cond).events.reward.erp_mu; % move
-                    end
-                end
-            end
-        end
-        
-        % average across channels
-        for m = 3 %1:length(monk)
-            for sess = 1:length(monk(m).erp.PPC.sess)
-                for cond = [3 4]
-                    monk(m).sess(sess).(type)(cond).erp_move_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_move);
-                    monk(m).sess(sess).(type)(cond).erp_target_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_target);
-                    monk(m).sess(sess).(type)(cond).erp_stop_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_stop);
-                    monk(m).sess(sess).(type)(cond).erp_reward_mu_ch = nanmean(monk(m).sess(sess).(type)(cond).erp_reward);
-                end
-            end
-        end
-        
-        % average across sessions
-        for m = 3 % 1:length(monk)
-            clear th_v th_w bet_v bet_w
-            for cond = [3 4]
-                for sess = 1:length(monk(m).erp.PFC.sess)
-                    
-                    erp_move_sess(sess,:) =  monk(m).sess(sess).(type)(cond).erp_move_mu_ch; ...
-                        [max_move_sess(sess,:),indx_move] = max(abs(monk(m).sess(sess).(type)(cond).erp_move_mu_ch(1,ts_move>=-0.5 & ts_move<=0.5))); max_move_time(sess,:) = ts_move_win(indx_move);
-                    erp_target_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_target_mu_ch; ...
-                        [max_target_sess(sess,:),indx_target] = max(abs(monk(m).sess(sess).(type)(cond).erp_target_mu_ch(1,ts_target>=-0.5 & ts_target<=0.5))); max_target_time(sess,:) = ts_target_win(indx_target);
-                    erp_stop_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_stop_mu_ch; ...
-                        [max_stop_sess(sess,:),indx_stop] = max(abs(monk(m).sess(sess).(type)(cond).erp_stop_mu_ch(1,ts_stop>=-0.5 & ts_stop<=0.5))); max_stop_time(sess,:) = ts_stop_win(indx_stop);
-                    erp_reward_sess(sess,:) = monk(m).sess(sess).(type)(cond).erp_reward_mu_ch; ...
-                        [max_reward_sess(sess,:),indx_reward] = max(abs(monk(m).sess(sess).(type)(cond).erp_reward_mu_ch(1,ts_reward>=-0.5 & ts_reward<=0.5))); max_reward_time(sess,:) = ts_reward_win(indx_reward);
-                    
-                end
-                
-                % mean
-                monk(m).erp.(type)(cond).move = nanmean(erp_move_sess);     monk(m).erp.(type)(cond).move_std = nanmean(nanstd(erp_move_sess));
-                monk(m).erp.(type)(cond).target = nanmean(erp_target_sess); monk(m).erp.(type)(cond).target_std = nanmean(nanstd(erp_target_sess));
-                monk(m).erp.(type)(cond).stop = nanmean(erp_stop_sess);     monk(m).erp.(type)(cond).stop_std = nanmean(nanstd(erp_stop_sess));
-                monk(m).erp.(type)(cond).reward = nanmean(erp_reward_sess); monk(m).erp.(type)(cond).reward_std = nanmean(nanstd(erp_reward_sess));
-                
-                monk(m).erp.(type)(cond).move_max = nanmean(max_move_sess);      monk(m).erp.(type)(cond).move_max_amp_std = nanstd(max_move_sess);
-                monk(m).erp.(type)(cond).target_max = nanmean(max_target_sess);  monk(m).erp.(type)(cond).target_max_amp_std = nanstd(max_target_sess);
-                monk(m).erp.(type)(cond).stop_max = nanmean(max_stop_sess);      monk(m).erp.(type)(cond).stop_max_amp_std = nanstd(max_stop_sess);
-                monk(m).erp.(type)(cond).reward_max = nanmean(max_reward_sess);  monk(m).erp.(type)(cond).reward_max_amp_std = nanstd(max_reward_sess);
-                
-                monk(m).erp.(type)(cond).move_max_time = nanmean(max_move_time);      monk(m).erp.(type)(cond).move_max_std = nanstd(max_move_time);
-                monk(m).erp.(type)(cond).target_max_time = nanmean(max_target_time);  monk(m).erp.(type)(cond).target_max_std = nanstd(max_target_time);
-                monk(m).erp.(type)(cond).stop_max_time = nanmean(max_stop_time);      monk(m).erp.(type)(cond).stop_max_std = nanstd(max_stop_time);
-                monk(m).erp.(type)(cond).reward_max_time = nanmean(max_reward_time);  monk(m).erp.(type)(cond).reward_max_std = nanstd(max_reward_time);
-            end
-        end
-        
-        
-        %% plot
-        %  move
-        %         figure;
-        %         for m = [1 3] %1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_move, smooth(monk(m).erp.(type)(cond).move),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP move'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        % avg for all monks
-        for m = 3 % 1:length(monk)
-            erp_move_before(m,:) = smooth(monk(m).erp.(type)(3).move);
-            erp_move_after(m,:) = smooth(monk(m).erp.(type)(4).move);
-        end
-        figure; hold on;
-        plot(ts_move, smooth(nanmean(erp_move_before)),'k', 'LineWidth', 2); hold on; plot(ts_move, smooth(nanmean(erp_move_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP move before/after'); axis square;
-        %% target
-        %         figure;
-        %         for m = [1 3] % 1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_target, smooth(monk(m).erp.(type)(cond).target),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP target'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        % avg for all monks
-        for m = 3 %1:length(monk)
-            erp_targ_before(m,:) = monk(m).erp.(type)(3).target;
-            erp_targ_after(m,:) = monk(m).erp.(type)(4).target;
-        end
-        figure; hold on;
-        plot(ts_target-0.3, smooth(nanmean(erp_targ_before)),'k', 'LineWidth', 2); hold on; plot(ts_target-0.3, smooth(nanmean(erp_targ_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off; vline(-0.3,'k');
-        title('ERP target before/after'); axis square;
-        %% stop
-        %         figure;
-        %         for m = [1 3] %1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_stop, smooth(monk(m).erp.(type)(cond).stop),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP stop'); legend({'Monk Q unrew', 'Monk Q rew', 'Monk S unrew','Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        % avg for all monks
-        for m = 3 %1:length(monk)
-            erp_stop_before(m,:) = smooth(monk(m).erp.(type)(3).stop);
-            erp_stop_after(m,:) = smooth(monk(m).erp.(type)(4).stop);
-        end
-        figure; hold on;
-        plot(ts_stop, smooth(nanmean(erp_stop_before)),'k', 'LineWidth', 2); hold on; plot(ts_stop, smooth(nanmean(erp_stop_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP stop before/after'); axis square;
-        %% reward
-        %         figure;
-        %         for m = [1 3] %1:length(monk)
-        %             for cond = [3 4]
-        %                 plot(ts_reward, smooth(monk(m).erp.(type)(cond).reward),'color',[1 3 2]== m, 'LineWidth', 2); hold on;
-        %                 set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        %                 title('ERP reward'); legend({'Monk Q rew', 'Monk S rew'}, 'box', 'off');
-        %             end
-        %         end
-        
-        % avg for all monks
-        for m = 3 %1:length(monk)
-            erp_reward_before(m,:) = smooth(monk(m).erp.(type)(3).reward);
-            erp_reward_after(m,:) = smooth(monk(m).erp.(type)(4).reward);
-        end
-        figure; hold on;
-        plot(ts_reward, smooth(nanmean(erp_reward_before)),'k', 'LineWidth', 2); hold on; plot(ts_reward, smooth(nanmean(erp_reward_after)),'--k', 'LineWidth', 2); hold on;
-        set(gca,'xlim',[-0.5 0.5], 'TickDir', 'out', 'FontSize', 22); box off;
-        title('ERP reward before/after'); axis square;
         
     case 'PSD_all'
         for nmonk = 1:length(monk)
@@ -1925,7 +849,7 @@ switch plot_type
         end
         
     case 'PSD_all_together'
-          ar = 'PPC';  
+        ar = 'PFC';  
         if strcmp(ar,'MST'), monk_ids = [1 3]; elseif strcmp(ar,'PFC'), monk_ids = [3 4]; else monk_ids = 1:length(monk); end
         
         f = monk(1).pw.freq; % frequency
@@ -1935,11 +859,22 @@ switch plot_type
         end
         
         figure; hold on
-        shadedErrorBar(f,mean(psd),mean(psd_sem), 'lineprops','k');
+        shadedErrorBar(f,nanmean(psd(monk_ids,:)),nanmean(psd_sem(monk_ids,:)), 'lineprops','k');
         xlim([4 50]); xlabel('Frequency (Hz)'); ylabel('Power spectral density (\muV^2/Hz)'); 
         set(gca,'TickDir', 'out', 'FontSize', 22); box off; % set(gca,'TickDir', 'out', 'FontSize', 22, 'YScale', 'log'); box off;
-        if strcmp(ar,'MST'), ylim([0 0.08*10e-4]); elseif strcmp(ar,'PFC'), ylim([0 0.4]); else ylim([0 0.04]); end  
+        % if strcmp(ar,'MST'), ylim([0 0.08*10e-4]); elseif strcmp(ar,'PFC'), ylim([0 0.4]); else ylim([0 0.04]); end  
         title(ar)
+        
+        % plot one monk
+        m = 4;
+        figure; hold on
+        shadedErrorBar(f,monk(m).pw.area.(ar).all.mu_sess,monk(m).pw.area.(ar).all.std_sess, 'lineprops','k');
+        xlim([4 50]); xlabel('Frequency (Hz)'); ylabel('Power spectral density (\muV^2/Hz)'); 
+        set(gca,'TickDir', 'out', 'FontSize', 22) %'yTick', [0 35 70]); 
+        box off; % set(gca,'TickDir', 'out', 'FontSize', 22, 'YScale', 'log'); box off;
+        % if strcmp(ar,'MST'), ylim([0 0.08*10e-4]); elseif strcmp(ar,'PFC'), ylim([0 0.4]); else ylim([0 0.04]); end  
+        title([ar ' monk ' num2str(m)]);
+        
 
     case 'PSD_move'
         for nmonk = 1:length(monk)
@@ -1983,23 +918,14 @@ switch plot_type
         end
         
     case 'PSD_move_together'
+        ar = 'PPC';  
         f = monk(1).pw.freq; % frequency
-        for nmonk = 3;  %1:length(monk) [1 3]
-            %             psd1_mst(nmonk,:) = monk(nmonk).pw.area.MST.stationary.mu_sess;
-            %             psd1_mst_sem(nmonk,:) = monk(nmonk).pw.area.MST.stationary.std_sess;
-            %             psd2_mst(nmonk,:) = monk(nmonk).pw.area.MST.mobile.mu_sess;
-            %             psd2_mst_sem(nmonk,:) = monk(nmonk).pw.area.MST.mobile.std_sess;
-            %
-            %             psd1_ppc(nmonk,:) = monk(nmonk).pw.area.PPC.stationary.mu_sess;
-            %             psd1_ppc_sem(nmonk,:) = monk(nmonk).pw.area.PPC.stationary.std_sess;
-            %             psd2_ppc(nmonk,:) = monk(nmonk).pw.area.PPC.mobile.mu_sess;
-            %             psd2_ppc_sem(nmonk,:) = monk(nmonk).pw.area.PPC.mobile.std_sess;
-            
-            psd1_pfc(nmonk,:) = monk(nmonk).pw.area.PFC.stationary.mu_sess;
-            psd1_pfc_sem(nmonk,:) = monk(nmonk).pw.area.PFC.stationary.std_sess;
-            psd2_pfc(nmonk,:) = monk(nmonk).pw.area.PFC.mobile.mu_sess;
-            psd2_pfc_sem(nmonk,:) = monk(nmonk).pw.area.PFC.mobile.std_sess;
-            
+        if strcmp(ar,'MST'), monk_ids = [1 3]; elseif strcmp(ar,'PFC'), monk_ids = [3 4]; else monk_ids = 1:length(monk); end
+        for nmonk = monk_ids
+            psd1(nmonk,:) = monk(nmonk).pw.area.(ar).stationary.mu_sess;
+            psd1_sem(nmonk,:) = monk(nmonk).pw.area.(ar).stationary.std_sess;
+            psd2(nmonk,:) = monk(nmonk).pw.area.(ar).mobile.mu_sess;
+            psd2_sem(nmonk,:) = monk(nmonk).pw.area.(ar).mobile.std_sess;
         end
         
         %% MST
@@ -2462,21 +1388,34 @@ switch plot_type
         end
         
     case 'spectro_all_monks'
-        ev = 'target'
         areas = 'PPC'
+        ev = 'stop'
+        
         % extract
         freq = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_freq;
         ts = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_ts;
         p_spectro_corr = all_monks.trialtype.reward(2).area.(areas).events.(ev).all_monks_mu;
         p_spectro_incorr = all_monks.trialtype.reward(1).area.(areas).events.(ev).all_monks_mu;
         
-        ts_s = ts-0.3; % ts or ts-0.3
-        win = [-0.5 0 .5];  % [-0.5 0.5];   [-1.5 1.5];
-        % stop  [-0.2 2.4]
-        % targ  [-0.2 2.4]
-        ylim_theta = [1 1.5];  % PPC [0 1.5]  PFC [1.2 2.4]  MST [0.5 2.8]
-        ylim_beta = [0.5 2];   % PPC [0.5 2]  PFC [0.4 1.2]  MST [-0.1 1]
+        if strcmp(ev,'target')
+            win = [-1 1]; x_lim = [-0.5 0.5]; ts_s = ts-0.3;
+        elseif strcmp(ev,'stop')
+            win = [-1.51 1.51]; x_lim = [-1 1]; ts_s = ts;
+        else
+            win = [-1 1]; x_lim = [-1 1]; ts_s = ts;
+        end
         
+        if strcmp(areas,'PPC')
+            ylim_theta = [1 1.5];
+            ylim_beta = [0.5 2];
+        elseif  strcmp(areas,'MST')
+            ylim_theta = [1.2 2.4] ;
+            ylim_beta = [0.4 1.2];
+        else
+            ylim_theta = [0.5 2.8];
+            ylim_beta = [-0.1 1];
+        end
+                
         % plot correct
         J = customcolormap_preset('black_teal_white');
         figure; hold on; colormap(J); % ts-0.3 to plot aligned to target off
@@ -4083,6 +3022,9 @@ switch plot_type
         
         
     case 'pop_psth_band_passed'
+       % note!! some plots are malfunctioning after normalizing...just use
+       % pop plots
+       
         ar = 'PFC'     % MST PPC PFC
         band = 'beta'
         ev = 'reward'
@@ -4101,11 +3043,12 @@ switch plot_type
             for nsess = 1:length(monk(m).sess)
                 %% gather
                 ts = monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.ts_rate_95(1,:);
-                r_corr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95);
-                r_corr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95)/sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95,1));
-                r_incorr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).incorr.rate_95);
-                r_incorr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).incorr.rate_95)/sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).incorr.rate_95,1));
-                
+                r_corr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95); max_for_norm = max(r_corr(nsess,:));
+                r_corr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95)./sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95,1));
+                r_incorr(nsess,:) = mean(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).incorr.rate_95); 
+                r_incorr_sem(nsess,:) = std(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).incorr.rate_95)./sqrt(size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).incorr.rate_95,1));
+                r_corr(nsess,:) = r_corr(nsess,:)./max_for_norm; 
+                r_incorr(nsess,:) = r_incorr(nsess,:)./max_for_norm;
                 % plot change in power
                 for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95,1), pre_max_corr(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).corr.rate_95(ch,ts>-1 & ts<0)); end
                 for ch = 1:size(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).incorr.rate_95,1), pre_max_incorr(ch) = max(monk(m).sess(nsess).pop.area.(ar).band_pass.(ev).(band).incorr.rate_95(ch,ts>-1 & ts<0)); end
@@ -4165,7 +3108,7 @@ switch plot_type
                 %subplot(1,length(nsess),nsess); hold on
                 shadedErrorBar(ts_align,smooth(r_corr(nsess,:),8),r_corr_sem(nsess,:), 'lineprops',{'Color', [0.78,0.77,0]})
                 shadedErrorBar(ts_align,smooth(r_incorr(nsess,:),8),r_incorr_sem(nsess,:), 'lineprops', 'k')
-                set(gca, 'xlim', [x_lim(1) x_lim(2)],'yLim', [0 33],'yTick', [0 30], 'TickDir', 'out', 'FontSize', 22); axis square; box off
+                set(gca, 'xlim', [x_lim(1) x_lim(2)], 'TickDir', 'out', 'FontSize', 22); axis square; box off
                 title([(ar) ' ' num2str(nsess)]);
                 xlabel('Time(s)'); if strcmp(ev,'target'), vline([-0.3 0],'-k'); else vline(0, '-k'); end
                 
@@ -4231,7 +3174,7 @@ switch plot_type
             figure; hold on
             shadedErrorBar(ts_align,smooth(mean(r_corr),8),mean(r_corr_sem), 'lineprops',{'Color', [0.78,0.77,0]})
             shadedErrorBar(ts_align,smooth(mean(r_incorr),8),mean(r_incorr_sem), 'lineprops', 'k')
-            set(gca, 'xlim', [x_lim(1) x_lim(2)], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 20], 'yTick', [0 10 20]); axis square; box off
+            set(gca, 'xlim', [x_lim(1) x_lim(2)], 'TickDir', 'out', 'FontSize', 22); axis square; box off
             xlabel('Time(s)'); if strcmp(ev,'target'), vline([-0.3 0],'-k'); else vline(0, '-k'); end
             
             % ratio
@@ -4258,10 +3201,11 @@ switch plot_type
         end
         
         %% plot psth all monks
+        close all;
         figure; hold on
         shadedErrorBar(ts_align,smooth(mean(r_corr_all),8),smooth(std(r_corr_all)/sqrt(size(r_corr_all,1))), 'lineprops',{'Color', [0.78,0.77,0]})
         shadedErrorBar(ts_align,smooth(mean(r_incorr_all),8),smooth(std(r_incorr_all)/sqrt(size(r_incorr_all,1))), 'lineprops', 'k')
-        set(gca, 'xlim', [x_lim(1) x_lim(2)], 'TickDir', 'out', 'FontSize', 22, 'yLim', [0 20], 'yTick', [0 20]); axis square; box off
+        set(gca, 'xlim', [x_lim(1) x_lim(2)],'ylim', [0 1],'yTick', [0 0.5 1], 'TickDir', 'out', 'FontSize', 22); axis square; box off
         xlabel([(ev) ' time (s)']); if strcmp(ev,'target'), vline([-0.3 0],'-k'); else vline(0, '-k'); end
         
         %% plot ratio all monks
